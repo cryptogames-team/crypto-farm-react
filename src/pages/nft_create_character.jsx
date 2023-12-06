@@ -27,7 +27,7 @@ function NFTCreateCharacter(props) {
 
         <div className="nft_character_container">
             <div className="nft_character_border">
-                <img src={props.nftImageURL}
+                <img src={props.characterInfo.imageURL}
                 className='nft_create_image'></img>
             </div>
         </div>
