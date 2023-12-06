@@ -1,0 +1,385 @@
+@import url('https://fonts.googleapis.com/css2?family=Paytone+One&display=swap');
+
+.label {
+    width: 200px;
+    height: auto;
+}
+
+#root {
+    height: 100%;
+}
+
+#container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Phaser 게임 컨테이너 스타일 */
+#game-container {
+    position: relative;
+    /* Phaser 게임의 너비 */
+    width: 100%;
+    /* Phaser 게임의 높이 */
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/*로그인 폼 오버레이 스타일*/
+.login_wrapper {
+    /*절대 위치 설정*/
+    position: absolute;
+    /*상단에서 20% 위치*/
+    top: 20%;
+    /*좌측에서 50% 위치*/
+    left: 50%;
+    /*정중앙 정렬을 위한 변환*/
+    transform: translate(-50%, -50%);
+    /*Phaser 게임 위에 오버레이되도록 z-index 설정*/
+    z-index: 10;
+    width: 500px;
+    height: 150px;
+
+    box-sizing: border-box;
+
+}
+
+.gamelogo {
+
+    z-index: 10;
+    image-rendering: pixelated;
+
+    width: 300px;
+    height: 300px;
+
+}
+
+h2 {
+    font-size: 24px;
+    color: #6A24FE;
+    margin-bottom: 20px;
+}
+
+
+/*지갑 로그인에 사용되는 버튼 안보이게 하기*/
+#login {
+    display: none;
+}
+
+#login_complete {
+    display: none;
+}
+
+
+/*특정한 구조의 요소에 스타일을 적용하는 방법*/
+/* id : login-form 태그의 자식 <input>에게 일괄 적용한다. */
+
+#replacement_button {
+    z-index: 15;
+    position: absolute;
+    top: 45%;
+    left: 35%;
+}
+
+
+/*로그인 폼 컴포넌트 스타일*/
+.border_container {
+    width: 500px;
+    height: 470px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.border1 {
+    width: 500px;
+    height: 150px;
+    border: 2.4px solid #181425;
+    background-color: #EEA468;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.border2 {
+    width: 99%;
+    height: 97%;
+    background-color: #B96F50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.border3 {
+    width: 98%;
+    height: 93%;
+    border: 2.4px solid #181425;
+    background-color: #EAD4AA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.border4 {
+    width: 98.7%;
+    height: 97%;
+    background-color: #C28669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.border5 {
+    width: 90%;
+    height: 50px;
+    border: 2.4px solid #181425;
+    background-color: #EAD4AA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button {
+    width: 99%;
+    height: 92%;
+    background-color: #E7A873;
+    border: none;
+    font-size: 16px;
+    text-shadow: 1px 1px 1px black;
+    font-family: 'Paytone One', sans-serif;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.heptagon {
+    margin-left: 10px;
+    width: 30px;
+    height: 30px;
+    left: 0;
+    position: absolute;
+}
+
+/* 텍스트만 왼쪽 정렬 */
+#login_text {
+    align-self: flex-start;
+    /* 왼쪽 정렬을 위해 */
+    width: 100%;
+    /* 부모 컨테이너의 폭에 맞춤 */
+
+    font-family: 'Paytone One', sans-serif;
+    color: white;
+    font-size: 20px;
+    text-shadow: 1px 1px 1px black;
+    margin-block-start: 5px;
+    margin-block-end: 5px;
+}
+
+/*캐릭터 선택 UI 컴포넌트 스타일*/
+/* .character_select_border_container {
+    width: 500px;
+    height: 470px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+ */
+
+#character_select_container {
+    width: 1000px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.character_select_border1 {
+    width: 1000px;
+    height: 500px;
+
+    /*절대 위치 설정*/
+    position: absolute;
+    /*상단에서 50% 위치*/
+    top: 50%;
+    /*좌측에서 50% 위치*/
+    left: 50%;
+    /*정중앙 정렬을 위한 변환*/
+    transform: translate(-50%, -50%);
+    z-index: 10;
+
+    border: 2.4px solid #181425;
+    background-color: #EEA468;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.character_select_border2 {
+    width: 99%;
+    height: 97%;
+    background-color: #B96F50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.character_select_border3 {
+    width: 98%;
+    height: 93%;
+    border: 2.4px solid #181425;
+    background-color: #EAD4AA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*자식 NFT 캐릭터를 격자 형태로 보여주기*/
+.character_select_border4 {
+    /* 스크롤 기능 추가 만약 아이템이 넘친다면 */
+    width: 98.7%;
+    height: 97%;
+    background-color: #C28669;
+    display: grid;
+    /* repeat() : 여러 개의 행이 모두 같은 넓이 일때 사용한다. */
+    /* 1fr : fr이란 유연한 크기를 갖는 단위이다  */
+    grid-template-columns: repeat(4, auto);
+    /*   align-items: center; */
+    justify-content: center;
+    column-gap: 5%;
+    position: relative;
+    overflow: auto;
+
+
+    /*자식 요소간 간격*/
+}
+
+
+/*position : fixed로 스크롤 바 위치 상관없이 버튼 위치 고정시키기*/
+.add_character_button {
+    width: 70px;
+    height: 50px;
+    margin-right: 45px;
+    margin-bottom: 40px;
+    padding: 0px;
+    right: 0px;
+    bottom: 0px;
+    position: fixed;
+}
+
+.add_img {
+    width: 100%;
+    height: 100%;
+    /*요소의 컨텐츠가 너무 커서 부모 요소를 넘어갈 경우 처리 */
+
+}
+
+
+
+
+/*NFT 캐릭터 컴포넌트 스타일*/
+.nft_character_container {
+    width: 150px;
+    height: 150px;
+    border: 2px solid #181425;
+    background-color: #EAD4AA;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*실질적인 NFT 캐릭터 컨테이너*/
+.nft_character_border {
+    width: 97%;
+    height: 97%;
+    background-color: #C28669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.nft_image {
+    margin-block-start: 5px;
+    width: 90px;
+    height: 90px;
+}
+
+.nft_p {
+    /*텍스트만 왼쪽 정렬을 위해 부모 컨테이너 폭에 맞춤*/
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+
+    font-family: 'Paytone One', sans-serif;
+    color: white;
+    font-size: medium;
+    text-shadow: 1px 1px 1px black;
+}
+
+/*캐릭터 생성 모달과 배경에 대한 스타일*/
+
+/*모달 배경 스타일 */
+.modal_backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+/*캐릭터 생성 모달*/
+.create_character_modal {
+    position: absolute;
+    width: 98%;
+    height: 93%;
+    border: 2.4px solid #181425;
+    background-color: #EAD4AA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+}
+
+/*캐릭터 선택 보더 4 참고*/
+.create_character_modal_border {
+    width: 98.7%;
+    height: 97%;
+    background-color: #C28669;
+
+    display: grid;
+    /* repeat() : 여러 개의 행이 모두 같은 넓이 일때 사용한다. */
+    /* 1fr : fr이란 유연한 크기를 갖는 단위이다  */
+    grid-template-columns: repeat(4, auto);
+    align-items: center;
+    justify-content: center;
+    column-gap: 5%;
+    position: relative;
+    overflow: auto;
+
+}
+
+
+/*nft 캐릭터 생성 컴포넌트 스타일*/
+.nft_create_image {
+
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 80%;
+    height: 80%;
+
+}
