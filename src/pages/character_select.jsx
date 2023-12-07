@@ -8,7 +8,7 @@ import NFTCharacter from './nft_select_character';
 import CreateCharacterModal from './create_character_modal';
 
 // import image
-import AddIcon from '../assets/add_character1.png'
+import addIcon from '../assets/add_character1.png'
 
 
 
@@ -151,7 +151,7 @@ function CharacterSelect(props) {
         let registeredNFTs = [];
 
         // 서버에 등록되지 않은 NFT 정보를 담는 배열
-        let unregisteredNFTs = [];        
+        let unregisteredNFTs = [];
 
         // 나중에 List 같은 자료구조가 있는지 확인하기
 
@@ -182,26 +182,37 @@ function CharacterSelect(props) {
               found = true;
 
             }
- 
+
           });
 
 
           // 이 asset_id는 서버에 등록되지 않았음          
-          if( !found ){
+          if (!found) {
 
-          console.log("서버에 등록되지 않은 assetId 발견 : " + nft.asset_id);
+            console.log("서버에 등록되지 않은 assetId 발견 : " + nft.asset_id);
 
-          // 서버에 등록되지 않은 캐릭터 정보를 담는 객체
-          let unregisteredCharInfo = nft;              
+            // 서버에 등록되지 않은 캐릭터 정보를 담는 객체
+            let unregisteredCharInfo = nft;
 
-          //console.log(unregisteredCharInfo);
+            //console.log(unregisteredCharInfo);
 
-          unregisteredNFTs.push(unregisteredCharInfo);
+            unregisteredNFTs.push(unregisteredCharInfo);
           }
 
         });
 
         //console.log(unregisteredNFTs);
+
+
+
+        for (let i = 0; i < 4; i++) {
+          //registeredNFTs.push("");
+        }
+
+        for (let i = 0; i < 11; i++) {
+          //unregisteredNFTs.push("");
+        }
+
 
 
         // 서버에 등록된 NFT 배열의 상태 설정
@@ -245,18 +256,21 @@ function CharacterSelect(props) {
     <div className="character_select_border1">
       <div className="character_select_border2">
 
-        {isModalOpen && <CreateCharacterModal 
-        unregisteredCharacters={unregisteredCharacters} 
-        onClose={closeModal} />}
+        {isModalOpen && <CreateCharacterModal
+          unregisteredCharacters={unregisteredCharacters}
+          onClose={closeModal} />}
 
         <div className="character_select_border3">
           <div className="character_select_border4">
 
             {registeredCharacters.map((character, index) => (
-              <NFTCharacter key={index} registeredCharacter={character} />
+              <NFTCharacter key={index} registeredCharacter={character}
+               />
             ))}
-            <button onClick={openModal}
-              className="add_character_button">캐릭터 생성</button>
+
+            <img src={addIcon}
+              onClick={openModal}
+              className='add_character_button'></img>
 
           </div>
         </div>

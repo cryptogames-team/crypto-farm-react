@@ -252,35 +252,56 @@ h2 {
     /* 1fr : fr이란 유연한 크기를 갖는 단위이다  */
     grid-template-columns: repeat(4, auto);
     /*   align-items: center; */
-    justify-content: center;
+    justify-content: flex-start;
     column-gap: 5%;
     position: relative;
     overflow: auto;
+    /*padding과 border가 요소의 지정된 너비 및 높이 내부에 포함된다. */
+    box-sizing: border-box;
 
+    /*gap을 설정해서 일정 간격 떨어지게 해야 되나?*/
 
-    /*자식 요소간 간격*/
+    /*padding 적용해보기 - 크기가 늘어난다.*/
+    /* 원래 크기 957.583 x 437.510*/
+
+    padding-right: 100px;
+    padding-left: 100px;
 }
+
+
 
 
 /*position : fixed로 스크롤 바 위치 상관없이 버튼 위치 고정시키기*/
 .add_character_button {
-    width: 70px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     margin-right: 45px;
     margin-bottom: 40px;
     padding: 0px;
     right: 0px;
     bottom: 0px;
     position: fixed;
+    image-rendering: pixelated;
+    cursor: pointer;
 }
 
 .add_img {
     width: 100%;
     height: 100%;
     /*요소의 컨텐츠가 너무 커서 부모 요소를 넘어갈 경우 처리 */
-
 }
 
+
+.close_window_button {
+    width: 40px;
+    height: 40px;
+    margin-top: 10px;
+    margin-right: 45px;
+    right: 0px;
+    position: fixed;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
 
 
 
@@ -365,16 +386,22 @@ h2 {
     /* repeat() : 여러 개의 행이 모두 같은 넓이 일때 사용한다. */
     /* 1fr : fr이란 유연한 크기를 갖는 단위이다  */
     grid-template-columns: repeat(4, auto);
-    align-items: center;
-    justify-content: center;
+/*     align-items: center; */
+    justify-content: flex-start;
     column-gap: 5%;
     position: relative;
     overflow: auto;
+    box-sizing: border-box;
+    padding-right: 100px;
+    padding-left: 100px;
 
 }
 
 
 /*nft 캐릭터 생성 컴포넌트 스타일*/
+
+
+
 .nft_create_image {
 
     margin-top: 10px;
@@ -382,4 +409,102 @@ h2 {
     width: 80%;
     height: 80%;
 
+}
+
+
+
+/*nft 캐릭터 이름 입력 폼*/
+
+
+
+
+
+.nft_character_form {
+
+    position: absolute;
+    width: 70%;
+    height: 50%;
+    border: 2.4px solid #181425;
+    background-color: #EAD4AA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+    
+}
+
+.nft_character_form_border1 {
+
+    width: 98.7%;
+    height: 97%;
+    background-color: #C28669;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+
+}
+
+.div_flex_row_center {
+
+    width: 100%;
+    height: 30%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-self: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.div_flex_row_space-between {
+
+    width: 100%;
+    height: 30%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+/*     align-self: flex-start; */
+/*     justify-self: center; */
+/*     align-items: center; */
+    justify-content: space-between;
+/*     gap: 10px; */
+}
+
+
+
+
+/*캐릭터 정보 입력 버튼 스타일*/
+.character_input_button {
+
+
+    width: 50%;
+    background-color: #EEA468;
+    color: white; /* 흰색 텍스트 */
+/*     padding: 15px 32px; */ /* 상하 15px, 좌우 32px 패딩 */
+    text-align: center; /* 텍스트 중앙 정렬 */
+    text-decoration: none; /* 텍스트 밑줄 제거 */
+    display: inline-block; /* 인라인-블록 디스플레이 */
+    font-size: 16px; /* 폰트 크기 */
+    margin: 0px 5px; /* 상하 4px, 좌우 2px 마진 */
+    cursor: pointer; /* 마우스 오버 시 커서 변경 */
+    border-radius: 8px; /* 테두리 둥근 처리 */
+}
+
+.character_input_button:hover {
+    background-color: #c58856; /* 마우스 오버 시 배경색 변경 */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 마우스 오버 시 그림자 효과 */
+}
+
+
+/*캐릭터 정보 입력 태그 스타일*/
+.input_character {
+
+    width: 70%;
+    font-size: 16px;
+    padding: 10px;
+    border: 2px solid #aaa;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.3s;
 }

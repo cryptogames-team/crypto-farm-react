@@ -180,7 +180,7 @@ function PhaserGameComponent() {
     */
 
     // F 키를 전체 화면 토글로 설정
-    let FKey = this.input.keyboard.addKey('F');
+/*     let FKey = this.input.keyboard.addKey('F');
     FKey.on('down', function () {
       if (this.scale.isFullscreen) {
         this.scale.stopFullscreen();
@@ -197,7 +197,7 @@ function PhaserGameComponent() {
       // 게임 캔버스의 현재 높이
       const canvasHeight = this.sys.game.canvas.height;
       console.log("현재 Canvas Size : %d, %d", canvasWidth, canvasHeight);
-    }, this);
+    }, this); */
 
     // Phaser 게임 인스턴스에서 스케일 매니저의 'resize' 이벤트에 대한 리스너 설정
     // 이벤트 리스너는 게임 창이나 캔버스 크기가 변경될 때마다 호출됨.
