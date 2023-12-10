@@ -49,6 +49,8 @@ function CharSelectWindow(props) {
     //console.log("생성된 캐릭터를 unregChars에서 제거");
     console.log("제거될 캐릭터 정보", characterToRemove);
 
+    
+
     // filter : 주어진 조건에 맞는 요소만을 포함하는 새 배열을 반환한다.
     setRegChars(unregChars.filter(character => character !== characterToRemove));
     
