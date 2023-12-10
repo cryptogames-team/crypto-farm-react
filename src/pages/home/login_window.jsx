@@ -1,15 +1,15 @@
 import React, { useRef } from 'react';
-import Logo from '../assets/heptagon_logo3.png'
+import Logo from '../../assets/heptagon_logo.png'
 
 
 
 // 리액트 함수 컴포넌트에서 페이저 게임 실행
 
 // 이미지 import
-import GameLogo from '../assets/crypto_farm_logo.png'
+import GameLogo from '../../assets/crypto_farm_logo.png'
 
 
-function LoginForm(props) {
+function LoginWindow(props) {
   // 로그인 폼 관련 로직
 
 
@@ -95,4 +95,4 @@ function LoginForm(props) {
 
 }
 
-export default LoginForm;
+export default LoginWindow;

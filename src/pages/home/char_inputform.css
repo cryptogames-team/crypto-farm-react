@@ -14,8 +14,11 @@ body {
 
     position: absolute;
 
+    align-self: center;
+    justify-self: center;
+
     width: 500px;
-    height: 100px;
+    height: 150px;
     border: 2.4px solid #181425;
     background-color: #EEA468;
     display: flex;
@@ -69,7 +72,7 @@ body {
 .input_user_name {
     font-size: 15px;
     height: 30px;
-    width: 250px;
+    width: 60%;
     background-color: #E7A873;
     border: none;
     box-shadow: inset 0px 1px 3px 0.5px black;

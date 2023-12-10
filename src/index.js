@@ -4,11 +4,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider, Outlet, Link} from "react-router-dom";
-import ErrorPage from './pages/error-page';
+import ErrorPage from './pages/home/error-page';
 import LandHome from './pages/land/land-home';
 import MarketHome from './pages/market/market-home';
-import PlayHome from './pages/play-home';
-import PlayIndex from './pages/play-index';
+import PlayHome from './pages/home/play-home';
+import PlayIndex from './pages/home/play-index';
 import { landLoader } from './loader/land-loader';
 
 const router = createBrowserRouter([
