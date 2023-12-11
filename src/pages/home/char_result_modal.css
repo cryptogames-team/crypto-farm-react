@@ -1,15 +1,9 @@
-body {
-/*     width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center; */
-    font-family: 'Paytone One',sans-serif;
-}
+/*캐릭터 생성 결과 창*/
+/* 전역 스타일은 play.css에서 확인*/
 
 
 /*이름 짓기UI/window container*/
-.form_border1 {
+.modal_border1 {
 
     position: absolute;
 
@@ -26,7 +20,7 @@ body {
     z-index: 11;
 }
 
-.form_border2 {
+.modal_border2 {
     width: 99%;
     height: 97%;
     background-color: #B96F50;
@@ -34,7 +28,7 @@ body {
     align-items: center;
     justify-content: center;
 }
-.form_border3 {
+.modal_border3 {
     width: 98%;
     height: 93%;
     border: 2.4px solid #181425;
@@ -45,7 +39,7 @@ body {
 }
 
 
-.form_border4 {
+.modal_border4 {
     width: 98.7%;
     height: 97%;
     background-color: #C28669;
@@ -55,35 +49,7 @@ body {
     justify-content: center;
 }
 
-.input_container{
-    width: 97%;
-    height: 70%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-.user_name_text{
-    font-size: 19px;
-    color: white;
-    text-shadow: 0.5px 0.4px 0.5px black; 
-    margin-right: 7px;
-}
-.input_user_name {
-    font-size: 15px;
-    height: 30px;
-    width: 60%;
-    background-color: #E7A873;
-    border: none;
-    box-shadow: inset 0px 1px 3px 0.5px black;
-    color: white;
-    text-shadow: 0.5px 0.4px 0.5px black; 
-    font-family: 'Paytone One',sans-serif;
-    justify-content: center;
-    text-align: center;
-}
-.input_user_name:focus {
-    outline: 1px solid white;
-}
+
 
 .button_container {
     width: 98%;
@@ -127,4 +93,11 @@ body {
     width: 99%;
     height: 18px;
     background-color: #E7A873;
+}
+
+.user_name_text{
+    font-size: 19px;
+    color: white;
+    text-shadow: 0.5px 0.4px 0.5px black; 
+    margin-right: 7px;
 }

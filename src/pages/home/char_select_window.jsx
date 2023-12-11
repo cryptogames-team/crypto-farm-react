@@ -46,20 +46,25 @@ function CharSelectWindow(props) {
   // 캐릭터 생성 성공 시 생성된 캐릭터를 unregChars에서 제거한다.
   const rmCreateChar = (characterToRemove) => {
 
-    //console.log("생성된 캐릭터를 unregChars에서 제거");
     console.log("제거될 캐릭터 정보", characterToRemove);
 
-    
+
+    // 캐릭터가 미등록 배열에서 제거 되지 않고 있음.
+    // 이유 : 제거될 캐릭터 정보와 미등록 캐릭터 배열의 객체의 키 값이 달라서 생기는 문제이다.
+    // asset_id로 비교하니 미등록 배열에서 삭제가 되었음.
+
+    console.log("생성된 캐릭터가 제거되기 전의 미등록 캐릭터 배열" , unregChars);
 
     // filter : 주어진 조건에 맞는 요소만을 포함하는 새 배열을 반환한다.
-    setRegChars(unregChars.filter(character => character !== characterToRemove));
+    setUnregChars(unregChars.filter(character => character.asset_id !== characterToRemove.asset_id));
     
+    console.log("생성된 캐릭터가 제거되고 난 후에 미등록 캐릭터 배열" , unregChars);
   }
 
 
 
   // 화살표 함수를 변수에 대입한다는 건
-  // 해당 변수를 함수를 참조한다. 
+  // 해당 변수로 함수를 참조한다. 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -158,9 +163,9 @@ function CharSelectWindow(props) {
       // 여기서 서버 응답을 받는다.
       // .json() : 받은 응답을 JSON 형식으로 변환한다.
       const data = await response.json();
-      
+
       // data는 캐릭터 정보가 담긴 객체들의 배열이다.
-      console.log(data);
+      console.log("서버로부터 받은 등록된 NFT 캐릭터들의 정보", data);
 
 
       // 내 NFT 배열을 전부 탐색하면서 서버로부터 받은 asset_id와 일치하는 요소 찾기
@@ -175,7 +180,7 @@ function CharSelectWindow(props) {
 
           // 서버에 등록된 asset_id 일 경우
           if (nft.asset_id === characterInfo.asset_id) {
-            console.log("서버에 등록된 assetId 발견 : " + characterInfo.asset_id);
+            //console.log("서버에 등록된 assetId 발견 : " + characterInfo.asset_id);
 
             // 서버에 등록된 캐릭터 정보를 담는 객체
             let registeredCharInfo = characterInfo;
@@ -184,7 +189,7 @@ function CharSelectWindow(props) {
             registeredCharInfo.imageURL = nft.imageURL;
 
             // 문자열과 함께 객체를 출력하려면 객체를 문자열로 변환해야 한다.
-            console.log("등록된 NFT 캐릭터의 정보 : ",registeredCharInfo);
+            //console.log("등록된 NFT 캐릭터의 정보 : ",registeredCharInfo);
 
             regNFTs.push(registeredCharInfo);
 
@@ -213,6 +218,18 @@ function CharSelectWindow(props) {
       });
 
 
+      // 배열의 길이 length
+      if (regNFTs.length > 0)
+        console.log("등록된 NFT 캐릭터들의 정보 : ", regNFTs);
+      else
+        console.log("등록된 NFT 캐릭터가 없음");
+
+      if (unregNFTs.length > 0)
+        console.log("등록되지 않은 NFT 캐릭터들의 정보 : ", unregNFTs);
+      else
+        console.log("등록되지 않은 NFT 캐릭터가 없음.");
+
+
       // 서버에 등록된 NFT 배열의 상태 설정
       setRegChars(regNFTs);
       // 서버에 등록되지 않은 NFT 배열의 상태 설정
@@ -222,11 +239,11 @@ function CharSelectWindow(props) {
     catch (error) {
       console.error('Error : ', error);
 
-/*       for (let i = 0; i < 1; i++) {
-        unregNFTs.push("");
-      }
-      // 서버에 등록되지 않은 NFT 배열의 상태 설정
-      setUnregChars(unregNFTs); */
+      /*       for (let i = 0; i < 1; i++) {
+              unregNFTs.push("");
+            }
+            // 서버에 등록되지 않은 NFT 배열의 상태 설정
+            setUnregChars(unregNFTs); */
 
 
     }
@@ -279,7 +296,7 @@ function CharSelectWindow(props) {
         {isModalOpen && <CharCreateModal
           unregChars={unregChars}
           onClose={closeModal}
-          onCreateChar={handleCreateChar} />}
+          onCreateChar={{handleCreateChar, rmCreateChar}} />}
 
         <div className="character_select_border3">
           <div className="character_select_border4">
@@ -301,7 +318,5 @@ function CharSelectWindow(props) {
   );
 
 }
-
-//<img src={AddIcon} className='add_img' />
 
 export default CharSelectWindow;

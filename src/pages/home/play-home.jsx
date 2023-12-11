@@ -57,7 +57,6 @@ function LoginWithCharacter() {
     // 초기화 전에 'handleLogin'에 접근 불가능함.
     componentToRender = <LoginWindow onLogin={handleLogin} />;
   } else {
-    // 데이터 전달이 안되고 있음
     componentToRender = <CharSelectWindow accountName={accountName} />;
   }
 

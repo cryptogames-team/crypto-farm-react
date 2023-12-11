@@ -17,7 +17,7 @@ function CharSelectItem({registeredCharacter}) {
     // NFT 캐릭터 선택 컴포넌트 클릭 이벤트에 등록할 콜백 함수
     // 서버에 등록된 NFT 캐릭터 정보를 로그에 띄운다.
     const handleClick = async () => {
-        console.log(registeredCharacter);
+        console.log("선택한 캐릭터 정보", registeredCharacter);
 
         try {
             const response = await fetch(serverURL, {
