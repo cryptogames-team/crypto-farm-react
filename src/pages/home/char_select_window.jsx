@@ -20,7 +20,7 @@ const serverURL = 'http://221.148.25.234:1234/user/all';
 
 // async : 비동기 처리
 // 함수형 컴포넌트는 async로 실행 불가능함.
-function CharSelectWindow(props) {
+function CharSelectWindow({accountName, onCharSelect}) {
 
   // 캐릭터 정보가 있는 NFT 배열 이름
   const [regChars, setRegChars] = useState([]);
@@ -29,6 +29,9 @@ function CharSelectWindow(props) {
 
   // 모달창 노출 여부 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+  const handleCharSelect = onCharSelect;
 
   // 자식 컴포넌트에서 부모 컴포넌트의 상태 변경하기
   // 캐릭터 생성 성공 시 생성된 캐릭터를 regChars에 추가한다.
@@ -80,7 +83,7 @@ function CharSelectWindow(props) {
         // 여기 안에 조건을 추가하면 크립토 팜의 NFT 캐릭터만 가져오게 할 수 있음.
         json: true,
         code: 'eosio.nft',
-        scope: props.accountName,
+        scope: accountName,
         table: 'assets',
         index_position: 2,
         key_type: "name",
@@ -275,7 +278,7 @@ function CharSelectWindow(props) {
 
   // useState()로 관리되는 변수를 전달 받지 않으면 undefined가 뜬다.
   // 계속 렌더링되는 모양
-  console.log("부모한테 받은 계정 이름 : " + props.accountName);
+  console.log("부모한테 받은 계정 이름 : " + accountName);
 
 
   return (
@@ -302,7 +305,9 @@ function CharSelectWindow(props) {
           <div className="character_select_border4">
 
             {regChars.map((character, index) => (
-              <CharSelectItem key={index} registeredCharacter={character}
+              <CharSelectItem key={index} 
+              registeredCharacter={character}
+              onCharSelect={handleCharSelect}
               />
             ))}
 

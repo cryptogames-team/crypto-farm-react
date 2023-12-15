@@ -44,11 +44,28 @@ function LoginWithCharacter() {
     setCurrentComponent("characterSelect");
   }
 
-  // 로그인 컴포넌트로부터 받은 계정 이름 전달
-  // props에 함수로 전달하는게 맞나
+  // 캐릭터 선택하면 
+  // 1. 캐릭터 선택 컴포넌트 닫고
+  // 2. 페이저 컴포넌트에 캐릭터 정보 전달
+  const handleCharSelect = (characterInfo) => {
 
+
+    console.log("부모에서 확인하는 선택한 캐릭터 정보", characterInfo);
+
+    // 캐릭터 선택 컴포넌트 닫기
+    setCurrentComponent("");
+
+    // 페이저 컴포넌트에 캐릭터 정보 전달
+    // props
+
+    setCharInfo(characterInfo);
+
+  }
 
   const [currentComponent, setCurrentComponent] = useState("login");
+
+  // 선택한 캐릭터 정보 관리
+  const [charInfo, setCharInfo] = useState({});
 
   // 렌더링할 컴포넌트 저장
   let componentToRender;
@@ -56,8 +73,13 @@ function LoginWithCharacter() {
 
     // 초기화 전에 'handleLogin'에 접근 불가능함.
     componentToRender = <LoginWindow onLogin={handleLogin} />;
+  } else if (currentComponent === "characterSelect") {
+    componentToRender = <CharSelectWindow 
+    accountName={accountName}
+    onCharSelect={handleCharSelect} />;
   } else {
-    componentToRender = <CharSelectWindow accountName={accountName} />;
+    // 리액트에서 null이나 false를 렌더링할 경우 아무것도 표시하지 않는다.
+    componentToRender = null;
   }
 
 
@@ -71,12 +93,12 @@ function LoginWithCharacter() {
 
 }
 
-
+// 여기서 로그인 컴포넌트 사라지게 만들어야 함.
 export default function PlayHome() {
   return (
 
     <div id="container">
-      <PhaserGameComponent />
+      <PhaserGameComponent charInfo={charInfo}  />
       <LoginWithCharacter />
     </div>
 

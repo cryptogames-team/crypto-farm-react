@@ -9,7 +9,7 @@ const serverURL = 'http://221.148.25.234:1234/user/';
 
 // 서버에 등록된 NFT 캐릭터 정보 객체를 부모 컴포넌트로부터 전달받는다
 // 구조 분해 할당 사용
-function CharSelectItem({registeredCharacter}) {
+function CharSelectItem({registeredCharacter, onCharSelect}) {
 
 
     //console.log(registeredCharacter);
@@ -17,8 +17,10 @@ function CharSelectItem({registeredCharacter}) {
     // NFT 캐릭터 선택 컴포넌트 클릭 이벤트에 등록할 콜백 함수
     // 서버에 등록된 NFT 캐릭터 정보를 로그에 띄운다.
     const handleClick = async () => {
-        console.log("선택한 캐릭터 정보", registeredCharacter);
 
+        let selectCharInfo = registeredCharacter;
+
+        console.log("선택한 캐릭터 정보", selectCharInfo);
         try {
             const response = await fetch(serverURL, {
                 // 요청 방식
@@ -40,8 +42,11 @@ function CharSelectItem({registeredCharacter}) {
               // .json() : 받은 응답을 JSON 형식으로 변환한다.
               const data = await response.json();
 
-              // accesstoken
+              // accessToken JWT 토큰?
               console.log(data);
+              selectCharInfo.accessToken = data.accessToken;
+
+              onCharSelect(selectCharInfo);
 
         } catch (error) {
             

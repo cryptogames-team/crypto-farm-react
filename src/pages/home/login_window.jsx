@@ -8,8 +8,8 @@ import Logo from '../../assets/heptagon_logo.png'
 // 이미지 import
 import GameLogo from '../../assets/crypto_farm_logo.png'
 
-
-function LoginWindow(props) {
+// props 구조 분해 할당
+function LoginWindow({onLogin}) {
   // 로그인 폼 관련 로직
 
 
@@ -49,7 +49,7 @@ function LoginWindow(props) {
 
 
       // 부모 컴포넌트한테 로그인한 계정 이름 보내기
-      props.onLogin(nameValue);
+      onLogin(nameValue);
     }
   }
 

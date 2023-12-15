@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import Phaser from 'phaser';
 
-function PhaserGameComponent() {
+// 게임에서 사용할 이미지는 public에 넣을 것
+
+function PhaserGameComponent({charInfo}) {
 
     // useEffect 훅을 사용하여 마운트 및 언마운트 시점 관리한다.
     useEffect(() => {
@@ -55,29 +57,26 @@ function PhaserGameComponent() {
   function preload() {
     // 에셋 로드
         // sunnysideworld 타일셋 PNG 파일 로드
-        this.load.image('sunnysideworld_tiles', 'assets/Maps/spr_tileset_sunnysideworld_16px.png');
-
+        //this.load.image('sunnysideworld_tiles', '../../assets/tilesets/spr_tileset_sunnysideworld_16px.png');
+        
+        // assets/Ma1ps/
         // Cow 타일셋 로드
-        this.load.image('cow_tiles', 'assets/Maps/spr_deco_cow_strip4.png');
+        //this.load.image('cow_tiles', '../../assets/tilesets/spr_deco_cow_strip4.png');
     
-        // 로그인 배경 png 로드
-        //this.load.image('login_background', 'assets/Maps/Crypto_Farm_Login.png');
     
         // 새 로그인 화면 배경에 사용할 
-        // 바닥, 목장, 밭, 나무들, 고지대, 언덕 png 로드
-        this.load.image('login_background_ground', 'assets/Maps/New_Crypto_Farm_Login_Ground.png');
-        this.load.image('login_background_pasture', 'assets/Maps/Crypto_Farm_Login_Pasture.png');
-        this.load.image('login_background_field', 'assets/Maps/Crypto_Farm_Login_Field.png');
-        this.load.image('login_background_house', 'assets/Maps/Crypto_Farm_Login_House.png');
-        this.load.image('login_background_tree', 'assets/Maps/Crypto_Farm_Login_Trees.png');
-        this.load.image('login_background_highground', 'assets/Maps/Crypto_Farm_Login_HighGround.png');
-        this.load.image('login_background_hill', 'assets/Maps/Crypto_Farm_Login_Hill.png');
+        // 바닥, 목장, 밭, 나무들, 고지대, 언덕
+        this.load.image('login_background_ground', 'assets/maps/New_Crypto_Farm_Login_Ground.png');
+        this.load.image('login_background_pasture', 'assets/maps/Crypto_Farm_Login_Pasture.png');
+        this.load.image('login_background_hill', 'assets/maps/Crypto_Farm_Login_Hill.png');
     
         // 크립토 팜 로고 로드
         //this.load.image('login_logo', 'assets/crypto_farm_logo.png');
     
         // 타일맵 JSON 파일 로드
-        this.load.tilemapTiledJSON('login_tilemap', 'assets/Maps/Crypto_Farm_Login.json');
+        // 이거 지금 필요없음.
+       // this.load.tilemapTiledJSON('login_tilemap', '../../assets/tilesets/Crypto_Farm_Login.json');
+
     
   }
 
@@ -149,12 +148,6 @@ function PhaserGameComponent() {
     login_background_hill.setScale(2);
     login_background_hill.setOrigin(0, 0);
 
-
-
-
-    // 로고 추가
-    //const login_logo = this.physics.add.image(centerX, centerY, 'login_logo');
-    //login_logo.setScale(0.7);
 
 
 
