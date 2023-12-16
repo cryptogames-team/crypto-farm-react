@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { eventSystem } from './event_system';
 
 import PhaserGameComponent from "./phaser_component";
 import LoginWindow from "./login_window";
@@ -18,12 +19,8 @@ window.addEventListener('resize', event => {
 }, false);
 
 
-
-
-
-// 리액트 컴포넌트에서 반드시 return() 포함되어야 함.
 // 로그인과 캐릭터 선택 컴포넌트를 담는 부모 컴포넌트
-// 컴포넌트 전환이 이루어져야 한다.
+// 여기에 페이저 컴포넌트를 넣을까?
 function LoginWithCharacter() {
 
 
@@ -56,16 +53,18 @@ function LoginWithCharacter() {
     setCurrentComponent("");
 
     // 페이저 컴포넌트에 캐릭터 정보 전달
-    // props
+    //setCharInfo(characterInfo);
 
-    setCharInfo(characterInfo);
+    // 캐릭터 선택 이벤트 발생
+    eventSystem.emit('charSelection', characterInfo );
+
 
   }
 
   const [currentComponent, setCurrentComponent] = useState("login");
 
   // 선택한 캐릭터 정보 관리
-  const [charInfo, setCharInfo] = useState({});
+  //const [charInfo, setCharInfo] = useState({});
 
   // 렌더링할 컴포넌트 저장
   let componentToRender;
@@ -98,7 +97,7 @@ export default function PlayHome() {
   return (
 
     <div id="container">
-      <PhaserGameComponent charInfo={charInfo}  />
+      <PhaserGameComponent  />
       <LoginWithCharacter />
     </div>
 

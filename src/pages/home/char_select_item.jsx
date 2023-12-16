@@ -43,7 +43,7 @@ function CharSelectItem({registeredCharacter, onCharSelect}) {
               const data = await response.json();
 
               // accessToken JWT 토큰?
-              console.log(data);
+              //console.log(data);
               selectCharInfo.accessToken = data.accessToken;
 
               onCharSelect(selectCharInfo);
