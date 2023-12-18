@@ -20,6 +20,7 @@ export default class InGameScene extends Phaser.Scene {
 
     }
 
+    // 애셋 로드
     preload() {
         // 자산 로딩
 
@@ -32,11 +33,38 @@ export default class InGameScene extends Phaser.Scene {
         this.load.tilemapTiledJSON('ingame_tilemap', 'assets/maps/ingame/Crypto_Farm_InGame.json');
 
 
-        // 캐릭터 로드
+
+
+        // 캐릭터 스프라이트 시트 로드
+        // 애셋 경로 : assets/Character
+        // 대기 스프라이트 시트
+        this.load.spritesheet('player_idle', 'assets/Character/IDLE/base_idle_strip9.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_idle_hand', 'assets/Character/IDLE/tools_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/bowlhair_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        // 이동 스프라이트 시트
+
+
+        // 땅 파기 스프라이트 시트
 
     }
 
     create() {
+
+
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
@@ -46,10 +74,7 @@ export default class InGameScene extends Phaser.Scene {
         // 소 타일셋 이미지
         const cow_tileset = ingameMap.addTilesetImage('spr_deco_cow_strip4', 'cow_tiles');
 
-
         // 제일 밑에 있는 레이어를 가장 먼저 생성한다.
-
-
         for (let i = 0; i < ingameMap.layers.length; i++) {
             // 이 방법을 쓰면 레이어 이름을 일일히 지정할 필요가 없음.
             // 레이어 인덱스 값을 넣어도 됨.
@@ -58,7 +83,7 @@ export default class InGameScene extends Phaser.Scene {
             // 낮은 깊이를 가진 레이어가 뒤에 배치되고, 높은 깊이를 가진 레이어가 앞에 배치된다.
             layer.setDepth(i);
             // 레이어 스케일 설정
-            layer.scale = 4;
+            layer.scale = 3;
         }
 
 
@@ -82,34 +107,44 @@ export default class InGameScene extends Phaser.Scene {
         this.camera = this.cameras.main;
 
 
+        // 스프라이트 인스턴스는 한 번에 하나의 텍스처 또는 이미지 키만을 사용한다.
+        // 캐릭터 생성
+        this.player = new Player(this, 600, 600, 'player_idle');
+        // 캐릭터 오른손 생성
+        this.player_hand = new Player(this, 600, 600, 'player_idle_hand');
+        // 캐릭터 헤어 생성
+        this.player_hair = new Player(this, 600, 600, 'player_idle_hair');
+
+
+
     }
 
     update() {
 
         // 메인 카메라 이동
         // 카메라 속도
-        const cameraSpeed = 5;
-        // 위쪽 화살표가 눌렸을 때
-        if (this.cursors.up.isDown) {
-            this.camera.scrollY -= cameraSpeed;
-        }
-        // 아래쪽 화살표가 눌렸을 때
-        if (this.cursors.down.isDown) {
-            this.camera.scrollY += cameraSpeed;
-        }
-        // 왼쪽 화살표가 눌렸을 때
-        if (this.cursors.left.isDown) {
-            this.camera.scrollX -= cameraSpeed;
-        }
-        // 오른쪽 화살표가 눌렸을 때
-        if (this.cursors.right.isDown) {
-            this.camera.scrollX += cameraSpeed;
-        }
+        /*         const cameraSpeed = 5;
+                // 위쪽 화살표가 눌렸을 때
+                if (this.cursors.up.isDown) {
+                    this.camera.scrollY -= cameraSpeed;
+                }
+                // 아래쪽 화살표가 눌렸을 때
+                if (this.cursors.down.isDown) {
+                    this.camera.scrollY += cameraSpeed;
+                }
+                // 왼쪽 화살표가 눌렸을 때
+                if (this.cursors.left.isDown) {
+                    this.camera.scrollX -= cameraSpeed;
+                }
+                // 오른쪽 화살표가 눌렸을 때
+                if (this.cursors.right.isDown) {
+                    this.camera.scrollX += cameraSpeed;
+                } */
 
+        this.player.update(this.cursors);
+        this.player_hand.update(this.cursors);
+        this.player_hair.update(this.cursors);
 
     }
-
-
-
 
 }

@@ -33,13 +33,13 @@ function PhaserGameComponent() {
           mode: Phaser.Scale.RESIZE,
           // 가로 및 세로 중앙에 배치한다.
           autoCenter: Phaser.Scale.CENTER_BOTH,
-
         },
 
         // 물리 속성
         physics: {
           default: 'arcade',
           arcade: {
+            // 디버그 모드
             debug: true
           }
         }
