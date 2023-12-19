@@ -23,11 +23,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         // 씬의 물리 시스템에 추가하여 물리적 상호작용을 가능하게 한다.
         scene.physics.add.existing(this);
 
+        // 물리
         // 중력 비활성화
         this.body.setGravity(0, 0);
-
         // 충돌 크기 변경
         this.setBodySize(16, 16);
+
 
         // 애니메이션 설정
         this.createAnimations(scene);
@@ -40,10 +41,95 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
 
         // 모든 스프라이트가 동일한 기준점을 공유하도록 해야한다.
+
+        
+
     }
 
-    createAnimations(scene) {
 
+
+    update(cursors) {
+        const speed = 150;
+
+        // 대기
+        if (this.texture.key === 'player_idle') {
+            this.anims.play('idle', true);
+        } else if (this.texture.key === 'player_idle_hand') {
+            this.anims.play('idle_hand', true);
+        } else if (this.texture.key === 'player_idle_hair') {
+            this.anims.play('idle_hair', true);
+        }
+        // 걷기
+        else if (this.texture.key === 'player_walk') {
+            this.anims.play('walk', true);
+        } else if (this.texture.key === 'player_walk_hand') {
+            this.anims.play('walk_hand', true);
+        } else if (this.texture.key === 'player_walk_hair') {
+            this.anims.play('walk_hair', true);
+        }
+        // 땅 파기
+        else if (this.texture.key === 'player_dig') {
+            this.anims.play('dig', true);
+        } else if (this.texture.key === 'player_dig_hand') {
+            this.anims.play('dig_hand', true);
+        } else if (this.texture.key === 'player_dig_hair') {
+            this.anims.play('dig_hair', true);
+        }
+
+
+        // 왼쪽 방향키를 누르는 동안
+        if (cursors.left.isDown) {
+
+            this.setVelocityX(-speed);
+            // 왼쪽을 바라봄.
+            this.scaleX = -3;
+            direction = "left";
+
+            //console.log("스프라이트 위치", this.x, this.y);
+            //console.log("스프라이트 body 위치", this.body.x, this.body.y);
+
+
+            // console.log("왼쪽 이동 중 스프라이트 body offset", this.body.offset);
+
+        } else if (cursors.right.isDown) {
+
+            this.setVelocityX(speed);
+            // 오른쪽을 바라봄
+            this.scaleX = 3;
+            direction = "right";
+            //console.log("스프라이트 위치", this.x, this.y);
+            //console.log("스프라이트 body 위치", this.body.x, this.body.y);
+
+            // console.log("오른쪽 이동 중 스프라이트 body offset", this.body.offset);
+
+        } else {
+            this.setVelocityX(0);
+        }
+
+        if (cursors.up.isDown) { // 위로 이동
+            this.setVelocityY(-speed);
+        } else if (cursors.down.isDown) { // 아래로 이동
+            this.setVelocityY(speed);
+        } else {
+            this.setVelocityY(0);
+        }
+
+        if (this.scaleX < 0) {
+            // 스프라이트가 뒤집혔을 때
+            // 오프셋 값을 바디의 크기만큼 추가하면 된다.
+            this.body.offset.x = 56;
+        }
+        else {
+            this.body.offset.x = 40;
+        }
+
+
+
+
+    }
+
+
+    createAnimations(scene) {
 
         // 전달받은 텍스처 키 확인하기
         //console.log("texture key : " + this.texture.key);
@@ -56,8 +142,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
         // origin 값 확인하기
         //console.log("초기 스프라이트 기준", this.originX, this.originY);
-        //console.log("초기 스프라이트 body 기준", this.body.offset);
-
+        //console.log("초기 스프라이트 body offset", this.body.offset);
 
 
         if (this.texture.key === 'player_idle') {
@@ -101,66 +186,92 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             });
 
         }
+        // 걷기
+        else if (this.texture.key === 'player_walk') {
+
+            scene.anims.create({
+                // 애니메이션의 고유 이름 설정
+                key: 'walk',
+                // 애니메이션에 사용될 프레임을 정의한다.
+                frames: scene.anims.generateFrameNumbers('player_walk', { start: 0, end: 7 }),
+                // 애니메이션의 프레임 속도
+                frameRate: 8,
+                // 애니메이션의 반복 여부
+                repeat: -1
+            });
+
+        } else if (this.texture.key === 'player_walk_hand') {
+
+            scene.anims.create({
+                // 애니메이션의 고유 이름 설정
+                key: 'walk_hand',
+                // 애니메이션에 사용될 프레임을 정의한다.
+                frames: scene.anims.generateFrameNumbers('player_walk_hand', { start: 0, end: 7 }),
+                // 애니메이션의 프레임 속도
+                frameRate: 8,
+                // 애니메이션의 반복 여부
+                repeat: -1
+            });
+
+        } else if (this.texture.key === 'player_walk_hair') {
+
+            scene.anims.create({
+                // 애니메이션의 고유 이름 설정
+                key: 'walk_hair',
+                // 애니메이션에 사용될 프레임을 정의한다.
+                frames: scene.anims.generateFrameNumbers('player_walk_hair', { start: 0, end: 7 }),
+                // 애니메이션의 프레임 속도
+                frameRate: 8,
+                // 애니메이션의 반복 여부
+                repeat: -1
+            });
+
+        }
+        // 땅 파기
+        else if (this.texture.key === 'player_dig') {
+
+            scene.anims.create({
+                // 애니메이션의 고유 이름 설정
+                key: 'dig',
+                // 애니메이션에 사용될 프레임을 정의한다.
+                frames: scene.anims.generateFrameNumbers('player_dig', { start: 0, end: 12 }),
+                // 애니메이션의 프레임 속도
+                frameRate: 13,
+                // 애니메이션의 반복 여부
+                repeat: -1
+            });
+
+        } else if (this.texture.key === 'player_dig_hand') {
+
+            scene.anims.create({
+                // 애니메이션의 고유 이름 설정
+                key: 'dig_hand',
+                // 애니메이션에 사용될 프레임을 정의한다.
+                frames: scene.anims.generateFrameNumbers('player_dig_hand', { start: 0, end: 12 }),
+                // 애니메이션의 프레임 속도
+                frameRate: 13,
+                // 애니메이션의 반복 여부
+                repeat: -1
+            });
+
+        } else if (this.texture.key === 'player_dig_hair') {
+
+            scene.anims.create({
+                // 애니메이션의 고유 이름 설정
+                key: 'dig_hair',
+                // 애니메이션에 사용될 프레임을 정의한다.
+                frames: scene.anims.generateFrameNumbers('player_dig_hair', { start: 0, end: 12 }),
+                // 애니메이션의 프레임 속도
+                frameRate: 13,
+                // 애니메이션의 반복 여부
+                repeat: -1
+            });
+
+        }
 
     }
 
-    update(cursors) {
-        const speed = 150;
-
-        if (this.texture.key === 'player_idle') {
-            this.anims.play('idle', true);
-        } else if (this.texture.key === 'player_idle_hand') {
-            this.anims.play('idle_hand', true);
-        } else if (this.texture.key === 'player_idle_hair') {
-            this.anims.play('idle_hair', true);
-        }
-
-        // 왼쪽 방향키를 누르는 동안
-        if (cursors.left.isDown) {
-
-            this.setVelocityX(-speed);
-            // 왼쪽을 바라봄.
-            this.scaleX = -3;
-            direction = "left";
-
-            //console.log("스프라이트 위치", this.x, this.y);
-            //console.log("스프라이트 body 위치", this.body.x, this.body.y);
 
 
-           // console.log("왼쪽 이동 중 스프라이트 body offset", this.body.offset);
 
-        } else if (cursors.right.isDown) {
-
-            this.setVelocityX(speed);
-            // 오른쪽을 바라봄
-            this.scaleX = 3;
-            direction = "right";
-            //console.log("스프라이트 위치", this.x, this.y);
-            //console.log("스프라이트 body 위치", this.body.x, this.body.y);
-
-           // console.log("오른쪽 이동 중 스프라이트 body offset", this.body.offset);
-
-        } else {
-            this.setVelocityX(0);
-        }
-
-        if (cursors.up.isDown) { // 위로 이동
-            this.setVelocityY(-speed);
-        } else if (cursors.down.isDown) { // 아래로 이동
-            this.setVelocityY(speed);
-        } else {
-            this.setVelocityY(0);
-        }
-
-        if (this.scaleX < 0) {
-            // 스프라이트가 뒤집혔을 때
-            // 오프셋 값을 바디의 크기만큼 추가하면 된다.
-            this.body.offset.x = 56;
-        }
-        else{
-            this.body.offset.x = 40;
-        }
-
-
-    }
 }

@@ -1,9 +1,13 @@
 import Phaser from 'phaser'
 import Player from '../characters/player'
+import PlayerObject from '../characters/player_object'
 
 
 export default class InGameScene extends Phaser.Scene {
 
+
+    locationText;
+    bodyLocationText;
 
     constructor() {
         super('InGameScene');
@@ -38,7 +42,7 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터 스프라이트 시트 로드
         // 애셋 경로 : assets/Character
         // 대기 스프라이트 시트
-        this.load.spritesheet('player_idle', 'assets/Character/IDLE/base_idle_strip9.png', {
+        this.load.spritesheet('player_idle_body', 'assets/Character/IDLE/base_idle_strip9.png', {
             // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
             // IDLE width 96 heigth 64
             frameWidth: 96,
@@ -55,14 +59,100 @@ export default class InGameScene extends Phaser.Scene {
             frameHeight: 64
         });
 
-        // 이동 스프라이트 시트
+        // 걷는 스프라이트 시트 player_walk
+        this.load.spritesheet('player_walk', 'assets/Character/WALKING/base_walk_strip8.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_walk_hand', 'assets/Character/WALKING/tools_walk_strip8.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_walk_hair', 'assets/Character/WALKING/bowlhair_walk_strip8.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        // 달리는 스프라이트 시트 player_run
 
 
-        // 땅 파기 스프라이트 시트
+        // 땅 파기 스프라이트 시트 player_dig
+        this.load.spritesheet('player_dig', 'assets/Character/DIG/base_dig_strip13.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_dig_hand', 'assets/Character/DIG/tools_dig_strip13.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_dig_hair', 'assets/Character/DIG/bowlhair_dig_strip13.png', {
+            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
+            // IDLE width 96 heigth 64
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
+
 
     }
 
     create() {
+
+
+        let idle_sprites = {
+            hair: 'player_idle_hair',
+            body: 'player_idle_body',
+            hand: 'player_idle_hand'
+        };
+
+        // 애니메이션 생성
+        this.anims.create({
+            // 애니메이션의 고유 이름 설정
+            key: 'idle_hair',
+            // 애니메이션에 사용될 프레임을 정의한다.
+            frames: this.anims.generateFrameNumbers('player_idle_hair', { start: 0, end: 8 }),
+            // 애니메이션의 프레임 속도
+            frameRate: 9,
+            // 애니메이션의 반복 여부
+            repeat: -1
+        });
+
+        this.anims.create({
+            // 애니메이션의 고유 이름 설정
+            key: 'idle_body',
+            // 애니메이션에 사용될 프레임을 정의한다.
+            frames: this.anims.generateFrameNumbers('player_idle_body', { start: 0, end: 8 }),
+            // 애니메이션의 프레임 속도
+            frameRate: 9,
+            // 애니메이션의 반복 여부
+            repeat: -1
+        });
+
+        this.anims.create({
+            // 애니메이션의 고유 이름 설정
+            key: 'idle_hand',
+            // 애니메이션에 사용될 프레임을 정의한다.
+            frames: this.anims.generateFrameNumbers('player_idle_hand', { start: 0, end: 8 }),
+            // 애니메이션의 프레임 속도
+            frameRate: 9,
+            // 애니메이션의 반복 여부
+            repeat: -1
+        });
+
 
 
 
@@ -107,15 +197,35 @@ export default class InGameScene extends Phaser.Scene {
         this.camera = this.cameras.main;
 
 
+
+
         // 스프라이트 인스턴스는 한 번에 하나의 텍스처 또는 이미지 키만을 사용한다.
-        // 캐릭터 생성
-        this.player = new Player(this, 600, 600, 'player_idle');
-        // 캐릭터 오른손 생성
-        this.player_hand = new Player(this, 600, 600, 'player_idle_hand');
-        // 캐릭터 헤어 생성
-        this.player_hair = new Player(this, 600, 600, 'player_idle_hair');
+        /*         // 캐릭터 생성
+                this.player = new Player(this, 600, 600, 'player_idle');
+                // 캐릭터 오른손 생성
+                this.player_hand = new Player(this, 600, 600, 'player_idle_hand');
+                // 캐릭터 헤어 생성
+                this.player_hair = new Player(this, 600, 600, 'player_idle_hair'); */
 
 
+        // 걷는 캐릭터 생성
+        /*         this.player = new Player(this, 600, 600, 'player_walk');
+                this.player_hand = new Player(this, 600, 600, 'player_walk_hand');
+                this.player_hair = new Player(this, 600, 600, 'player_walk_hair'); */
+
+        // 땅 파는 캐릭터 생성
+        /*         this.player = new Player(this, 600, 600, 'player_dig');
+                this.player_hand = new Player(this, 600, 600, 'player_dig_hand');
+                this.player_hair = new Player(this, 600, 600, 'player_dig_hair'); */
+
+
+        // 캐릭터 오브젝트
+        this.playerObject = new PlayerObject(this, 500, 600, idle_sprites);
+
+        // 디버그 텍스트 추가
+        //  Pass in a basic style object with the constructor
+        //this.locationText = this.add.text(1300, 0, 'Phaser', { fontFamily: 'Arial', fontSize: 30 }).setDepth(100);
+        
 
     }
 
@@ -141,9 +251,15 @@ export default class InGameScene extends Phaser.Scene {
                     this.camera.scrollX += cameraSpeed;
                 } */
 
-        this.player.update(this.cursors);
-        this.player_hand.update(this.cursors);
-        this.player_hair.update(this.cursors);
+
+        this.playerObject.update(this.cursors);
+
+        //this.locationText.setText("PlayerObject x : " + this.playerObject.x);
+
+
+        //this.player.update(this.cursors);
+        //this.player_hand.update(this.cursors);
+        //this.player_hair.update(this.cursors);
 
     }
 
