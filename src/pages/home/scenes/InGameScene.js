@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import Player from '../characters/player'
 import PlayerObject from '../characters/player_object'
 
 
@@ -12,7 +11,7 @@ export default class InGameScene extends Phaser.Scene {
     constructor() {
         super('InGameScene');
 
-        //console.log("인 게임 씬 실행");
+
     }
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
     // 씬의 초기화를 담당하며, 씬이 시작하기 전에 필요한 설정이나 변수의 초기화등을 수행하는데 사용된다.
@@ -28,7 +27,6 @@ export default class InGameScene extends Phaser.Scene {
     preload() {
         // 자산 로딩
 
-
         // sunnysideworld 타일셋 PNG 파일 로드
         this.load.image('sunnysideworld_tiles', 'assets/maps/spr_tileset_sunnysideworld_16px.png');
         this.load.image('cow_tiles', 'assets/maps/spr_deco_cow_strip4.png');
@@ -36,72 +34,61 @@ export default class InGameScene extends Phaser.Scene {
         // 타일맵 JSON 파일 로드
         this.load.tilemapTiledJSON('ingame_tilemap', 'assets/maps/ingame/Crypto_Farm_InGame.json');
 
-
-
-
         // 캐릭터 스프라이트 시트 로드
         // 애셋 경로 : assets/Character
         // 대기 스프라이트 시트
         this.load.spritesheet('player_idle_body', 'assets/Character/IDLE/base_idle_strip9.png', {
             // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
             frameWidth: 96,
             frameHeight: 64
         });
-
         this.load.spritesheet('player_idle_hand', 'assets/Character/IDLE/tools_idle_strip9.png', {
             frameWidth: 96,
             frameHeight: 64
         });
-
         this.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/bowlhair_idle_strip9.png', {
             frameWidth: 96,
             frameHeight: 64
         });
 
         // 걷는 스프라이트 시트 player_walk
-        this.load.spritesheet('player_walk', 'assets/Character/WALKING/base_walk_strip8.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
+        this.load.spritesheet('player_walk_body', 'assets/Character/WALKING/base_walk_strip8.png', {
             frameWidth: 96,
             frameHeight: 64
         });
-
         this.load.spritesheet('player_walk_hand', 'assets/Character/WALKING/tools_walk_strip8.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
             frameWidth: 96,
             frameHeight: 64
         });
-
         this.load.spritesheet('player_walk_hair', 'assets/Character/WALKING/bowlhair_walk_strip8.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
             frameWidth: 96,
             frameHeight: 64
         });
 
         // 달리는 스프라이트 시트 player_run
-
+        this.load.spritesheet('player_run_body', 'assets/Character/RUN/base_run_strip8.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('player_run_hand', 'assets/Character/RUN/tools_run_strip8.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('player_run_hair', 'assets/Character/RUN/bowlhair_run_strip8.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
 
         // 땅 파기 스프라이트 시트 player_dig
-        this.load.spritesheet('player_dig', 'assets/Character/DIG/base_dig_strip13.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
+        this.load.spritesheet('player_dig_body', 'assets/Character/DIG/base_dig_strip13.png', {
             frameWidth: 96,
             frameHeight: 64
         });
-
         this.load.spritesheet('player_dig_hand', 'assets/Character/DIG/tools_dig_strip13.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
             frameWidth: 96,
             frameHeight: 64
         });
-
         this.load.spritesheet('player_dig_hair', 'assets/Character/DIG/bowlhair_dig_strip13.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            // IDLE width 96 heigth 64
             frameWidth: 96,
             frameHeight: 64
         });
@@ -119,7 +106,14 @@ export default class InGameScene extends Phaser.Scene {
             hand: 'player_idle_hand'
         };
 
-        // 애니메이션 생성
+        let walk_sprites = {
+            hair: 'player_walk_hair',
+            body: 'player_walk_body',
+            hand: 'player_walk_hand'
+        }
+
+        // 애니메이션 생성 9프레임
+        // 대기 애니메이션 생성
         this.anims.create({
             // 애니메이션의 고유 이름 설정
             key: 'idle_hair',
@@ -130,28 +124,79 @@ export default class InGameScene extends Phaser.Scene {
             // 애니메이션의 반복 여부
             repeat: -1
         });
-
         this.anims.create({
-            // 애니메이션의 고유 이름 설정
             key: 'idle_body',
-            // 애니메이션에 사용될 프레임을 정의한다.
             frames: this.anims.generateFrameNumbers('player_idle_body', { start: 0, end: 8 }),
-            // 애니메이션의 프레임 속도
             frameRate: 9,
-            // 애니메이션의 반복 여부
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'idle_hand',
+            frames: this.anims.generateFrameNumbers('player_idle_hand', { start: 0, end: 8 }),
+            frameRate: 9,
             repeat: -1
         });
 
+        // 걷는 애니메이션 생성 8프레임
         this.anims.create({
-            // 애니메이션의 고유 이름 설정
-            key: 'idle_hand',
-            // 애니메이션에 사용될 프레임을 정의한다.
-            frames: this.anims.generateFrameNumbers('player_idle_hand', { start: 0, end: 8 }),
-            // 애니메이션의 프레임 속도
-            frameRate: 9,
-            // 애니메이션의 반복 여부
+            key: 'walk_hair',
+            frames: this.anims.generateFrameNumbers('player_walk_hair', { start: 0, end: 7 }),
+            frameRate: 8,
             repeat: -1
         });
+        this.anims.create({
+            key: 'walk_body',
+            frames: this.anims.generateFrameNumbers('player_walk_body', { start: 0, end: 7 }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'walk_hand',
+            frames: this.anims.generateFrameNumbers('player_walk_hand', { start: 0, end: 7 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        // 달리기 애니메이션 생성 8 프레임
+        this.anims.create({
+            key: 'run_hair',
+            frames: this.anims.generateFrameNumbers('player_run_hair', { start: 0, end: 7 }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'run_body',
+            frames: this.anims.generateFrameNumbers('player_run_body', { start: 0, end: 7 }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'run_hand',
+            frames: this.anims.generateFrameNumbers('player_run_hand', { start: 0, end: 7 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        // 땅파기 애니메이션 생성 13 프레임
+        this.anims.create({
+            key: 'dig_hair',
+            frames: this.anims.generateFrameNumbers('player_dig_hair', { start: 0, end: 12 }),
+            frameRate: 13,
+            repeat: 0
+        });
+        this.anims.create({
+            key: 'dig_body',
+            frames: this.anims.generateFrameNumbers('player_dig_body', { start: 0, end: 12 }),
+            frameRate: 13,
+            repeat: 0
+        });
+        this.anims.create({
+            key: 'dig_hand',
+            frames: this.anims.generateFrameNumbers('player_dig_hand', { start: 0, end: 12 }),
+            frameRate: 13,
+            repeat: 0
+        });
+        // anims : AnimationManager
 
 
 
@@ -192,34 +237,14 @@ export default class InGameScene extends Phaser.Scene {
         //this.cameras.main.setBounds(0, 0, this.cameras.main.width, this.cameras.main.height);
 
         // 키보드 입력 설정
-        this.cursors = this.input.keyboard.createCursorKeys();
+        this.cursorsKeys = this.input.keyboard.createCursorKeys();
         // 카메라 참조
         this.camera = this.cameras.main;
 
+        let spriteArray = [];
+        spriteArray.push(idle_sprites,walk_sprites);
 
-
-
-        // 스프라이트 인스턴스는 한 번에 하나의 텍스처 또는 이미지 키만을 사용한다.
-        /*         // 캐릭터 생성
-                this.player = new Player(this, 600, 600, 'player_idle');
-                // 캐릭터 오른손 생성
-                this.player_hand = new Player(this, 600, 600, 'player_idle_hand');
-                // 캐릭터 헤어 생성
-                this.player_hair = new Player(this, 600, 600, 'player_idle_hair'); */
-
-
-        // 걷는 캐릭터 생성
-        /*         this.player = new Player(this, 600, 600, 'player_walk');
-                this.player_hand = new Player(this, 600, 600, 'player_walk_hand');
-                this.player_hair = new Player(this, 600, 600, 'player_walk_hair'); */
-
-        // 땅 파는 캐릭터 생성
-        /*         this.player = new Player(this, 600, 600, 'player_dig');
-                this.player_hand = new Player(this, 600, 600, 'player_dig_hand');
-                this.player_hair = new Player(this, 600, 600, 'player_dig_hair'); */
-
-
-        // 캐릭터 오브젝트
+        // 플레이어 캐릭터 오브젝트 씬에 생성
         this.playerObject = new PlayerObject(this, 500, 600, idle_sprites);
 
         // 디버그 텍스트 추가
@@ -232,34 +257,29 @@ export default class InGameScene extends Phaser.Scene {
     update() {
 
         // 메인 카메라 이동
-        // 카메라 속도
         /*         const cameraSpeed = 5;
                 // 위쪽 화살표가 눌렸을 때
-                if (this.cursors.up.isDown) {
+                if (this.cursorsKeys.up.isDown) {
                     this.camera.scrollY -= cameraSpeed;
                 }
                 // 아래쪽 화살표가 눌렸을 때
-                if (this.cursors.down.isDown) {
+                if (this.cursorsKeys.down.isDown) {
                     this.camera.scrollY += cameraSpeed;
                 }
                 // 왼쪽 화살표가 눌렸을 때
-                if (this.cursors.left.isDown) {
+                if (this.cursorsKeys.left.isDown) {
                     this.camera.scrollX -= cameraSpeed;
                 }
                 // 오른쪽 화살표가 눌렸을 때
-                if (this.cursors.right.isDown) {
+                if (this.cursorsKeys.right.isDown) {
                     this.camera.scrollX += cameraSpeed;
                 } */
 
 
-        this.playerObject.update(this.cursors);
+        this.playerObject.update(this.cursorsKeys);
 
         //this.locationText.setText("PlayerObject x : " + this.playerObject.x);
 
-
-        //this.player.update(this.cursors);
-        //this.player_hand.update(this.cursors);
-        //this.player_hair.update(this.cursors);
 
     }
 
