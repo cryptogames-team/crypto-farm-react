@@ -92,8 +92,8 @@ function CharSelectWindow({accountName, onCharSelect}) {
         limit: 100
       });
 
-      // 계정의 모든 NFT
-      console.log(response);
+      // 계정의 크립토 팜 관련 NFT
+      console.log("크립토 팜 NFT 정보",response);
 
       // 받은 NFT 정보 개수만큼 배열에 넣기
       response.rows.forEach(function (nft) {
@@ -103,18 +103,21 @@ function CharSelectWindow({accountName, onCharSelect}) {
         let imageURL = "https://ipfs.io/ipfs/" + nft.immutable_serialized_data[1].value[1];
         // nft 애셋 id
         let asset_id = nft.asset_id;
+        // 캐릭터 구별하는 name 키값
+        let name = nft.immutable_serialized_data[2].value[1];
 
         // nft 정보 담는 객체 생성
         let nft_info = {
           asset_id: asset_id,
-          imageURL: imageURL
+          imageURL: imageURL,
+          name : name
         }
 
         my_nfts.push(nft_info);
 
       });
 
-      console.log(my_nfts);
+      console.log("크립토 팜 NFT 정보에서 필요한 거만 빼옴",my_nfts);
 
 
 
@@ -190,6 +193,8 @@ function CharSelectWindow({accountName, onCharSelect}) {
 
             // 캐릭터 정보 객체에 imageURL 추가
             registeredCharInfo.imageURL = nft.imageURL;
+            // name key 추가
+            registeredCharInfo.name = nft.name;
 
             // 문자열과 함께 객체를 출력하려면 객체를 문자열로 변환해야 한다.
             //console.log("등록된 NFT 캐릭터의 정보 : ",registeredCharInfo);

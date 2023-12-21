@@ -21,6 +21,8 @@ function CharSelectItem({registeredCharacter, onCharSelect}) {
         let selectCharInfo = registeredCharacter;
 
         console.log("선택한 캐릭터 정보", selectCharInfo);
+
+        // JWT 토큰 발급받는듯? 
         try {
             const response = await fetch(serverURL, {
                 // 요청 방식

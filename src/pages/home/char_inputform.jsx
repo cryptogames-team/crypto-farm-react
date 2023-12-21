@@ -86,6 +86,8 @@ function CharInputForm({ unregiCharInfo, onClose, onCreateChar, onCreateResult }
             if (data.error === undefined) {
                 // NFT 정보 객체에 ImageURL 키 추가하기
                 data.imageURL = unregiCharInfo.imageURL;
+                // name key 추가
+                data.name = unregiCharInfo.name;
                 handleCreateChar(data);
                 rmCreateChar(data);
                 console.log("캐릭터 생성 성공", data);
