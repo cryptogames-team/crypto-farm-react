@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 
 // 캐릭터가 바라보고 있는 방향
-let direction = "right";
+let playerDirection = "right";
 
 // 캐릭터 스프라이트 크기 배율
-const spriteScale = 6;
+const spriteScale = 4;
 // 실제 캐릭터 스프라이트 X,Y 크기
 const spriteX = 16;
 const spriteY = 16;
@@ -38,7 +38,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         //this.body.setBounce(1);
         this.body.setSize(bodyX, bodyY);
         // 자식 오브젝트들은 부모 컨테이너 depth 따라가나봄.
-        this.setDepth(2);
+        this.setDepth(3);
 
         // Container에도 body가 있음
         // 기본 body size는 64,64px
@@ -48,7 +48,6 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         // 컨테이너 바디 절반 크기 만큼 이동시키면 컨테이너 바디랑 딱 일치함.
         // 컨테이너에 스프라이트를 추가할 때, 스프라이트 위치는 컨테이너 내에서 상대적 위치를 나타냄.
         // 컨테이너 내부의 스프라이트가 바디를 넘어가지 않게 상대 위치를 조정해야 한다.
-
         this.bodySprite = scene.add.sprite(bodyX / 2, bodyY / 2, 'player_idle_body');
         this.bodySprite.setScale(spriteScale);
         this.handSprite = scene.add.sprite(bodyX / 2, bodyY / 2, 'player_idle_hand');
@@ -81,7 +80,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
 
     update(cursorsKeys, keys) {
 
-        // 상태 머신 실행?
+        // 상태 머신 실행
         this.stateMachine.step();
 
     }
@@ -228,11 +227,11 @@ class MoveState extends State {
             player.body.setVelocityX(-currentSpeed);
             // 스프라이트 왼쪽으로 반전시키기
             player.flipSprites(true);
-            direction = 'left';
+            playerDirection = 'left';
         } else if (right.isDown || D.isDown) { // 오른쪽 이동
             player.body.setVelocityX(currentSpeed);
             player.flipSprites(false);
-            direction = "right";
+            playerDirection = "right";
         }
         if (up.isDown || W.isDown) { // 위로 이동
             player.body.setVelocityY(-currentSpeed);
