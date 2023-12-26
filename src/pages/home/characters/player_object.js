@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
-// 캐릭터가 바라보고 있는 방향
-let playerDirection = "right";
+
 
 // 캐릭터 스프라이트 크기 배율
 const spriteScale = 4;
@@ -16,6 +15,11 @@ const bodyY = spriteY * spriteScale;
 // GameObjects.Container : 여러 게임 오브젝트(예: 스프라이트, 텍스트, 그래픽 등)를 
 // 그룹화하고 하나의 단위로 관리할 수 있게 해주는 컨테이너
 export default class PlayerObject extends Phaser.GameObjects.Container {
+
+
+    // 캐릭터가 바라보고 있는 방향
+    playerDirection;
+
 
     constructor(scene, x, y) {
         // 상속받은 부모 클래스의 생성자
@@ -38,11 +42,19 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         //this.body.setBounce(1);
         this.body.setSize(bodyX, bodyY);
         // 자식 오브젝트들은 부모 컨테이너 depth 따라가나봄.
-        this.setDepth(3);
+        this.setDepth(10);
+        
+
+        // 컨테이너의 오리진은 변경을 못한다는데
+        // 컨테이너의 바디에는 애초에 오리진이 없다.
+
+        // 컨테이너의 중앙값 구하기
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
 
         // Container에도 body가 있음
         // 기본 body size는 64,64px
 
+        this.playerDirection = "right";
 
         // 캐릭터 스프라이트 추가
         // 컨테이너 바디 절반 크기 만큼 이동시키면 컨테이너 바디랑 딱 일치함.
@@ -227,11 +239,11 @@ class MoveState extends State {
             player.body.setVelocityX(-currentSpeed);
             // 스프라이트 왼쪽으로 반전시키기
             player.flipSprites(true);
-            playerDirection = 'left';
+            player.playerDirection = 'left';
         } else if (right.isDown || D.isDown) { // 오른쪽 이동
             player.body.setVelocityX(currentSpeed);
             player.flipSprites(false);
-            playerDirection = "right";
+            player.playerDirection = 'right';
         }
         if (up.isDown || W.isDown) { // 위로 이동
             player.body.setVelocityY(-currentSpeed);
@@ -286,12 +298,26 @@ class DigState extends State {
             player.hairSprite.anims.play('dig_hair', true);
         }
         player.bodySprite.anims.play('dig_body', true);
-        player.handSprite.anims.play('dig_hand', true);
+        let DigAnim = player.handSprite.anims.play('dig_hand', true);
 
+        // animationupdate 이벤트에 리스너 추가
+        // animationupdate 이벤트는 애니메이션의 각 프레임마다 발생한다.
+        DigAnim.on('animationupdate', (anim, frame) => {
+            if(frame.index === 6) {
+                //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
+                scene.paintTiles();
+            }
+        });
+
+        // 애니메이션 전부 정지시켜야하나?
 
         // 땅 파는 애니메이션이 종료되면 대기 상태로 전환
         player.bodySprite.once('animationcomplete', () => {
             player.stateMachine.transition('idle');
+
+
+            // 등록된 콜백 함수 전부 해제
+            DigAnim.removeAllListeners();
         })
 
 
@@ -302,8 +328,7 @@ class DigState extends State {
     }
 }
 
-// 3초 후 콜백함수 실행
-// Wait a third of a second and then go back to idle
+// 3초 후 콜백함수 실행해서 대기 상태로 전환
 /* scene.time.delayedCall(300, () => {
     this.stateMachine.transition('idle');
 }); */

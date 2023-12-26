@@ -13,18 +13,23 @@ const tileSize = 16 * layerScale;
 
 export default class InGameScene extends Phaser.Scene {
 
-
     locationText;
     bodyLocationText;
+    tileIndexText;
+    tileLocationText;
+    mouseLocationText;
+    playerTileIndexText;
+    playerDirectionText;
 
-    debugLocationText;
-
-    // paint tileMap
+    // paint tileMap example
     selectedTile;
     marker;
     controls;
     ingameMap;
     shiftKey;
+
+    playerTileX;
+    playerTileY;
 
     constructor() {
         super('InGameScene');
@@ -134,6 +139,16 @@ export default class InGameScene extends Phaser.Scene {
 
     create() {
 
+
+        // 게임 화면의 가로, 세로 중앙 좌표
+        const centerX = this.cameras.main.centerX;
+        const centerY = this.cameras.main.centerY;
+
+        // 게임 화면의 가로, 세로 좌표
+        const rightX = this.cameras.main.width;
+        const bottomY = this.cameras.main.height;
+
+
         // 캐릭터 애니메이션 생성에 필요한 정보를 담은 객체 배열 
         const animations = [
             // 대기 애니메이션 9 프레임
@@ -172,6 +187,7 @@ export default class InGameScene extends Phaser.Scene {
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
         this.ingameMap = this.make.tilemap({ key: 'ingame_tilemap' });
         // 현재 사용중인 타일셋 이미지를 추가
+        // 타일셋 오브젝트를 리턴한다.
         const sunnysideworld_tileset = this.ingameMap.addTilesetImage('sunnysideworld_16px', 'sunnysideworld_tiles');
         // 소 타일셋 이미지
         //const cow_tileset = this.ingameMap.addTilesetImage('spr_deco_cow_strip4', 'cow_tiles');
@@ -223,12 +239,31 @@ export default class InGameScene extends Phaser.Scene {
         // layer 파라미터가 비었으면 현재 레이어가 사용된다.
         this.selectedTile = this.ingameMap.getTileAt(2, 3);
 
+        // return Tile 클래스를 리턴해야됨.
+        //this.tilesetTile;
+
         // 그래픽 객체 추가
         this.marker = this.add.graphics();
         this.marker.lineStyle(2, 0x000000, 1);
+        // 사각형 그리기 시작 위치 왼쪽 상단
         this.marker.strokeRect(0, 0, tileSize, tileSize);
         this.marker.setDepth(5);
 
+
+        // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
+        // 컨테이너 클래스의 오리진은 변경이 불가능하다.
+
+        // 컨테이너의 중앙값 구하기
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
+        const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
+        const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
+
+        // 플레이어의 중앙 위치를 점으로 찍는다.
+        this.playerLocationMarker = this.add.graphics({ fillStyle: { color: 0xff0000 } });
+        this.playerLocationMarker.fillCircle(playerCenterX, playerCenterY, 1);
+        this.playerLocationMarker.setDepth(100);
+
+        // 플레이어 현재 위치와 오리진 위치가 같음.
 
 
         // 키보드 입력 설정
@@ -276,16 +311,60 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // 디버그 텍스트 추가
-        //  Pass in a basic style object with the constructor
-        this.debugLocationText =
-            this.add.text(1300, 0, 'Phaser', { fontFamily: 'Arial', fontSize: 30 }).setDepth(100);
-        this.debugLocationText.setScrollFactor(0);
-        // 현재 사용되는 레이어 인덱스 - 가장 마지막 레이어인 오브젝트 레이어
-        console.log("현재 사용되는 레이어 인덱스 " + this.ingameMap.currentLayerIndex);
+        // 마우스 포인터의 게임 월드내의 좌표값 표시
+        // 화면 오른쪽 상단에 위치
+        /*         this.mouseLocationText =
+                    this.add.text(rightX, 0, 'Mouse Location', { fontFamily: 'Arial', fontSize: 30 }).setDepth(100);
+                this.mouseLocationText.setScrollFactor(0);
+                this.mouseLocationText.setOrigin(1, 0);
+        
+                // 마우스 포인터가 위치한 타일의 인덱스
+                this.tileIndexText =
+                    this.add.text(0, 0, 'Mouse Tile Index', { fontFamily: 'Arial', fontSize: 30, backgroundColor: '#000000' }).setDepth(100);
+                this.tileIndexText.setScrollFactor(0);
+        
+        
+                // 마우스 포인터가 위치한 타일의 월드 상의 위치
+                this.tileLocationText =
+                    this.add.text(centerX, 0, 'Mouse Tile Location', {
+                        fontFamily: 'Arial',
+                        fontSize: 30,
+                        backgroundColor: '#000000',
+                        align: 'center'
+                    }).setDepth(100);
+                this.tileLocationText.setScrollFactor(0);
+                // 텍스트를 가로 중앙에 정렬하기 위해 오리진 설정
+                this.tileLocationText.setOrigin(0.5, 0); */
 
+        // 현재 플레이어가 위치한 타일의 인덱스 표시
+        this.playerTileIndexText =
+            this.add.text(centerX, bottomY, 'player tile index', {
+                fontFamily: 'Arial',
+                fontSize: 30,
+                backgroundColor: '#000000',
+                align: 'center'
+            }).setDepth(100);
+        this.playerTileIndexText.setScrollFactor(0);
+        this.playerTileIndexText.setOrigin(0.5, 1);
+
+        // 플레이어가 현재 바라보는 방향 표시
+        this.playerDirectionText =
+            this.add.text(centerX, 0, 'Player Direction : Right', {
+                fontFamily: 'Arial',
+                fontSize: 30,
+                backgroundColor: '#000000',
+                align: 'center'
+            }).setDepth(100);
+        this.playerDirectionText.setScrollFactor(0);
+        // 텍스트를 가로 중앙에 정렬하기 위해 오리진 설정
+        this.playerDirectionText.setOrigin(0.5, 0);
     }
 
-    update() {
+    // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
+    // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
+    // 이 값은 게임이 얼마나 매끄럽게 실행되고 있는지를 나타내는데 사용될 수 있으며,
+    // 주로 프레임 간 일정한 속도를 유지하기 위한 물리 계산에 사용한다.
+    update(time, delta) {
 
         // 메인 카메라 이동
         /*         const cameraSpeed = 5;
@@ -308,35 +387,49 @@ export default class InGameScene extends Phaser.Scene {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
 
+        // 플레이어의 현재 위치 : Vector 2
+        const playerX = this.playerObject.x;
+        const playerY = this.playerObject.y;
+
+        // 플레이어의 현재 중앙 위치
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
+        const playerCenterX = playerX + (this.playerObject.body.width / 2);
+        const playerCenterY = playerY + (this.playerObject.body.height / 2);
 
 
-        // 현재 활성화된 포인터(예: 마우스 커서)의 위치를 카메라의 뷰포트 좌표로 변환한다.
-        // this.input.activePointer : 게임에서 현재 활성화된 포인터를 나타낸다.
-        // positionTocamera(this.camera) : 활성화된 포인터의 위치를 메인 카메라의 뷰포트 좌표로 변환
-        // 화면상의 포인터 위치를 게임 세계 내의 실제 위치로 매핑하는데 사용한다.
-        const worldPoint = this.input.activePointer.positionToCamera(this.camera);
+        // 플레이어 현재 위치 마커 업데이트
+        // 플레이어의 중앙 위치를 점으로 찍는다.
+        this.playerLocationMarker.clear();
+        /*         this.playerLocationMarker.fillCircle(playerCenterX, playerCenterY, 2);
+                this.playerLocationMarker.setDepth(100); */
 
-        // 마우스 커서의 게임 세계 내의 좌표 값
-        this.debugLocationText.setText("WorldPoint X : " + worldPoint.x +
-        "\nWorldPoint Y : " + worldPoint.y);
-
-        // 가장 가까운 타일로 반올림
-        const pointerTileX = this.ingameMap.worldToTileX(worldPoint.x);
-        const pointerTileY = this.ingameMap.worldToTileY(worldPoint.y);
-
-        // 월드 공간에서 타일 좌표로 스냅
-        this.marker.x = this.ingameMap.tileToWorldX(pointerTileX);
-        this.marker.y = this.ingameMap.tileToWorldY(pointerTileY);
-
-        // 마우스 왼쪽 버튼을 누르면 새 타일로 칠하기
-        if (this.input.manager.activePointer.isDown) {
-            if (this.shiftKey.isDown) {
-                this.selectedTile = this.ingameMap.getTileAt(pointerTileX, pointerTileY);
-            }
-            else {
-                this.ingameMap.putTileAt(this.selectedTile, pointerTileX, pointerTileY);
-            }
+        // 캐릭터 중앙 위치 값에서 캐릭터가 바라보는 방향 앞에 1타일 크기만큼 떨어진 곳에 점찍기
+        let pointX = playerCenterX;
+        // 캐릭터가 현재 바라보는 방향
+        if (this.playerObject.playerDirection === 'left') {
+            pointX = playerCenterX - tileSize;
+        } else if (this.playerObject.playerDirection === "right") {
+            pointX = playerCenterX + tileSize;
         }
+        this.playerDirectionText.setText("Player Direction : " + this.playerObject.playerDirection);
+        this.playerLocationMarker.fillCircle(pointX, playerCenterY, 2);
+
+
+        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
+        // 캐릭터 중앙 위치가 기준점
+        const playerTileX = this.ingameMap.worldToTileX(pointX);
+        const playerTileY = this.ingameMap.worldToTileY(playerCenterY);
+        this.playerTileX = playerTileX;
+        this.playerTileY = playerTileY;
+
+
+        // 구한 타일의 인덱스 표시 
+        this.playerTileIndexText.setText("PlayerTileIndex X : " + playerTileX +
+            "\nPlayerTileIndex Y : " + playerTileY);
+
+        // 타일 마커 위치 설정
+        this.marker.x = this.ingameMap.tileToWorldX(playerTileX);
+        this.marker.y = this.ingameMap.tileToWorldY(playerTileY);
 
     }
 
@@ -494,6 +587,71 @@ export default class InGameScene extends Phaser.Scene {
         });
 
     }
+
+
+    // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
+    // 캐릭터 땅파기 애니메이션에 실행될 콜백 함수
+    paintTiles() {
+        console.log("paintTiles() 호출됨.");
+        // 타일 인덱스 전달  
+        // 페이저 타일 인덱스는 1부터 시작한다.
+        // GroundLayer 2의 타일이 변경되게 한다.
+        this.ingameMap.putTileAt(1011, this.playerTileX, this.playerTileY, undefined, 1);
+
+        let tile = this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 1);
+
+        // 타일 회전 제거
+        if (tile) {
+            tile.rotation = 0;
+            // 타일의 X축, Y축 반전 제거
+            tile.flipX = false;
+            tile.flipY = false;
+
+            // 타일맵 레이어의 렌더링 업데이트 호출 안해도 타일 회전 제거 됨.
+            //tile.layer.tilemapLayer.render();
+        }
+    }
+
+
+    getMousePointerTile() {
+        // 현재 활성화된 포인터(예: 마우스 커서)의 위치를 카메라의 뷰포트 좌표로 변환한다.
+        // this.input.activePointer : 게임에서 현재 활성화된 포인터를 나타낸다.
+        // positionTocamera(this.camera) : 활성화된 포인터의 위치를 메인 카메라의 뷰포트 좌표로 변환
+        // 화면상의 포인터 위치를 게임 세계 내의 실제 위치로 매핑하는데 사용한다.
+        const worldPoint = this.input.activePointer.positionToCamera(this.camera);
+
+        // 마우스 커서의 게임 세계 내의 좌표 값 표시
+        this.mouseLocationText.setText("WorldPoint X : " + worldPoint.x +
+            "\nWorldPoint Y : " + worldPoint.y);
+
+        // 마우스 포인터 위치가 속한 타일의 X,Y 인덱스 반환
+        // 마우스 포인터가 어느 타일에 위치하는지 알 수 있다.
+        // worldToTileX() : 월드 좌표계에서 X 좌표를 타일 좌표계의 X 좌표로 변환한다.
+        // 픽셀 단위의 월드 좌표를 입력받아, 해당 위치가 속한 타일의 X 인덱스를 반환한다.
+        const pointerTileX = this.ingameMap.worldToTileX(worldPoint.x);
+        const pointerTileY = this.ingameMap.worldToTileY(worldPoint.y);
+
+        // 마우스 포인터가 위치한 타일 인덱스 표시
+        this.tileIndexText.setText("TileIndex X : " + pointerTileX +
+            "\nTileIndex Y : " + pointerTileY);
+
+        // 월드 공간에서 타일 좌표로 스냅
+        // 마우스 포인터가 위치한 해당 타일의 월드 좌표계에서 실제 위치를 알아낸다.
+        // tileToWorldX() : 타일 좌표계에서 X 좌표를 월드 좌표계의 X 좌표로 변환한다.
+        // 타일의 X 인덱스를 입력받아, 해당 타일의 월드 좌표계에서 X위치(픽셀 단위) 반환
+        this.marker.x = this.ingameMap.tileToWorldX(pointerTileX);
+        this.marker.y = this.ingameMap.tileToWorldY(pointerTileY);
+
+        // 마우스 포인터가 위치한 타일의 월드 상에서 위치 표시
+        this.tileLocationText.setText("TileLocation X : " + this.marker.x +
+            "\nTileLocation Y : " + this.marker.y);
+
+        // 마우스 왼쪽 버튼을 누르면 새 타일로 칠하기
+        if (this.input.manager.activePointer.isDown) {
+            //this.ingameMap.putTileAt(this.selectedTile, tileX, TileY);
+        }
+    }
+
 
 }
 
