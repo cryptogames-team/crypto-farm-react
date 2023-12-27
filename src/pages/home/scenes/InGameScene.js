@@ -128,13 +128,33 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // sunnysideworld 타일셋 PNG 파일 로드
-        this.load.image('sunnysideworld_tiles', 'assets/maps/spr_tileset_sunnysideworld_16px.png');
-        this.load.image('cow_tiles', 'assets/maps/spr_deco_cow_strip4.png');
+        // 상대 경로 설정
+        this.load.path = "assets/maps/";
+        this.load.image('sunnysideworld_tiles', 'spr_tileset_sunnysideworld_16px.png');
+        this.load.image('cow_tiles', 'spr_deco_cow_strip4.png');
 
         // 타일맵 JSON 파일 로드
-        this.load.tilemapTiledJSON('ingame_tilemap', 'assets/maps/ingame/Crypto_Farm_InGame.json');
+        this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
 
+ 
+        // 상대 경로 재설정
+        // selectbox.png를 로드
+        this.load.path = "assets/UI/";
+        this.load.image("selectbox_bl", 'selectbox_bl.png');
+        this.load.image("selectbox_br", 'selectbox_br.png');
+        this.load.image("selectbox_tl", 'selectbox_tl.png');
+        this.load.image("selectbox_tr", 'selectbox_tr.png');
 
+        // itemdisc01
+        // 도구 아이콘 배경
+        this.load.image("itemdisc01_icon", 'itemdisc_01.png');
+
+        // tool icon
+        // 삽, 도끼, 곡괭이, 물뿌리개
+        this.load.image("shovel_icon", 'shovel.png');
+        this.load.image("water_icon", 'water.png');
+        this.load.image("axe_icon", 'axe.png');
+        this.load.image("pickaxe_icon", 'pickaxe.png');
     }
 
     create() {
@@ -239,15 +259,13 @@ export default class InGameScene extends Phaser.Scene {
         // layer 파라미터가 비었으면 현재 레이어가 사용된다.
         this.selectedTile = this.ingameMap.getTileAt(2, 3);
 
-        // return Tile 클래스를 리턴해야됨.
-        //this.tilesetTile;
 
         // 그래픽 객체 추가
-        this.marker = this.add.graphics();
+/*         this.marker = this.add.graphics();
         this.marker.lineStyle(2, 0x000000, 1);
         // 사각형 그리기 시작 위치 왼쪽 상단
         this.marker.strokeRect(0, 0, tileSize, tileSize);
-        this.marker.setDepth(5);
+        this.marker.setDepth(5); */
 
 
         // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
@@ -347,6 +365,7 @@ export default class InGameScene extends Phaser.Scene {
         this.playerTileIndexText.setScrollFactor(0);
         this.playerTileIndexText.setOrigin(0.5, 1);
 
+
         // 플레이어가 현재 바라보는 방향 표시
         this.playerDirectionText =
             this.add.text(centerX, 0, 'Player Direction : Right', {
@@ -358,7 +377,117 @@ export default class InGameScene extends Phaser.Scene {
         this.playerDirectionText.setScrollFactor(0);
         // 텍스트를 가로 중앙에 정렬하기 위해 오리진 설정
         this.playerDirectionText.setOrigin(0.5, 0);
-    }
+
+
+
+        const selectBoxScale = 2;
+        const selectBoxDepth = 3;
+
+        // select box 4방향 추가하기
+        this.selectBoxTL = this.add.image(0, 0, 'selectbox_tl').setOrigin(0,0);
+        this.selectBoxTL.setScale(selectBoxScale); 
+        this.selectBoxTL.setDepth(selectBoxDepth);
+
+        this.selectBoxTR = this.add.image(0, 0, 'selectbox_tr').setOrigin(1,0);
+        this.selectBoxTR.setScale(selectBoxScale); 
+        this.selectBoxTR.setDepth(selectBoxDepth);
+
+        this.selectBoxBL = this.add.image(0, 0, 'selectbox_bl').setOrigin(0,1);
+        this.selectBoxBL.setScale(selectBoxScale); 
+        this.selectBoxBL.setDepth(selectBoxDepth);
+
+        this.selectBoxBR = this.add.image(0, 0, 'selectbox_br').setOrigin(1,1);
+        this.selectBoxBR.setScale(selectBoxScale); 
+        this.selectBoxBR.setDepth(selectBoxDepth);
+
+
+        const toolIconDepth = 100;
+        const toolDiscDepth = 99;
+
+        const toolScale = 5;
+        const discScale = 4;
+
+        // 여백 설정
+        const padding = 10;
+        // 도구 아이콘 사이 간격
+        const space = 100;
+
+
+        // 설정 객체 정의
+        var toolIconConfig = {
+            origin: 1,
+            depth: toolIconDepth,
+            scale: toolScale,
+            scrollFactor: 0
+        };
+
+        const toolIconX = rightX - padding;
+        const toolIconY = bottomY - padding;
+
+        const toolNumber = 4;
+
+        // 현재 장착중인 도구를 나타내는 UI 아이콘 추가 항상 화면 오른쪽 아래에 위치함.
+        // 1번 도구 - 삽
+        this.toolIcon = this.physics.add.image(toolIconX - space * 4, toolIconY, 'shovel_icon')
+        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale).setScrollFactor(0);
+
+        this.toolNumberTxt = this.add.text(this.toolIcon.x - this.toolIcon.displayWidth, 
+            this.toolIcon.y - this.toolIcon.displayHeight, '1', {
+            fontFamily: 'Arial',
+            fontSize: 30,
+            color : 'black',
+            fontStyle : 'bold'
+
+        }).setDepth(100).setScrollFactor(0).setOrigin(0);
+
+        // 현재 장착 중인 장비 표시하는 그래픽스 객체
+        this.equipMarker = this.add.graphics();
+        this.equipMarker.lineStyle(2, 0x000000, 1);
+        // 사각형 그리기 시작 위치 왼쪽 상단
+        this.equipMarker.strokeRect(this.toolNumberTxt.x, this.toolNumberTxt.y, 
+            this.toolIcon.displayWidth, this.toolIcon.displayHeight);
+        this.equipMarker.setDepth(5); 
+        this.equipMarker.setScrollFactor(0);
+
+
+
+
+        // 2번 도구 - 물뿌리개 - 이미지 크기가 달라서 생기는 문제
+        // 14x14로 통일해본다.
+        this.toolIcon2 = this.physics.add.image(toolIconX - space * 3, toolIconY, 'water_icon')
+        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale).setScrollFactor(0);
+
+        this.toolIcon2.setDisplaySize(14 * 5, 14 * 5);
+
+        this.toolNumberTxt = this.add.text(this.toolIcon2.x - this.toolIcon2.displayWidth, 
+            this.toolIcon2.y - this.toolIcon2.displayHeight, '2', {
+            fontFamily: 'Arial',
+            fontSize: 30,
+            color : 'black',
+            fontStyle : 'bold'
+
+        }).setDepth(100).setScrollFactor(0).setOrigin(0);
+
+        
+
+
+
+        // 3번 도구 - 도끼
+        this.toolIcon3 = this.add.image(700, 500, 'axe_icon')
+        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale);
+/*         this.toolDisc3 = this.add.image(700, 500, 'itemdisc01_icon').
+        setOrigin(1).setDepth(toolDiscDepth).setScale(discScale); */
+
+        // 4번 도구 - 곡괭이
+        this.toolIcon4 = this.add.image(800, 500, 'pickaxe_icon')
+        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale);
+/*         this.toolDisc4 = this.add.image(800, 500, 'itemdisc01_icon').
+        setOrigin(1).setDepth(toolDiscDepth).setScale(discScale); */
+
+
+        // 툴 아이콘을 디스크 중앙에 배치시켜야 한다.
+
+    } 
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
     // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
@@ -427,9 +556,28 @@ export default class InGameScene extends Phaser.Scene {
         this.playerTileIndexText.setText("PlayerTileIndex X : " + playerTileX +
             "\nPlayerTileIndex Y : " + playerTileY);
 
-        // 타일 마커 위치 설정
-        this.marker.x = this.ingameMap.tileToWorldX(playerTileX);
-        this.marker.y = this.ingameMap.tileToWorldY(playerTileY);
+
+        // 캐릭터 바로 앞 타일의 월드 상의 위치
+        const frontTileX = this.ingameMap.tileToWorldX(playerTileX);
+        const frontTileY = this.ingameMap.tileToWorldX(playerTileY);
+
+
+        // 타일 마커 위치 업데이트
+/*         this.marker.x = frontTileX;
+        this.marker.y = frontTileY; */
+
+        // SelectBox 위치 업데이트
+        this.selectBoxTL.x = frontTileX;
+        this.selectBoxTL.y = frontTileY;
+
+        this.selectBoxTR.x = frontTileX + tileSize;
+        this.selectBoxTR.y = frontTileY;
+
+        this.selectBoxBL.x = frontTileX;
+        this.selectBoxBL.y = frontTileY + tileSize;
+
+        this.selectBoxBR.x = frontTileX + tileSize;
+        this.selectBoxBR.y = frontTileY + tileSize;
 
     }
 
@@ -592,24 +740,33 @@ export default class InGameScene extends Phaser.Scene {
     // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
     // 캐릭터 땅파기 애니메이션에 실행될 콜백 함수
     paintTiles() {
-        console.log("paintTiles() 호출됨.");
-        // 타일 인덱스 전달  
-        // 페이저 타일 인덱스는 1부터 시작한다.
-        // GroundLayer 2의 타일이 변경되게 한다.
-        this.ingameMap.putTileAt(1011, this.playerTileX, this.playerTileY, undefined, 1);
+        //console.log("paintTiles() 호출됨.");
+        // 타일 인덱스를 전달, 페이저 타일 인덱스는 1부터 시작한다.
+        // 전체 레이어의 타일 변경
+        this.ingameMap.putTileAt(68, this.playerTileX, this.playerTileY, true, 0);
+        this.ingameMap.putTileAt(1011, this.playerTileX, this.playerTileY, true, 1);
+        this.ingameMap.putTileAt(-1, this.playerTileX, this.playerTileY, true, 2);
 
-        let tile = this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 1);
 
-        // 타일 회전 제거
-        if (tile) {
-            tile.rotation = 0;
-            // 타일의 X축, Y축 반전 제거
-            tile.flipX = false;
-            tile.flipY = false;
+        // 변경한 레이어의 타일들을 배열에 넣음
+        let tiles = [];
+        tiles.push(this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 0));
+        tiles.push(this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 1));
+        tiles.push(this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 2));
 
-            // 타일맵 레이어의 렌더링 업데이트 호출 안해도 타일 회전 제거 됨.
-            //tile.layer.tilemapLayer.render();
-        }
+        // 각 레이어의 타일의 회전 제거
+        tiles.forEach((tile) => {
+
+            if (tile) {
+                tile.rotation = 0;
+                // 타일의 X축, Y축 반전 제거
+                tile.flipX = false;
+                tile.flipY = false;
+    
+                // 타일맵 레이어의 렌더링 업데이트 호출 안해도 타일 회전 제거 됨.
+                //tile.layer.tilemapLayer.render();
+            }
+        });
     }
 
 
@@ -652,6 +809,22 @@ export default class InGameScene extends Phaser.Scene {
         }
     }
 
+    // 이미지 속성 설정하는 함수
+    configureImage(image, config) {
+        if (config.origin !== undefined) {
+            image.setOrigin(config.origin);
+        }
+        if (config.depth !== undefined) {
+            image.setDepth(config.depth);
+        }
+        if (config.scale !== undefined) {
+            image.setScale(config.scale);
+        }
+        if (config.scrollFactor !== undefined) {
+            image.setScrollFactor(config.scrollFactor);
+        }
+        return image;
+    }
 
 }
 

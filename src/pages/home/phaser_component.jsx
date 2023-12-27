@@ -19,6 +19,8 @@ function PhaserGameComponent() {
         width: window.innerWidth,
         height: window.innerHeight,
         pixelArt : true,
+        // 픽셀 반올림 활성화
+        roundPixels : true,
         // Phaser 게임을 삽입할 DOM 요소의 ID
         parent: 'game-container', 
 
