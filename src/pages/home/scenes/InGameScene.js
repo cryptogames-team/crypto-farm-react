@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
+import QuickSlot from '../ui/quick_slot';
 
 let currentMapWidth = 512;
 let currentMapHeight = 320;
@@ -10,6 +11,8 @@ const layerScale = 4;
 // 타일맵의 타일 크기
 // 실제 타일 크기에 맞게 설정해야 한다.
 const tileSize = 16 * layerScale;
+
+
 
 export default class InGameScene extends Phaser.Scene {
 
@@ -31,10 +34,11 @@ export default class InGameScene extends Phaser.Scene {
     playerTileX;
     playerTileY;
 
+    // 현재 장착중인 도구 슬롯 번호 - 기본값 0
+    equipNumber = 0;
+
     constructor() {
         super('InGameScene');
-
-
     }
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
     // 씬의 초기화를 담당하며, 씬이 시작하기 전에 필요한 설정이나 변수의 초기화등을 수행하는데 사용된다.
@@ -48,6 +52,9 @@ export default class InGameScene extends Phaser.Scene {
         // 스프라이트 로더 인스턴스 생성
         this.spriteLoader = new SpriteLoader(this);
 
+        // 캐릭터 테스트용 하드코딩
+        //this.characterInfo.name = 'base';
+
     }
 
     // 애셋 로드
@@ -56,8 +63,8 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터 스프라이트 시트 로드 정보 담은 객체 배열
 
         // 현재 헤어스프라이트만 캐릭터마다 다름.
-        // 로드할 헤어 스프라이트 시트들
-        const characterHairSprties = [
+        // 로드할 헤어 스프라이트 시트들 <- 이거 사용안함.
+/*         const characterHairSprties = [
             // 대기 헤어 스프라이트 시트
             { name: 'bowlhair_idle', path: 'assets/Character/IDLE/bowlhair_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
             { name: 'longhair_idle', path: 'assets/Character/IDLE/longhair_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
@@ -74,13 +81,28 @@ export default class InGameScene extends Phaser.Scene {
             { name: 'bowlhair_dig', path: 'assets/Character/DIG/bowlhair_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
             { name: 'longhair_dig', path: 'assets/Character/DIG/longhair_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
             { name: 'curlyhair_dig', path: 'assets/Character/DIG/curlyhair_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
-        ];
+            // 도끼질 헤어 스프라이트 시트
+            { name: 'bowlhair_axe', path: 'assets/Character/AXE/bowlhair_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'longhair_axe', path: 'assets/Character/AXE/longhair_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'curlyhair_axe', path: 'assets/Character/AXE/curlyhair_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
+            // 물주는 헤어 스프라이트 시트
+            { name: 'bowlhair_water', path: 'assets/Character/WATERING/bowlhair_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'longhair_water', path: 'assets/Character/WATERING/longhair_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'curlyhair_water', path: 'assets/Character/WATERING/curlyhair_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
+            // 채광 헤어 스프라이트 시트
+            { name: 'bowlhair_mine', path: 'assets/Character/MINING/bowlhair_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'longhair_mine', path: 'assets/Character/MINING/longhair_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'curlyhair_mine', path: 'assets/Character/MINING/curlyhair_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
+        ]; */
 
         // 헤어 애셋 경로
         let idle_hair_path = '';
         let walk_hair_path = '';
         let run_hair_path = '';
         let dig_hair_path = '';
+        let axe_hair_path = '';
+        let water_hair_path = '';
+        let mine_hair_path = '';
 
         // base는 빡빡이라서 헤어 스프라이트가 필요 없음
         if (this.characterInfo.name === 'long hair') {
@@ -88,12 +110,18 @@ export default class InGameScene extends Phaser.Scene {
             walk_hair_path = 'assets/Character/WALKING/longhair_walk_strip8.png';
             run_hair_path = 'assets/Character/RUN/longhair_run_strip8.png';
             dig_hair_path = 'assets/Character/DIG/longhair_dig_strip13.png';
+            axe_hair_path = 'assets/Character/AXE/longhair_axe_strip10.png';
+            water_hair_path = 'assets/Character/WATERING/longhair_watering_strip5.png';
+            mine_hair_path = 'assets/Character/MINING/longhair_mining_strip10.png';
 
         } else if (this.characterInfo.name === 'curly') {
             idle_hair_path = 'assets/Character/IDLE/curlyhair_idle_strip9.png';
             walk_hair_path = 'assets/Character/WALKING/curlyhair_walk_strip8.png';
             run_hair_path = 'assets/Character/RUN/curlyhair_run_strip8.png';
             dig_hair_path = 'assets/Character/DIG/curlyhair_dig_strip13.png';
+            axe_hair_path = 'assets/Character/AXE/curlyhair_axe_strip10.png';
+            water_hair_path = 'assets/Character/WATERING/curlyhair_watering_strip5.png';
+            mine_hair_path = 'assets/Character/MINING/curlyhair_mining_strip10.png';
         }
         // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
         else if (this.characterInfo.name === 'bow' || this.characterInfo.name === undefined) {
@@ -101,6 +129,9 @@ export default class InGameScene extends Phaser.Scene {
             walk_hair_path = 'assets/Character/WALKING/bowlhair_walk_strip8.png';
             run_hair_path = 'assets/Character/RUN/bowlhair_run_strip8.png';
             dig_hair_path = 'assets/Character/DIG/bowlhair_dig_strip13.png';
+            axe_hair_path = 'assets/Character/AXE/bowlhair_axe_strip10.png';
+            water_hair_path = 'assets/Character/WATERING/bowlhair_watering_strip5.png';
+            mine_hair_path = 'assets/Character/MINING/bowlhair_mining_strip10.png';
         }
 
 
@@ -121,6 +152,18 @@ export default class InGameScene extends Phaser.Scene {
             { name: 'player_dig_hair', path: dig_hair_path, frameWidth: 96, frameHeight: 64 },
             { name: 'player_dig_body', path: 'assets/Character/DIG/base_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
             { name: 'player_dig_hand', path: 'assets/Character/DIG/tools_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
+            // 도끼질 스프라이트 시트
+            { name: 'player_axe_hair', path: axe_hair_path, frameWidth: 96, frameHeight: 64 },
+            { name: 'player_axe_body', path: 'assets/Character/AXE/base_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_axe_hand', path: 'assets/Character/AXE/tools_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
+            // 물주는 스프라이트 시트
+            { name: 'player_water_hair', path: water_hair_path, frameWidth: 96, frameHeight: 64 },
+            { name: 'player_water_body', path: 'assets/Character/WATERING/base_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_water_hand', path: 'assets/Character/WATERING/tools_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
+            // 채굴 스프라이트 시트
+            { name: 'player_mine_hair', path: mine_hair_path, frameWidth: 96, frameHeight: 64 },
+            { name: 'player_mine_body', path: 'assets/Character/MINING/base_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_mine_hand', path: 'assets/Character/MINING/tools_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
         ];
 
         // 플레이어 캐릭터에 사용할 스프라이트 시트 로드
@@ -149,12 +192,20 @@ export default class InGameScene extends Phaser.Scene {
         // 도구 아이콘 배경
         this.load.image("itemdisc01_icon", 'itemdisc_01.png');
 
-        // tool icon
-        // 삽, 도끼, 곡괭이, 물뿌리개
-        this.load.image("shovel_icon", 'shovel.png');
-        this.load.image("water_icon", 'water.png');
-        this.load.image("axe_icon", 'axe.png');
-        this.load.image("pickaxe_icon", 'pickaxe.png');
+
+        // 로드할 아이콘 이미지 정보를 담은 객체 배열
+        this.iconLoadConfigs = [
+            { key : "shovel_icon", url : "shovel.png"},
+            { key : "water_icon", url : "water.png"},
+            { key : "axe_icon", url : "axe.png"},
+            { key : "pickaxe_icon", url : "pickaxe.png"},
+        ];
+        // 도구 아이콘들 로드
+        this.iconLoadConfigs.forEach((iconLoadConfig) => {
+            this.load.image(iconLoadConfig.key, iconLoadConfig.url);
+        })
+
+
     }
 
     create() {
@@ -187,6 +238,18 @@ export default class InGameScene extends Phaser.Scene {
             { key: 'dig_hair', frames: this.anims.generateFrameNumbers('player_dig_hair', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
             { key: 'dig_body', frames: this.anims.generateFrameNumbers('player_dig_body', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
             { key: 'dig_hand', frames: this.anims.generateFrameNumbers('player_dig_hand', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
+            // 도끼질 애니메이션 10 프레임
+            { key: 'axe_hair', frames: this.anims.generateFrameNumbers('player_axe_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            { key: 'axe_body', frames: this.anims.generateFrameNumbers('player_axe_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            { key: 'axe_hand', frames: this.anims.generateFrameNumbers('player_axe_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            // 물주는 애니메이션 5 프레임
+            { key: 'water_hair', frames: this.anims.generateFrameNumbers('player_water_hair', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
+            { key: 'water_body', frames: this.anims.generateFrameNumbers('player_water_body', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
+            { key: 'water_hand', frames: this.anims.generateFrameNumbers('player_water_hand', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
+            // 채굴 애니메이션 10 프레임
+            { key: 'mine_hair', frames: this.anims.generateFrameNumbers('player_mine_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            { key: 'mine_body', frames: this.anims.generateFrameNumbers('player_mine_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            { key: 'mine_hand', frames: this.anims.generateFrameNumbers('player_mine_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
         ];
 
 
@@ -196,6 +259,40 @@ export default class InGameScene extends Phaser.Scene {
         this.playerObject = new PlayerObject(this, 500, 600);
 
 
+
+        // 퀵슬롯 UI 생성 관련 코드
+        // 배열로 관리 this.load.image() 부분도 배열화 가능한가?
+
+        this.QuickSlot = [];
+
+        const quickSlotNumber = 4;
+
+        // 퀵슬롯 UI 생성 컨테이너 클래스는 Origin 설정 불가능함.
+        // Origin 기본값 (0,0) 으로 왼쪽 상단임
+        // 게임 화면 오른쪽 하단에 위치시키는 코드
+        for( let i = 0; i < quickSlotNumber; i++){
+            const slotWidth = 100;
+            const slotHeight = 100;
+
+            const slotX = rightX - (slotWidth * (quickSlotNumber - i));
+            const slotY = bottomY - slotHeight;
+
+            const slotNumber = i + 1;
+            const iconKey = this.iconLoadConfigs[i].key;
+
+            this.QuickSlot.push(new QuickSlot(this, slotX, slotY, slotNumber, iconKey));
+        }
+        // 퀵슬롯 UI 생성 관련 코드
+
+        
+        // 현재 장착중인 도구 슬롯 표시하는 사각형 객체
+        this.equipMarker = this.add.graphics();
+        this.equipMarker.lineStyle(2, 0x000000, 1);
+        // 사각형 그리기 시작 위치 왼쪽 상단
+        this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
+            100, 100);
+        this.equipMarker.setDepth(5); 
+        this.equipMarker.setScrollFactor(0);
 
         // createDebugGraphic()
         // 충돌 영역에 대한 디버그 그래픽 설정
@@ -259,15 +356,6 @@ export default class InGameScene extends Phaser.Scene {
         // layer 파라미터가 비었으면 현재 레이어가 사용된다.
         this.selectedTile = this.ingameMap.getTileAt(2, 3);
 
-
-        // 그래픽 객체 추가
-/*         this.marker = this.add.graphics();
-        this.marker.lineStyle(2, 0x000000, 1);
-        // 사각형 그리기 시작 위치 왼쪽 상단
-        this.marker.strokeRect(0, 0, tileSize, tileSize);
-        this.marker.setDepth(5); */
-
-
         // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
         // 컨테이너 클래스의 오리진은 변경이 불가능하다.
 
@@ -281,10 +369,7 @@ export default class InGameScene extends Phaser.Scene {
         this.playerLocationMarker.fillCircle(playerCenterX, playerCenterY, 1);
         this.playerLocationMarker.setDepth(100);
 
-        // 플레이어 현재 위치와 오리진 위치가 같음.
-
-
-        // 키보드 입력 설정
+        // 키보드 키 입력 설정
         this.cursorsKeys = this.input.keyboard.createCursorKeys();
         const controlConfig = {
             camera: this.cameras.main,
@@ -300,6 +385,54 @@ export default class InGameScene extends Phaser.Scene {
         this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+
+        // 숫자 키 객체 생성 1~4
+        this.numberKeys = this.input.keyboard.addKeys({
+            'one': 'ONE',
+            'two': 'TWO',
+            'three': 'THREE',
+            'four': 'FOUR'
+        });
+
+        // 1번키 입력 이벤트 리스너
+        this.numberKeys.one.on('down', (event) =>{
+            this.equipNumber = 0;
+
+            this.equipMarker.clear();
+            this.equipMarker.lineStyle(2, 0x000000, 1);
+            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
+                100, 100);
+        });
+        // 2번키
+        this.numberKeys.two.on('down', (event) =>{
+            this.equipNumber = 1;
+
+            this.equipMarker.clear();
+            this.equipMarker.lineStyle(2, 0x000000, 1);
+            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
+                100, 100);
+        });
+        // 3번키
+        this.numberKeys.three.on('down', (event) =>{
+            this.equipNumber = 2;
+
+            this.equipMarker.clear();
+            this.equipMarker.lineStyle(2, 0x000000, 1);
+            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
+                100, 100);
+        });
+        // 4번키
+        this.numberKeys.four.on('down', (event) =>{
+            this.equipNumber = 3;
+
+            this.equipMarker.clear();
+            this.equipMarker.lineStyle(2, 0x000000, 1);
+            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
+                100, 100);
+        });
+
+
+
 
         // 게임 시작시 디버그 그래픽 숨기기
         /*         debugGraphics.forEach((debugGraphic) => {
@@ -399,93 +532,6 @@ export default class InGameScene extends Phaser.Scene {
         this.selectBoxBR = this.add.image(0, 0, 'selectbox_br').setOrigin(1,1);
         this.selectBoxBR.setScale(selectBoxScale); 
         this.selectBoxBR.setDepth(selectBoxDepth);
-
-
-        const toolIconDepth = 100;
-        const toolDiscDepth = 99;
-
-        const toolScale = 5;
-        const discScale = 4;
-
-        // 여백 설정
-        const padding = 10;
-        // 도구 아이콘 사이 간격
-        const space = 100;
-
-
-        // 설정 객체 정의
-        var toolIconConfig = {
-            origin: 1,
-            depth: toolIconDepth,
-            scale: toolScale,
-            scrollFactor: 0
-        };
-
-        const toolIconX = rightX - padding;
-        const toolIconY = bottomY - padding;
-
-        const toolNumber = 4;
-
-        // 현재 장착중인 도구를 나타내는 UI 아이콘 추가 항상 화면 오른쪽 아래에 위치함.
-        // 1번 도구 - 삽
-        this.toolIcon = this.physics.add.image(toolIconX - space * 4, toolIconY, 'shovel_icon')
-        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale).setScrollFactor(0);
-
-        this.toolNumberTxt = this.add.text(this.toolIcon.x - this.toolIcon.displayWidth, 
-            this.toolIcon.y - this.toolIcon.displayHeight, '1', {
-            fontFamily: 'Arial',
-            fontSize: 30,
-            color : 'black',
-            fontStyle : 'bold'
-
-        }).setDepth(100).setScrollFactor(0).setOrigin(0);
-
-        // 현재 장착 중인 장비 표시하는 그래픽스 객체
-        this.equipMarker = this.add.graphics();
-        this.equipMarker.lineStyle(2, 0x000000, 1);
-        // 사각형 그리기 시작 위치 왼쪽 상단
-        this.equipMarker.strokeRect(this.toolNumberTxt.x, this.toolNumberTxt.y, 
-            this.toolIcon.displayWidth, this.toolIcon.displayHeight);
-        this.equipMarker.setDepth(5); 
-        this.equipMarker.setScrollFactor(0);
-
-
-
-
-        // 2번 도구 - 물뿌리개 - 이미지 크기가 달라서 생기는 문제
-        // 14x14로 통일해본다.
-        this.toolIcon2 = this.physics.add.image(toolIconX - space * 3, toolIconY, 'water_icon')
-        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale).setScrollFactor(0);
-
-        this.toolIcon2.setDisplaySize(14 * 5, 14 * 5);
-
-        this.toolNumberTxt = this.add.text(this.toolIcon2.x - this.toolIcon2.displayWidth, 
-            this.toolIcon2.y - this.toolIcon2.displayHeight, '2', {
-            fontFamily: 'Arial',
-            fontSize: 30,
-            color : 'black',
-            fontStyle : 'bold'
-
-        }).setDepth(100).setScrollFactor(0).setOrigin(0);
-
-        
-
-
-
-        // 3번 도구 - 도끼
-        this.toolIcon3 = this.add.image(700, 500, 'axe_icon')
-        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale);
-/*         this.toolDisc3 = this.add.image(700, 500, 'itemdisc01_icon').
-        setOrigin(1).setDepth(toolDiscDepth).setScale(discScale); */
-
-        // 4번 도구 - 곡괭이
-        this.toolIcon4 = this.add.image(800, 500, 'pickaxe_icon')
-        .setOrigin(1).setDepth(toolIconDepth).setScale(toolScale);
-/*         this.toolDisc4 = this.add.image(800, 500, 'itemdisc01_icon').
-        setOrigin(1).setDepth(toolDiscDepth).setScale(discScale); */
-
-
-        // 툴 아이콘을 디스크 중앙에 배치시켜야 한다.
 
     } 
 

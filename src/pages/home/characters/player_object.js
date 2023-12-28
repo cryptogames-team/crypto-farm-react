@@ -25,7 +25,6 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         // 상속받은 부모 클래스의 생성자
         super(scene, x, y);
 
-        //console.log(spriteArray);
 
         // 씬에 캐릭터 추가
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
@@ -36,28 +35,24 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         // 물리
         // 중력 비활성화
         this.body.setGravity(0);
-        // 충돌 크기 변경
         // Body가 Wolrd 경계와 충돌하는지 여부 설정
         this.body.setCollideWorldBounds(true);
-        //this.body.setBounce(1);
+        // body 사이즈 변경하여 충돌 크기 정함.
         this.body.setSize(bodyX, bodyY);
-        // 자식 오브젝트들은 부모 컨테이너 depth 따라가나봄.
+        // 자식 오브젝트들은 부모 컨테이너의 뎁스를 따라감.
         this.setDepth(10);
-        
 
-        // 컨테이너의 오리진은 변경을 못한다는데
-        // 컨테이너의 바디에는 애초에 오리진이 없다.
+        // 컨테이너 클래스의 특징
+        // 컨테이너의 오리진은 변경이 불가능하다. 기본값 (0,0) - 왼쪽 상단
+        // 기본 body size는 64,64px
 
         // 컨테이너의 중앙값 구하기
         // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
 
-        // Container에도 body가 있음
-        // 기본 body size는 64,64px
-
+        // 캐릭터가 바라보는 방향 기본값 - right
         this.playerDirection = "right";
 
         // 캐릭터 스프라이트 추가
-        // 컨테이너 바디 절반 크기 만큼 이동시키면 컨테이너 바디랑 딱 일치함.
         // 컨테이너에 스프라이트를 추가할 때, 스프라이트 위치는 컨테이너 내에서 상대적 위치를 나타냄.
         // 컨테이너 내부의 스프라이트가 바디를 넘어가지 않게 상대 위치를 조정해야 한다.
         this.bodySprite = scene.add.sprite(bodyX / 2, bodyY / 2, 'player_idle_body');
@@ -83,27 +78,44 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         this.stateMachine = new StateMachine('idle', {
             idle: new IdleState(),
             move: new MoveState(),
-            dig: new DigState(),
-        }, [scene, this])
-
-
+            action: new ActionState(),
+        }, [scene, this]);
     }
 
 
-    update(cursorsKeys, keys) {
-
+    update() {
         // 상태 머신 실행
         this.stateMachine.step();
-
     }
 
-    // 좌우 이동할 때 스프라이트 반전시킴
+    // 왼쪽으로 이동하면 캐릭터 스프라이트 x축 반전시킴
     flipSprites(isFlipped) {
         this.bodySprite.setFlipX(isFlipped);
-        if(this.hairSprite){
+        if (this.hairSprite) {
             this.hairSprite.setFlipX(isFlipped);
         }
         this.handSprite.setFlipX(isFlipped);
+    }
+
+    // 캐릭터 애니메이션 재생 함수
+    // state : 재생할 애니메이션을 나타내는 상태
+    // hairSprite : 빡빡이 캐릭터인지 확인한다. 빡빡이면 hairSprite가 없기 때문에
+    playAnimation(state, hairSprite) {
+
+        if (hairSprite) {
+            this.hairSprite.anims.play(state + '_hair', true);
+        }
+        this.bodySprite.anims.play(state + '_body', true);
+
+        return this.handSprite.anims.play(state + '_hand', true);
+
+    }
+
+    // 캐릭터 대기 상태로 전환
+    // anim : 콜백 함수를 제거할 애니메이션 매니저
+    transitionToIdle(anim){
+        this.stateMachine.transition('idle');
+        anim.removeAllListeners();
     }
 
 }
@@ -114,6 +126,7 @@ class StateMachine {
     constructor(initialState, possibleStates, stateArgs = []) {
         this.initialState = initialState;
         this.possibleStates = possibleStates;
+        // 상태 인자
         this.stateArgs = stateArgs;
         this.state = null;
 
@@ -144,7 +157,7 @@ class StateMachine {
 
 }
 
-// 상태 
+// 상태 머신에 사용할 상태 클래스
 class State {
     // 새로운 상태로 처음 전활될 때 실행되는 함수
     // 예) 땅파는 상태로 전환될 때 땅파기 애니메이션을 시작하는 것
@@ -157,17 +170,15 @@ class State {
     }
 }
 
-// 대기 상태
+// 대기 상태 - 캐릭터의 기본 상태
 class IdleState extends State {
     enter(scene, player) {
         // player는 컨테이너 클래스이다.
+
+        // 대기 상태면 속도 0
         player.body.setVelocity(0);
-        // 빡빡이 캐릭터는 헤어 스프라이트가 없음
-        if (player.hairSprite) {
-            player.hairSprite.anims.play('idle_hair', true);
-        }
-        player.bodySprite.anims.play('idle_body', true);
-        player.handSprite.anims.play('idle_hand', true);
+        // 대기 애니메이션 재생
+        player.playAnimation('idle', player.hairSprite);
 
     }
 
@@ -176,17 +187,13 @@ class IdleState extends State {
         const { left, right, up, down, space } = scene.cursorsKeys;
         const { W, A, S, D } = scene.keys;
 
-        //console.log("현재 대기 상태");
-
-        // 스페이스 바를 누르면 땅파는 상태로 전환
+        // 스페이스 바를 누르면 행동 상태로 전환
         if (space.isDown) {
-            player.stateMachine.transition('dig');
+            player.stateMachine.transition('action');
             return;
         }
 
-
         // 방향키를 누르면 걷는 상태로 전환
-        // W, A, S, D 입력 무반응
         if (left.isDown || right.isDown || up.isDown || down.isDown ||
             W.isDown || A.isDown || S.isDown || D.isDown) {
             player.stateMachine.transition('move');
@@ -204,13 +211,14 @@ class MoveState extends State {
     }
 
     execute(scene, player) {
+        // 구조 분해로 키 객체 할당
         const { left, right, up, down, space, shift } = scene.cursorsKeys;
         const { W, A, S, D } = scene.keys;
 
 
         // 스페이스 바 누르면 땅파기 상태로 전환
         if (space.isDown) {
-            player.stateMachine.transition('dig');
+            player.stateMachine.transition('action');
             return;
         }
         // 방향키를 누르고 있지 않으면 대기 상태로 전환
@@ -261,65 +269,67 @@ class MoveState extends State {
 
             // 씬에서 애니메이션 생성하면 
             // 키를 플레이어 클래스에게 넘겨주지 않아도 됨.
-
-            // 빡빡이 캐릭터는 헤어 스프라이트가 없음
-            if (player.hairSprite) {
-                player.hairSprite.anims.play('walk_hair', true);
-            }
-            player.bodySprite.anims.play('walk_body', true);
-            player.handSprite.anims.play('walk_hand', true);
+            player.playAnimation('walk', player.hairSprite);
         } else if (playerVelocity.x === runSpeed || playerVelocity.x === -runSpeed ||
-            playerVelocity.y === runSpeed || playerVelocity.y === -runSpeed) {
+                playerVelocity.y === runSpeed || playerVelocity.y === -runSpeed) {
+
             // 달리는 애니메이션 재생
-
-            // 빡빡이 캐릭터는 헤어 스프라이트가 없음
-            if (player.hairSprite) {
-                player.hairSprite.anims.play('run_hair', true);
-            }
-
-            player.bodySprite.anims.play('run_body', true);
-            player.handSprite.anims.play('run_hand', true);
+            player.playAnimation('run', player.hairSprite);
         }
-
-
     }
 }
 
-// 땅파는 상태
-class DigState extends State {
+// 땅파는 상태 -> 행동 상태로 변경
+// 캐릭터가 현재 장착한 도구에 따라 애니메이션을 재생한다.
+class ActionState extends State {
     enter(scene, player) {
+
+        const equipNumber = scene.equipNumber;
 
         // 캐릭터 이동 강제 정지
         player.body.setVelocity(0);
 
-        // 땅 파는 애니메이션 실행
-        // 빡빡이 캐릭터는 헤어 스프라이트가 없음
-        if (player.hairSprite) {
-            player.hairSprite.anims.play('dig_hair', true);
+        // 캐릭터가 현재 장착한 도구 확인
+        //console.log("캐릭터가 현재 장착한 도구 인덱스 " + scene.equipNumber);
+
+        // 삽일 경우 땅 파는 애니메이션 실행
+        if (equipNumber === 0) {
+
+            let digAnim = player.playAnimation('dig', player.hairSprite);
+            // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
+            digAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 6) {
+                    //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
+                    scene.paintTiles();
+                }
+            });
+
+            // 애니메이션이 종료되면 대기 상태로 전환
+            // 이벤트 리스너에 콜백 함수 등록하려면, 함수를 바로 호출하는 것이 아닌
+            // 함수 참조를 전달해야 한다.
+            // 클래스의 멤버 함수를 등록하는 방법 - 함수 참조와 'bind'
+            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
+
         }
-        player.bodySprite.anims.play('dig_body', true);
-        let DigAnim = player.handSprite.anims.play('dig_hand', true);
+        // 물 뿌리개일 경우
+        else if (equipNumber === 1) {
 
-        // animationupdate 이벤트에 리스너 추가
-        // animationupdate 이벤트는 애니메이션의 각 프레임마다 발생한다.
-        DigAnim.on('animationupdate', (anim, frame) => {
-            if(frame.index === 6) {
-                //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
-                scene.paintTiles();
-            }
-        });
+            let waterAnim = player.playAnimation('water', player.hairSprite);
+            // 필요하면 Anim.on('animationupdate', () => {}) 사용해서 애니메이션에 이벤트 리스너 등록
+            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(waterAnim));
+        }
+        // 도끼일 경우
+        else if (equipNumber === 2) {
+            
+            let axeAnim = player.playAnimation('axe', player.hairSprite);
+            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(axeAnim));
+        }
+        // 곡괭이일 경우
+        else if (equipNumber === 3) {
 
-        // 애니메이션 전부 정지시켜야하나?
-
-        // 땅 파는 애니메이션이 종료되면 대기 상태로 전환
-        player.bodySprite.once('animationcomplete', () => {
-            player.stateMachine.transition('idle');
-
-
-            // 등록된 콜백 함수 전부 해제
-            DigAnim.removeAllListeners();
-        })
-
+            let mineAnim = player.playAnimation('mine', player.hairSprite);
+            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(mineAnim));
+        }
 
     }
 
