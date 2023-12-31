@@ -2,6 +2,8 @@ import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
 import QuickSlot from '../ui/quick_slot';
 
+// 현재 맵 크기
+// 기본 값 : 농장 타일 맵의 원본 크기
 let currentMapWidth = 512;
 let currentMapHeight = 320;
 
@@ -16,30 +18,39 @@ const tileSize = 16 * layerScale;
 
 export default class InGameScene extends Phaser.Scene {
 
-    locationText;
-    bodyLocationText;
-    tileIndexText;
-    tileLocationText;
-    mouseLocationText;
+
+
+    // 플레이어 현재 위치한 타일의 인덱스
     playerTileIndexText;
-    playerDirectionText;
+    // 게임 캐릭터의 정보 - 캐릭터 외형, 레벨, 소지금등을 포함한다.
+    characterInfo;
+    // 현재 장착중인 도구 슬롯 번호 - 기본값 0
+    equipNumber = 0;
+
+    // 인 게임에 사용할 농장 타일맵 
+    ingameMap;
+
+    spriteLoader;
 
     // paint tileMap example
     selectedTile;
     marker;
     controls;
-    ingameMap;
     shiftKey;
 
+    // 플레이어가 현재 위치한 타일의 X,Y 좌표 위치?
     playerTileX;
     playerTileY;
 
-    // 현재 장착중인 도구 슬롯 번호 - 기본값 0
-    equipNumber = 0;
+    // getMousePointerTile()에서 사용할 멤버 변수
+    tileIndexText;
+    mouseLocationText;
 
+    // 생성자가 왜 있지?
     constructor() {
         super('InGameScene');
     }
+
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
     // 씬의 초기화를 담당하며, 씬이 시작하기 전에 필요한 설정이나 변수의 초기화등을 수행하는데 사용된다.
     // 씬으로 전달되는 데이터를 받을 수 있는 유일한 곳
@@ -52,120 +63,89 @@ export default class InGameScene extends Phaser.Scene {
         // 스프라이트 로더 인스턴스 생성
         this.spriteLoader = new SpriteLoader(this);
 
-        // 캐릭터 테스트용 하드코딩
-        //this.characterInfo.name = 'base';
+        // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
+        //this.characterInfo.name = 'curly';
 
     }
 
     // 애셋 로드
     preload() {
 
-        // 캐릭터 스프라이트 시트 로드 정보 담은 객체 배열
-
-        // 현재 헤어스프라이트만 캐릭터마다 다름.
-        // 로드할 헤어 스프라이트 시트들 <- 이거 사용안함.
-/*         const characterHairSprties = [
-            // 대기 헤어 스프라이트 시트
-            { name: 'bowlhair_idle', path: 'assets/Character/IDLE/bowlhair_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_idle', path: 'assets/Character/IDLE/longhair_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_idle', path: 'assets/Character/IDLE/curlyhair_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
-            // 걷는 헤어 스프라이트 시트
-            { name: 'bowlhair_walk', path: 'assets/Character/WALKING/bowlhair_walk_strip8.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_walk', path: 'assets/Character/WALKING/longhair_walk_strip8.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_walk', path: 'assets/Character/WALKING/curlyhair_walk_strip8.png', frameWidth: 96, frameHeight: 64 },
-            // 달리는 헤어 스프라이트 시트
-            { name: 'bowlhair_run', path: 'assets/Character/RUN/bowlhair_run_strip8.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_run', path: 'assets/Character/RUN/longhair_run_strip8.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_run', path: 'assets/Character/RUN/curlyhair_run_strip8.png', frameWidth: 96, frameHeight: 64 },
-            // 땅파는 헤어 스프라이트 시트
-            { name: 'bowlhair_dig', path: 'assets/Character/DIG/bowlhair_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_dig', path: 'assets/Character/DIG/longhair_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_dig', path: 'assets/Character/DIG/curlyhair_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
-            // 도끼질 헤어 스프라이트 시트
-            { name: 'bowlhair_axe', path: 'assets/Character/AXE/bowlhair_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_axe', path: 'assets/Character/AXE/longhair_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_axe', path: 'assets/Character/AXE/curlyhair_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
-            // 물주는 헤어 스프라이트 시트
-            { name: 'bowlhair_water', path: 'assets/Character/WATERING/bowlhair_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_water', path: 'assets/Character/WATERING/longhair_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_water', path: 'assets/Character/WATERING/curlyhair_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
-            // 채광 헤어 스프라이트 시트
-            { name: 'bowlhair_mine', path: 'assets/Character/MINING/bowlhair_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'longhair_mine', path: 'assets/Character/MINING/longhair_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'curlyhair_mine', path: 'assets/Character/MINING/curlyhair_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
-        ]; */
-
-        // 헤어 애셋 경로
-        let idle_hair_path = '';
-        let walk_hair_path = '';
-        let run_hair_path = '';
-        let dig_hair_path = '';
-        let axe_hair_path = '';
-        let water_hair_path = '';
-        let mine_hair_path = '';
+        // 헤어 애셋 경로 객체
+        const hairPath = {
+            idle: "",
+            walk: "",
+            run: "",
+            dig: "",
+            axe: "",
+            water: "",
+            mine: ""
+        };
 
         // base는 빡빡이라서 헤어 스프라이트가 필요 없음
         if (this.characterInfo.name === 'long hair') {
-            idle_hair_path = 'assets/Character/IDLE/longhair_idle_strip9.png';
-            walk_hair_path = 'assets/Character/WALKING/longhair_walk_strip8.png';
-            run_hair_path = 'assets/Character/RUN/longhair_run_strip8.png';
-            dig_hair_path = 'assets/Character/DIG/longhair_dig_strip13.png';
-            axe_hair_path = 'assets/Character/AXE/longhair_axe_strip10.png';
-            water_hair_path = 'assets/Character/WATERING/longhair_watering_strip5.png';
-            mine_hair_path = 'assets/Character/MINING/longhair_mining_strip10.png';
-
+            hairPath.idle = 'IDLE/longhair_idle_strip9.png';
+            hairPath.walk = 'WALKING/longhair_walk_strip8.png';
+            hairPath.run = 'RUN/longhair_run_strip8.png';
+            hairPath.dig = 'DIG/longhair_dig_strip13.png';
+            hairPath.axe = 'AXE/longhair_axe_strip10.png';
+            hairPath.water = 'WATERING/longhair_watering_strip5.png';
+            hairPath.mine = 'MINING/longhair_mining_strip10.png';
         } else if (this.characterInfo.name === 'curly') {
-            idle_hair_path = 'assets/Character/IDLE/curlyhair_idle_strip9.png';
-            walk_hair_path = 'assets/Character/WALKING/curlyhair_walk_strip8.png';
-            run_hair_path = 'assets/Character/RUN/curlyhair_run_strip8.png';
-            dig_hair_path = 'assets/Character/DIG/curlyhair_dig_strip13.png';
-            axe_hair_path = 'assets/Character/AXE/curlyhair_axe_strip10.png';
-            water_hair_path = 'assets/Character/WATERING/curlyhair_watering_strip5.png';
-            mine_hair_path = 'assets/Character/MINING/curlyhair_mining_strip10.png';
+            hairPath.idle = 'IDLE/curlyhair_idle_strip9.png';
+            hairPath.walk = 'WALKING/curlyhair_walk_strip8.png';
+            hairPath.run = 'RUN/curlyhair_run_strip8.png';
+            hairPath.dig = 'DIG/curlyhair_dig_strip13.png';
+            hairPath.axe = 'AXE/curlyhair_axe_strip10.png';
+            hairPath.water = 'WATERING/curlyhair_watering_strip5.png';
+            hairPath.mine = 'MINING/curlyhair_mining_strip10.png';
         }
         // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
         else if (this.characterInfo.name === 'bow' || this.characterInfo.name === undefined) {
-            idle_hair_path = 'assets/Character/IDLE/bowlhair_idle_strip9.png';
-            walk_hair_path = 'assets/Character/WALKING/bowlhair_walk_strip8.png';
-            run_hair_path = 'assets/Character/RUN/bowlhair_run_strip8.png';
-            dig_hair_path = 'assets/Character/DIG/bowlhair_dig_strip13.png';
-            axe_hair_path = 'assets/Character/AXE/bowlhair_axe_strip10.png';
-            water_hair_path = 'assets/Character/WATERING/bowlhair_watering_strip5.png';
-            mine_hair_path = 'assets/Character/MINING/bowlhair_mining_strip10.png';
+            hairPath.idle = 'IDLE/bowlhair_idle_strip9.png';
+            hairPath.walk = 'WALKING/bowlhair_walk_strip8.png';
+            hairPath.run = 'RUN/bowlhair_run_strip8.png';
+            hairPath.dig = 'DIG/bowlhair_dig_strip13.png';
+            hairPath.axe = 'AXE/bowlhair_axe_strip10.png';
+            hairPath.water = 'WATERING/bowlhair_watering_strip5.png';
+            hairPath.mine = 'MINING/bowlhair_mining_strip10.png';
         }
 
 
+        // 스프라이트 시트의 frameWidth 96, frameHeigth 64
         const characterSprites = [
             // 대기 스프라이트 시트
-            { name: 'player_idle_hair', path: idle_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_idle_body', path: 'assets/Character/IDLE/base_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_idle_hand', path: 'assets/Character/IDLE/tools_idle_strip9.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_idle_hair', path: hairPath.idle },
+            { name: 'player_idle_body', path: 'IDLE/base_idle_strip9.png' },
+            { name: 'player_idle_hand', path: 'IDLE/tools_idle_strip9.png' },
             // 걷는 스프라이트 시트
-            { name: 'player_walk_hair', path: walk_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_walk_body', path: 'assets/Character/WALKING/base_walk_strip8.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_walk_hand', path: 'assets/Character/WALKING/tools_walk_strip8.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_walk_hair', path: hairPath.walk },
+            { name: 'player_walk_body', path: 'WALKING/base_walk_strip8.png' },
+            { name: 'player_walk_hand', path: 'WALKING/tools_walk_strip8.png' },
             // 달리는 스프라이트 시트
-            { name: 'player_run_hair', path: run_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_run_body', path: 'assets/Character/RUN/base_run_strip8.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_run_hand', path: 'assets/Character/RUN/tools_run_strip8.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_run_hair', path: hairPath.run },
+            { name: 'player_run_body', path: 'RUN/base_run_strip8.png' },
+            { name: 'player_run_hand', path: 'RUN/tools_run_strip8.png' },
             // 땅파는 스프라이트 시트
-            { name: 'player_dig_hair', path: dig_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_dig_body', path: 'assets/Character/DIG/base_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_dig_hand', path: 'assets/Character/DIG/tools_dig_strip13.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_dig_hair', path: hairPath.dig },
+            { name: 'player_dig_body', path: 'DIG/base_dig_strip13.png' },
+            { name: 'player_dig_hand', path: 'DIG/tools_dig_strip13.png' },
             // 도끼질 스프라이트 시트
-            { name: 'player_axe_hair', path: axe_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_axe_body', path: 'assets/Character/AXE/base_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_axe_hand', path: 'assets/Character/AXE/tools_axe_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_axe_hair', path: hairPath.axe },
+            { name: 'player_axe_body', path: 'AXE/base_axe_strip10.png' },
+            { name: 'player_axe_hand', path: 'AXE/tools_axe_strip10.png' },
             // 물주는 스프라이트 시트
-            { name: 'player_water_hair', path: water_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_water_body', path: 'assets/Character/WATERING/base_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_water_hand', path: 'assets/Character/WATERING/tools_watering_strip5.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_water_hair', path: hairPath.water },
+            { name: 'player_water_body', path: 'WATERING/base_watering_strip5.png' },
+            { name: 'player_water_hand', path: 'WATERING/tools_watering_strip5.png' },
             // 채굴 스프라이트 시트
-            { name: 'player_mine_hair', path: mine_hair_path, frameWidth: 96, frameHeight: 64 },
-            { name: 'player_mine_body', path: 'assets/Character/MINING/base_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
-            { name: 'player_mine_hand', path: 'assets/Character/MINING/tools_mining_strip10.png', frameWidth: 96, frameHeight: 64 },
+            { name: 'player_mine_hair', path: hairPath.mine },
+            { name: 'player_mine_body', path: 'MINING/base_mining_strip10.png' },
+            { name: 'player_mine_hand', path: 'MINING/tools_mining_strip10.png' },
         ];
 
+        // 상대 경로 설정
+        this.load.path = 'assets/Character/';
         // 플레이어 캐릭터에 사용할 스프라이트 시트 로드
         characterSprites.forEach(sprite => this.spriteLoader.loadSprite(sprite));
 
@@ -179,7 +159,7 @@ export default class InGameScene extends Phaser.Scene {
         // 타일맵 JSON 파일 로드
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
 
- 
+
         // 상대 경로 재설정
         // selectbox.png를 로드
         this.load.path = "assets/UI/";
@@ -188,17 +168,12 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("selectbox_tl", 'selectbox_tl.png');
         this.load.image("selectbox_tr", 'selectbox_tr.png');
 
-        // itemdisc01
-        // 도구 아이콘 배경
-        this.load.image("itemdisc01_icon", 'itemdisc_01.png');
-
-
         // 로드할 아이콘 이미지 정보를 담은 객체 배열
         this.iconLoadConfigs = [
-            { key : "shovel_icon", url : "shovel.png"},
-            { key : "water_icon", url : "water.png"},
-            { key : "axe_icon", url : "axe.png"},
-            { key : "pickaxe_icon", url : "pickaxe.png"},
+            { key: "shovel_icon", url: "shovel.png" },
+            { key: "water_icon", url: "water.png" },
+            { key: "axe_icon", url: "axe.png" },
+            { key: "pickaxe_icon", url: "pickaxe.png" },
         ];
         // 도구 아이콘들 로드
         this.iconLoadConfigs.forEach((iconLoadConfig) => {
@@ -256,49 +231,61 @@ export default class InGameScene extends Phaser.Scene {
         // 스프라이트 로더 클래스에 애니메이션 정보 전달해서 씬에서 애니메이션 생성하기
         animations.forEach(animation => this.spriteLoader.createAnimation(animation));
         // 플레이어 캐릭터 오브젝트 씬에 생성
+        // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
+        // 컨테이너 클래스의 오리진은 변경이 불가능하다.
         this.playerObject = new PlayerObject(this, 500, 600);
 
+        // 플레이어 캐릭터의 중앙값 구하기
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
+        const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
+        const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
-
-        // 퀵슬롯 UI 생성 관련 코드
-        // 배열로 관리 this.load.image() 부분도 배열화 가능한가?
-
-        this.QuickSlot = [];
-
+        // 퀵슬롯 UI 생성 코드
+        // 퀵슬롯 UI 객체 배열
+        this.QuickSlots = [];
+        // 퀵슬롯의 개수
         const quickSlotNumber = 4;
 
         // 퀵슬롯 UI 생성 컨테이너 클래스는 Origin 설정 불가능함.
         // Origin 기본값 (0,0) 으로 왼쪽 상단임
         // 게임 화면 오른쪽 하단에 위치시키는 코드
-        for( let i = 0; i < quickSlotNumber; i++){
-            const slotWidth = 100;
-            const slotHeight = 100;
+        for (let i = 0; i < quickSlotNumber; i++) {
+            const slotWidth = 150;
+            const slotHeight = 150;
 
+            // 퀵슬롯의 위치
             const slotX = rightX - (slotWidth * (quickSlotNumber - i));
             const slotY = bottomY - slotHeight;
 
             const slotNumber = i + 1;
             const iconKey = this.iconLoadConfigs[i].key;
 
-            this.QuickSlot.push(new QuickSlot(this, slotX, slotY, slotNumber, iconKey));
+            this.QuickSlots.push(new QuickSlot(this, slotX, slotY, 
+                slotWidth, slotHeight, slotNumber, iconKey));
         }
-        // 퀵슬롯 UI 생성 관련 코드
 
-        
+
+        // 그래픽스 객체 추가
         // 현재 장착중인 도구 슬롯 표시하는 사각형 객체
         this.equipMarker = this.add.graphics();
-        this.equipMarker.lineStyle(2, 0x000000, 1);
+        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려진다.
+        this.equipMarker.lineStyle(4, 0xFF0000, 1);
         // 사각형 그리기 시작 위치 왼쪽 상단
-        this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
-            100, 100);
-        this.equipMarker.setDepth(5); 
+        this.equipMarker.strokeRect(this.QuickSlots[this.equipNumber].x + 3
+            , this.QuickSlots[this.equipNumber].y + 3,
+            144, 144);
+        this.equipMarker.setDepth(101);
         this.equipMarker.setScrollFactor(0);
 
-        // createDebugGraphic()
+        // 플레이어의 중앙 위치에서 바라보는 방향의 바로 앞 타일의 위치를 점으로 찍는다.
+/*         this.frontTilePoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
+        this.frontTilePoint.fillCircle(playerCenterX, playerCenterY, 1);
+        this.frontTilePoint.setDepth(100); */
+
+
         // 충돌 영역에 대한 디버그 그래픽 설정
         // 각 레이어의 충돌 영역을 그린다.
         const debugGraphics = [];
-
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
@@ -326,6 +313,7 @@ export default class InGameScene extends Phaser.Scene {
 
             // 각 레이어에 충돌 적용하기
             layer.setCollisionByProperty({ collides: true });
+            // 플레이어 캐릭터와 레이어 충돌 적용
             this.physics.add.collider(this.playerObject, layer);
 
             // 디버그 그래픽 객체 배열 초기화
@@ -350,95 +338,31 @@ export default class InGameScene extends Phaser.Scene {
             layer.renderDebug(debugGraphics[i], styleconfig);
         }
 
-
-        // getTileAt(tileX, tileY, [,nonNull], [, layer])
-        // 주어진 레이어에서 주어진 타일 좌표에 있는 타일을 가져온다.
-        // layer 파라미터가 비었으면 현재 레이어가 사용된다.
-        this.selectedTile = this.ingameMap.getTileAt(2, 3);
-
-        // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
-        // 컨테이너 클래스의 오리진은 변경이 불가능하다.
-
-        // 컨테이너의 중앙값 구하기
-        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
-        const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
-        const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
-
-        // 플레이어의 중앙 위치를 점으로 찍는다.
-        this.playerLocationMarker = this.add.graphics({ fillStyle: { color: 0xff0000 } });
-        this.playerLocationMarker.fillCircle(playerCenterX, playerCenterY, 1);
-        this.playerLocationMarker.setDepth(100);
-
         // 키보드 키 입력 설정
+        // 방향키, 쉬프트, 스페이스바 키 객체 생성
         this.cursorsKeys = this.input.keyboard.createCursorKeys();
-        const controlConfig = {
-            camera: this.cameras.main,
-            left: this.cursorsKeys.left,
-            right: this.cursorsKeys.right,
-            up: this.cursorsKeys.up,
-            down: this.cursorsKeys.down,
-            speed: 0.5
-        };
-        // FixedKeyControl 클래스는 카메라에 대한 간단하고 고정된 키 기반 컨트롤 제공한다. 
-        this.controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig);
-        // addKeys() : 특정 키 또는 여러 키에 대한 Phaser Key 객체를 생성한다.
-        this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
-        this.keys = this.input.keyboard.addKeys('W,A,S,D');
-        let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
-
         // 숫자 키 객체 생성 1~4
         this.numberKeys = this.input.keyboard.addKeys({
             'one': 'ONE',
             'two': 'TWO',
             'three': 'THREE',
             'four': 'FOUR'
-        });
+        });        
 
-        // 1번키 입력 이벤트 리스너
-        this.numberKeys.one.on('down', (event) =>{
-            this.equipNumber = 0;
+        // addKeys() : 특정 키 또는 여러 키에 대한 Phaser Key 객체를 생성한다.
+        this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+        this.keys = this.input.keyboard.addKeys('W,A,S,D');
+        let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
 
-            this.equipMarker.clear();
-            this.equipMarker.lineStyle(2, 0x000000, 1);
-            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
-                100, 100);
-        });
+        // 키 입력 이벤트 리스너 등록
+        // 1번키
+        this.numberKeys.one.on('down', (event) => this.equipQuickSlot(0));
         // 2번키
-        this.numberKeys.two.on('down', (event) =>{
-            this.equipNumber = 1;
-
-            this.equipMarker.clear();
-            this.equipMarker.lineStyle(2, 0x000000, 1);
-            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
-                100, 100);
-        });
+        this.numberKeys.two.on('down', (event) => this.equipQuickSlot(1));
         // 3번키
-        this.numberKeys.three.on('down', (event) =>{
-            this.equipNumber = 2;
-
-            this.equipMarker.clear();
-            this.equipMarker.lineStyle(2, 0x000000, 1);
-            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
-                100, 100);
-        });
+        this.numberKeys.three.on('down', (event) => this.equipQuickSlot(2));
         // 4번키
-        this.numberKeys.four.on('down', (event) =>{
-            this.equipNumber = 3;
-
-            this.equipMarker.clear();
-            this.equipMarker.lineStyle(2, 0x000000, 1);
-            this.equipMarker.strokeRect(this.QuickSlot[this.equipNumber].x, this.QuickSlot[this.equipNumber].y, 
-                100, 100);
-        });
-
-
-
-
-        // 게임 시작시 디버그 그래픽 숨기기
-        /*         debugGraphics.forEach((debugGraphic) => {
-                    debugGraphic.visible = false;  
-                }); */
-
+        this.numberKeys.four.on('down', (event) => this.equipQuickSlot(3));
         // 'C' 키 입력 이벤트 리스너
         toggleDebugKey.on('down', function () {
             // 디버그 그래픽 표시 상태 토글
@@ -448,117 +372,48 @@ export default class InGameScene extends Phaser.Scene {
 
         });
 
+        // 게임 시작시 디버그 그래픽 숨기기
+        /*         debugGraphics.forEach((debugGraphic) => {
+                    debugGraphic.visible = false;  
+                }); */
+
+
         // 카메라 참조
         this.camera = this.cameras.main;
         // 카메라 이동 경계 설정
-        // 월드 경계랑 크기가 동일하다.
         this.cameras.main.setBounds(0, 0, currentMapWidth, currentMapHeight);
         this.camera.startFollow(this.playerObject);
 
         // 물리
-        // 월드 경계 설정
+        // 월드 경계 설정해서 플레이어 캐릭터가 못 나가게 한다.
         this.physics.world.setBounds(0, 0, currentMapWidth, currentMapHeight);
 
-
-
         // 디버그 텍스트 추가
-        // 마우스 포인터의 게임 월드내의 좌표값 표시
-        // 화면 오른쪽 상단에 위치
-        /*         this.mouseLocationText =
-                    this.add.text(rightX, 0, 'Mouse Location', { fontFamily: 'Arial', fontSize: 30 }).setDepth(100);
-                this.mouseLocationText.setScrollFactor(0);
-                this.mouseLocationText.setOrigin(1, 0);
-        
-                // 마우스 포인터가 위치한 타일의 인덱스
-                this.tileIndexText =
-                    this.add.text(0, 0, 'Mouse Tile Index', { fontFamily: 'Arial', fontSize: 30, backgroundColor: '#000000' }).setDepth(100);
-                this.tileIndexText.setScrollFactor(0);
-        
-        
-                // 마우스 포인터가 위치한 타일의 월드 상의 위치
-                this.tileLocationText =
-                    this.add.text(centerX, 0, 'Mouse Tile Location', {
-                        fontFamily: 'Arial',
-                        fontSize: 30,
-                        backgroundColor: '#000000',
-                        align: 'center'
-                    }).setDepth(100);
-                this.tileLocationText.setScrollFactor(0);
-                // 텍스트를 가로 중앙에 정렬하기 위해 오리진 설정
-                this.tileLocationText.setOrigin(0.5, 0); */
+        // 텍스트 스타일 객체
+        const txtStyle = {
+            fontFamily : 'Arial',
+            fontSize : 30,
+            backgroundColor: '#000000',
+            align: 'center'
+        };
 
-        // 현재 플레이어가 위치한 타일의 인덱스 표시
-        this.playerTileIndexText =
-            this.add.text(centerX, bottomY, 'player tile index', {
-                fontFamily: 'Arial',
-                fontSize: 30,
-                backgroundColor: '#000000',
-                align: 'center'
-            }).setDepth(100);
-        this.playerTileIndexText.setScrollFactor(0);
-        this.playerTileIndexText.setOrigin(0.5, 1);
+        // 현재 플레이어가 위치한 타일의 인덱스 표시하고 화면 중앙 아래쪽에 배치한다.        
+        this.playerTileIndexText = this.add.text(centerX, bottomY, 'player tile index',txtStyle);
+        this.playerTileIndexText.setScrollFactor(0).setOrigin(0.5, 1).setDepth(100);
 
-
-        // 플레이어가 현재 바라보는 방향 표시
-        this.playerDirectionText =
-            this.add.text(centerX, 0, 'Player Direction : Right', {
-                fontFamily: 'Arial',
-                fontSize: 30,
-                backgroundColor: '#000000',
-                align: 'center'
-            }).setDepth(100);
-        this.playerDirectionText.setScrollFactor(0);
-        // 텍스트를 가로 중앙에 정렬하기 위해 오리진 설정
-        this.playerDirectionText.setOrigin(0.5, 0);
-
-
-
+        // 박스의 스케일과 뎁스
         const selectBoxScale = 2;
         const selectBoxDepth = 3;
 
-        // select box 4방향 추가하기
-        this.selectBoxTL = this.add.image(0, 0, 'selectbox_tl').setOrigin(0,0);
-        this.selectBoxTL.setScale(selectBoxScale); 
-        this.selectBoxTL.setDepth(selectBoxDepth);
-
-        this.selectBoxTR = this.add.image(0, 0, 'selectbox_tr').setOrigin(1,0);
-        this.selectBoxTR.setScale(selectBoxScale); 
-        this.selectBoxTR.setDepth(selectBoxDepth);
-
-        this.selectBoxBL = this.add.image(0, 0, 'selectbox_bl').setOrigin(0,1);
-        this.selectBoxBL.setScale(selectBoxScale); 
-        this.selectBoxBL.setDepth(selectBoxDepth);
-
-        this.selectBoxBR = this.add.image(0, 0, 'selectbox_br').setOrigin(1,1);
-        this.selectBoxBR.setScale(selectBoxScale); 
-        this.selectBoxBR.setDepth(selectBoxDepth);
-
-    } 
+        // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
+        this.frontTileMarker = new SelectBox(this, 550, 550 , tileSize , tileSize, selectBoxScale, selectBoxDepth);
+    }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
     // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
     // 이 값은 게임이 얼마나 매끄럽게 실행되고 있는지를 나타내는데 사용될 수 있으며,
     // 주로 프레임 간 일정한 속도를 유지하기 위한 물리 계산에 사용한다.
     update(time, delta) {
-
-        // 메인 카메라 이동
-        /*         const cameraSpeed = 5;
-                // 위쪽 화살표가 눌렸을 때
-                if (this.cursorsKeys.up.isDown) {
-                    this.camera.scrollY -= cameraSpeed;
-                }
-                // 아래쪽 화살표가 눌렸을 때
-                if (this.cursorsKeys.down.isDown) {
-                    this.camera.scrollY += cameraSpeed;
-                }
-                // 왼쪽 화살표가 눌렸을 때
-                if (this.cursorsKeys.left.isDown) {
-                    this.camera.scrollX -= cameraSpeed;
-                }
-                // 오른쪽 화살표가 눌렸을 때
-                if (this.cursorsKeys.right.isDown) {
-                    this.camera.scrollX += cameraSpeed;
-                } */
 
         this.playerObject.update(this.cursorsKeys, this.keys);
 
@@ -572,13 +427,7 @@ export default class InGameScene extends Phaser.Scene {
         const playerCenterY = playerY + (this.playerObject.body.height / 2);
 
 
-        // 플레이어 현재 위치 마커 업데이트
-        // 플레이어의 중앙 위치를 점으로 찍는다.
-        this.playerLocationMarker.clear();
-        /*         this.playerLocationMarker.fillCircle(playerCenterX, playerCenterY, 2);
-                this.playerLocationMarker.setDepth(100); */
-
-        // 캐릭터 중앙 위치 값에서 캐릭터가 바라보는 방향 앞에 1타일 크기만큼 떨어진 곳에 점찍기
+        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 앞에 1타일 크기만큼 떨어진 곳 위치 구하기
         let pointX = playerCenterX;
         // 캐릭터가 현재 바라보는 방향
         if (this.playerObject.playerDirection === 'left') {
@@ -586,9 +435,11 @@ export default class InGameScene extends Phaser.Scene {
         } else if (this.playerObject.playerDirection === "right") {
             pointX = playerCenterX + tileSize;
         }
-        this.playerDirectionText.setText("Player Direction : " + this.playerObject.playerDirection);
-        this.playerLocationMarker.fillCircle(pointX, playerCenterY, 2);
 
+        // 플레이어 중앙 위치의 바로 앞 타일의 위치를 찍는다.
+/*         this.frontTilePoint.clear();
+        this.frontTilePoint.fillCircle(pointX, playerCenterY, 2);
+ */
 
         // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
         // 캐릭터 중앙 위치가 기준점
@@ -598,7 +449,7 @@ export default class InGameScene extends Phaser.Scene {
         this.playerTileY = playerTileY;
 
 
-        // 구한 타일의 인덱스 표시 
+        // 구한 타일의 인덱스를 텍스트 표시 
         this.playerTileIndexText.setText("PlayerTileIndex X : " + playerTileX +
             "\nPlayerTileIndex Y : " + playerTileY);
 
@@ -607,188 +458,29 @@ export default class InGameScene extends Phaser.Scene {
         const frontTileX = this.ingameMap.tileToWorldX(playerTileX);
         const frontTileY = this.ingameMap.tileToWorldX(playerTileY);
 
-
-        // 타일 마커 위치 업데이트
-/*         this.marker.x = frontTileX;
-        this.marker.y = frontTileY; */
-
-        // SelectBox 위치 업데이트
-        this.selectBoxTL.x = frontTileX;
-        this.selectBoxTL.y = frontTileY;
-
-        this.selectBoxTR.x = frontTileX + tileSize;
-        this.selectBoxTR.y = frontTileY;
-
-        this.selectBoxBL.x = frontTileX;
-        this.selectBoxBL.y = frontTileY + tileSize;
-
-        this.selectBoxBR.x = frontTileX + tileSize;
-        this.selectBoxBR.y = frontTileY + tileSize;
+        // 상호작용 할 타일 마커 위치 업데이트
+        this.frontTileMarker.x = frontTileX;
+        this.frontTileMarker.y = frontTileY;
 
     }
 
+    // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
+    equipQuickSlot(equipNumber) {
 
-    // 함수 분리
-    createAnimation() {
-
-        // 대기 애니메이션 생성 9 프레임
-        // this : Scene
-        // anims : AnimationManager
-        this.anims.create({
-            // 애니메이션의 고유 이름 설정
-            key: 'idle_hair',
-            // 애니메이션에 사용될 프레임을 정의한다.
-            frames: this.anims.generateFrameNumbers('player_idle_hair', { start: 0, end: 8 }),
-            // 애니메이션의 프레임 속도
-            frameRate: 9,
-            // 애니메이션의 반복 여부
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'idle_body',
-            frames: this.anims.generateFrameNumbers('player_idle_body', { start: 0, end: 8 }),
-            frameRate: 9,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'idle_hand',
-            frames: this.anims.generateFrameNumbers('player_idle_hand', { start: 0, end: 8 }),
-            frameRate: 9,
-            repeat: -1
-        });
-
-        // 걷는 애니메이션 생성 8프레임
-        this.anims.create({
-            key: 'walk_hair',
-            frames: this.anims.generateFrameNumbers('player_walk_hair', { start: 0, end: 7 }),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'walk_body',
-            frames: this.anims.generateFrameNumbers('player_walk_body', { start: 0, end: 7 }),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'walk_hand',
-            frames: this.anims.generateFrameNumbers('player_walk_hand', { start: 0, end: 7 }),
-            frameRate: 8,
-            repeat: -1
-        });
-
-        // 달리기 애니메이션 생성 8 프레임
-        this.anims.create({
-            key: 'run_hair',
-            frames: this.anims.generateFrameNumbers('player_run_hair', { start: 0, end: 7 }),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'run_body',
-            frames: this.anims.generateFrameNumbers('player_run_body', { start: 0, end: 7 }),
-            frameRate: 8,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'run_hand',
-            frames: this.anims.generateFrameNumbers('player_run_hand', { start: 0, end: 7 }),
-            frameRate: 8,
-            repeat: -1
-        });
-
-        // 땅파기 애니메이션 생성 13 프레임
-        this.anims.create({
-            key: 'dig_hair',
-            frames: this.anims.generateFrameNumbers('player_dig_hair', { start: 0, end: 12 }),
-            frameRate: 13,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'dig_body',
-            frames: this.anims.generateFrameNumbers('player_dig_body', { start: 0, end: 12 }),
-            frameRate: 13,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'dig_hand',
-            frames: this.anims.generateFrameNumbers('player_dig_hand', { start: 0, end: 12 }),
-            frameRate: 13,
-            repeat: 0
-        });
-
+        this.equipNumber = equipNumber;
+        this.equipMarker.clear();
+        this.equipMarker.lineStyle(4, 0xFF0000, 1);
+        this.equipMarker.strokeRect(this.QuickSlots[equipNumber].x + 3
+            , this.QuickSlots[equipNumber].y + 3,
+            144, 144);
     }
-
-    // 스프라이트 로드 함수
-    loadSpriteSheet() {
-        // 캐릭터 스프라이트 시트 로드
-        // 애셋 경로 : assets/Character
-        // 대기 스프라이트 시트
-        this.load.spritesheet('player_idle_body', 'assets/Character/IDLE/base_idle_strip9.png', {
-            // 실제 스프라이트 시트의 각 프레임 크기에 맞춰야 함.
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_idle_hand', 'assets/Character/IDLE/tools_idle_strip9.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/bowlhair_idle_strip9.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-
-        // 걷는 스프라이트 시트 player_walk
-        this.load.spritesheet('player_walk_body', 'assets/Character/WALKING/base_walk_strip8.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_walk_hand', 'assets/Character/WALKING/tools_walk_strip8.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_walk_hair', 'assets/Character/WALKING/bowlhair_walk_strip8.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-
-        // 달리는 스프라이트 시트 player_run
-        this.load.spritesheet('player_run_body', 'assets/Character/RUN/base_run_strip8.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_run_hand', 'assets/Character/RUN/tools_run_strip8.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_run_hair', 'assets/Character/RUN/bowlhair_run_strip8.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-
-        // 땅 파기 스프라이트 시트 player_dig
-        this.load.spritesheet('player_dig_body', 'assets/Character/DIG/base_dig_strip13.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_dig_hand', 'assets/Character/DIG/tools_dig_strip13.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-        this.load.spritesheet('player_dig_hair', 'assets/Character/DIG/bowlhair_dig_strip13.png', {
-            frameWidth: 96,
-            frameHeight: 64
-        });
-
-    }
-
 
     // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
     // 캐릭터 땅파기 애니메이션에 실행될 콜백 함수
     paintTiles() {
-        //console.log("paintTiles() 호출됨.");
         // 타일 인덱스를 전달, 페이저 타일 인덱스는 1부터 시작한다.
         // 전체 레이어의 타일 변경
+        // 68 : 갈색 땅 타일 1011 : 밭 타일 -1 : 빈 타일 인덱스
         this.ingameMap.putTileAt(68, this.playerTileX, this.playerTileY, true, 0);
         this.ingameMap.putTileAt(1011, this.playerTileX, this.playerTileY, true, 1);
         this.ingameMap.putTileAt(-1, this.playerTileX, this.playerTileY, true, 2);
@@ -808,15 +500,19 @@ export default class InGameScene extends Phaser.Scene {
                 // 타일의 X축, Y축 반전 제거
                 tile.flipX = false;
                 tile.flipY = false;
-    
-                // 타일맵 레이어의 렌더링 업데이트 호출 안해도 타일 회전 제거 됨.
-                //tile.layer.tilemapLayer.render();
             }
         });
     }
 
 
+    // 마우스 포인터가 위치한 타일의 픽셀 위치를 구하는 함수
     getMousePointerTile() {
+
+        // getTileAt(tileX, tileY, [,nonNull], [, layer])
+        // 타일맵에서 주어진 레이어에서 주어진 타일 좌표에 있는 타일을 가져온다.
+        // layer 파라미터가 비었으면 현재 레이어가 사용된다.
+        this.selectedTile = this.ingameMap.getTileAt(2, 3);
+
         // 현재 활성화된 포인터(예: 마우스 커서)의 위치를 카메라의 뷰포트 좌표로 변환한다.
         // this.input.activePointer : 게임에서 현재 활성화된 포인터를 나타낸다.
         // positionTocamera(this.camera) : 활성화된 포인터의 위치를 메인 카메라의 뷰포트 좌표로 변환
@@ -845,9 +541,6 @@ export default class InGameScene extends Phaser.Scene {
         this.marker.x = this.ingameMap.tileToWorldX(pointerTileX);
         this.marker.y = this.ingameMap.tileToWorldY(pointerTileY);
 
-        // 마우스 포인터가 위치한 타일의 월드 상에서 위치 표시
-        this.tileLocationText.setText("TileLocation X : " + this.marker.x +
-            "\nTileLocation Y : " + this.marker.y);
 
         // 마우스 왼쪽 버튼을 누르면 새 타일로 칠하기
         if (this.input.manager.activePointer.isDown) {
@@ -874,8 +567,10 @@ export default class InGameScene extends Phaser.Scene {
 
 }
 
-
+// 스프라이트 시트 로더 클래스 - 로드 부분을 따로 클래스로 분리
 class SpriteLoader {
+
+    // 페이저 씬 객체를 생성자에서 받는다.
     constructor(scene) {
         this.scene = scene;
     }
@@ -888,6 +583,12 @@ class SpriteLoader {
             return;
         }
 
+        // frameWidth, frameHeight 기본 값 설정
+        if (spriteData.frameWidth === undefined)
+            spriteData.frameWidth = 96;
+        if (spriteData.frameHeight === undefined)
+            spriteData.frameHeight = 64;
+
         this.scene.load.spritesheet(
             spriteData.name,
             spriteData.path, {
@@ -898,6 +599,47 @@ class SpriteLoader {
 
     createAnimation(animationData) {
         this.scene.anims.create(animationData);
+    }
+
+}
+
+// 플레이어가 상호작용할 타일을 표시하거나 선택한 아이템을 표시하는 UI 박스
+class SelectBox extends Phaser.GameObjects.Container {
+    
+    topLeft;
+    topRight;
+    bottomLeft;
+    bottomRight;
+    
+    // scene : 박스 UI가 추가될 씬
+    // x, y 박스 위치 시작점
+    // width, height 박스의 길이와 높이
+    // scale : 박스를 구성하는 UI들의 스케일
+    constructor(scene, x, y, width, height, scale, depth){
+        super(scene, x, y);
+
+        scene.add.existing(this);
+
+        this.setDepth(depth);
+        
+        // 사각형의 각 꼭짓점에 select box UI 추가
+        this.topLeft = scene.add.image(0, 0, 'selectbox_tl');
+        this.topLeft.setOrigin(0, 0).setScale(scale);
+
+        this.topRight = scene.add.image(width, 0, 'selectbox_tr');
+        this.topRight.setOrigin(1, 0).setScale(scale);
+
+        this.bottomLeft = scene.add.image(0, height, 'selectbox_bl');
+        this.bottomLeft.setOrigin(0, 1).setScale(scale);
+
+        this.bottomRight = scene.add.image(width, height, 'selectbox_br');
+        this.bottomRight.setOrigin(1, 1).setScale(scale);
+
+
+        this.add(this.topLeft);
+        this.add(this.topRight);
+        this.add(this.bottomLeft);
+        this.add(this.bottomRight);
     }
 
 }

@@ -106,9 +106,8 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
             this.hairSprite.anims.play(state + '_hair', true);
         }
         this.bodySprite.anims.play(state + '_body', true);
-
+        // return 이 있는 이유 특정 애니메이션에 이벤트 리스너 달아야해서
         return this.handSprite.anims.play(state + '_hand', true);
-
     }
 
     // 캐릭터 대기 상태로 전환
