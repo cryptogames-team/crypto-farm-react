@@ -110,6 +110,20 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         return this.handSprite.anims.play(state + '_hand', true);
     }
 
+    // 게임 캐릭터 씨앗 심는 동작 정의한 함수
+    plantSeed(scene, seed, plantTile){
+
+            // 씨앗 심는 애니메이션이 애셋에 없어서 물 주는 애니메이션으로 대체
+            let plantAnim = this.playAnimation('water', this.hairSprite);
+            plantAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 3) {
+                    scene.addSeed(seed, plantTile);
+                }
+            });
+            this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
+
+    }
+
     // 캐릭터 대기 상태로 전환
     // anim : 콜백 함수를 제거할 애니메이션 매니저
     transitionToIdle(anim){
@@ -228,8 +242,8 @@ class MoveState extends State {
         }
 
 
-        const runSpeed = 250;
-        const walkSpeed = 150;
+        const runSpeed = 350;
+        const walkSpeed = 200;
         let currentSpeed = 0;
 
         // 달리는지 걷는지 체크
@@ -328,6 +342,62 @@ class ActionState extends State {
 
             let mineAnim = player.playAnimation('mine', player.hairSprite);
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(mineAnim));
+        }
+        // 감자 씨앗인 경우
+        // 나중에 씨앗 아이템을 장착한 경우로 변경하기
+        else if (equipNumber === 4) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'potato',plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        // 당근 씨앗
+        else if (equipNumber === 5) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'carrot',plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        // 호박 씨앗
+        else if (equipNumber === 6) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'pumpkin',plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        // 양배추 씨앗
+        else if (equipNumber === 7) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'cabbage',plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        else{
+            player.stateMachine.transition('idle');
         }
 
     }
