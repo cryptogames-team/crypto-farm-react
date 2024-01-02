@@ -47,6 +47,12 @@ export default class InGameScene extends Phaser.Scene {
     tileIndexText;
     mouseLocationText;
 
+    // 농작물 검색 영역
+    searchArea;
+
+    // 플레이어가 상호작용할 타일을 표시하는 UI 마커
+    interTileMarker
+
     // 생성자가 왜 있지?
     constructor() {
         super('InGameScene');
@@ -92,6 +98,7 @@ export default class InGameScene extends Phaser.Scene {
             hairPath.axe = 'AXE/longhair_axe_strip10.png';
             hairPath.water = 'WATERING/longhair_watering_strip5.png';
             hairPath.mine = 'MINING/longhair_mining_strip10.png';
+            hairPath.do = 'DOING/longhair_doing_strip8.png';
         } else if (this.characterInfo.name === 'curly') {
             hairPath.idle = 'IDLE/curlyhair_idle_strip9.png';
             hairPath.walk = 'WALKING/curlyhair_walk_strip8.png';
@@ -100,6 +107,7 @@ export default class InGameScene extends Phaser.Scene {
             hairPath.axe = 'AXE/curlyhair_axe_strip10.png';
             hairPath.water = 'WATERING/curlyhair_watering_strip5.png';
             hairPath.mine = 'MINING/curlyhair_mining_strip10.png';
+            hairPath.do = 'DOING/curlyhair_doing_strip8.png';
         }
         // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
         else if (this.characterInfo.name === 'bow' || this.characterInfo.name === undefined) {
@@ -110,6 +118,7 @@ export default class InGameScene extends Phaser.Scene {
             hairPath.axe = 'AXE/bowlhair_axe_strip10.png';
             hairPath.water = 'WATERING/bowlhair_watering_strip5.png';
             hairPath.mine = 'MINING/bowlhair_mining_strip10.png';
+            hairPath.do = 'DOING/bowlhair_doing_strip8.png';
         }
 
 
@@ -143,6 +152,11 @@ export default class InGameScene extends Phaser.Scene {
             { name: 'player_mine_hair', path: hairPath.mine },
             { name: 'player_mine_body', path: 'MINING/base_mining_strip10.png' },
             { name: 'player_mine_hand', path: 'MINING/tools_mining_strip10.png' },
+            // 행동 스프라이트 시트
+            { name: 'player_do_hair', path: hairPath.do },
+            { name: 'player_do_body', path: 'DOING/base_doing_strip8.png' },
+            { name: 'player_do_hand', path: 'DOING/tools_doing_strip8.png' },
+
         ];
 
         // 상대 경로 설정
@@ -170,12 +184,13 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("selectbox_tr", 'selectbox_tr.png');
 
 
+        // { key: "water_icon", url: "assets/UI/water.png" }
         this.load.path = "";
         // 로드할 아이콘 이미지 정보를 담은 객체 배열
         this.iconLoadConfigs = [
             // 도구 아이콘들
             { key: "shovel_icon", url: "assets/UI/shovel.png" },
-            { key: "water_icon", url: "assets/UI/water.png" },
+            { key: "harvest_icon", url: "assets/UI/hand_open_02.png" },
             { key: "axe_icon", url: "assets/UI/axe.png" },
             { key: "pickaxe_icon", url: "assets/UI/pickaxe.png" },
             // 씨앗 아이콘들
@@ -192,12 +207,36 @@ export default class InGameScene extends Phaser.Scene {
 
         // 농작물 이미지 로드
         this.load.path = "assets/Elements/Crops/"
+        // 감자 이미지
+        // 새싹
         this.load.image('potato_01', "potato_01.png");
+        // 성장기
+        this.load.image('potato_02', "potato_02.png");
+        this.load.image('potato_03', "potato_03.png");
+        // 수확기
+        this.load.image('potato_04', "potato_04.png");
+        // 열매 
+        this.load.image('potato_05', "potato_05.png");
+        // 당근
         this.load.image('carrot_01', "carrot_01.png");
+        this.load.image('carrot_02', "carrot_02.png");
+        this.load.image('carrot_03', "carrot_03.png");
+        this.load.image('carrot_04', "carrot_04.png");
+        this.load.image('carrot_05', "carrot_05.png");
+        // 호박
         this.load.image('pumpkin_01', "pumpkin_01.png");
-        this.load.image('cabbage_01', "cabbage_01.png");
-        
+        this.load.image('pumpkin_02', "pumpkin_02.png");
+        this.load.image('pumpkin_03', "pumpkin_03.png");
+        this.load.image('pumpkin_04', "pumpkin_04.png");
+        this.load.image('pumpkin_05', "pumpkin_05.png");
 
+        // 양배추
+        this.load.image('cabbage_01', "cabbage_01.png");
+        this.load.image('cabbage_02', "cabbage_02.png");
+        this.load.image('cabbage_03', "cabbage_03.png");
+        this.load.image('cabbage_04', "cabbage_04.png");
+        this.load.image('cabbage_05', "cabbage_05.png");
+        
     }
 
     create() {
@@ -242,6 +281,10 @@ export default class InGameScene extends Phaser.Scene {
             { key: 'mine_hair', frames: this.anims.generateFrameNumbers('player_mine_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
             { key: 'mine_body', frames: this.anims.generateFrameNumbers('player_mine_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
             { key: 'mine_hand', frames: this.anims.generateFrameNumbers('player_mine_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            // 행동 애니메이션 8 프레임
+            { key: 'do_hair', frames: this.anims.generateFrameNumbers('player_do_hair', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+            { key: 'do_body', frames: this.anims.generateFrameNumbers('player_do_body', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+            { key: 'do_hand', frames: this.anims.generateFrameNumbers('player_do_hand', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
         ];
 
 
@@ -251,6 +294,16 @@ export default class InGameScene extends Phaser.Scene {
         // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
         // 컨테이너 클래스의 오리진은 변경이 불가능하다.
         this.playerObject = new PlayerObject(this, 500, 600);
+
+        // 플레이어가 상호작용할 타일 안에 있는 농작물을 검색하는 물리 객체
+        // 스프라이트 키에 null 넣으면 이미지가 표시되지 않음.
+        // setSize() 이거 좀 귀찮은 메소드네...
+        this.searchArea = this.physics.add.sprite(500, 500, null);
+        this.searchArea.setDisplaySize(tileSize, tileSize).setOrigin(0,0);
+        this.searchArea.body.debugShowBody = false;
+
+        // setSize() 하니까 갑자기 물리 바디 오리진이 0,0에서 0.5, 0.5가 됨.
+
 
         // 플레이어 캐릭터의 중앙값 구하기
         // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
@@ -442,7 +495,7 @@ export default class InGameScene extends Phaser.Scene {
         const selectBoxDepth = 3;
 
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
-        this.frontTileMarker = new SelectBox(this, 550, 550 , tileSize , tileSize, selectBoxScale, selectBoxDepth);
+        this.interTileMarker = new SelectBox(this, 550, 550 , tileSize , tileSize, selectBoxScale, selectBoxDepth);
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -494,13 +547,17 @@ export default class InGameScene extends Phaser.Scene {
         this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable );
 
 
-        // 캐릭터 바로 앞 타일의 월드 상의 위치
+        // 캐릭터가 상호작용할 타일의 월드 상의 위치
         const frontTileX = this.ingameMap.tileToWorldX(interactTileX);
-        const frontTileY = this.ingameMap.tileToWorldX(interactTileY);
+        const frontTileY = this.ingameMap.tileToWorldY(interactTileY);
 
-        // 상호작용 할 타일 마커 위치 업데이트
-        this.frontTileMarker.x = frontTileX;
-        this.frontTileMarker.y = frontTileY;
+        // 상호작용 할 타일 표시 UI 마커 위치 업데이트
+        this.interTileMarker.x = frontTileX;
+        this.interTileMarker.y = frontTileY;
+
+        // 검색 영역 위치도 업데이트
+        this.searchArea.x = frontTileX;
+        this.searchArea.y = frontTileY;
 
     }
 
@@ -592,8 +649,26 @@ export default class InGameScene extends Phaser.Scene {
 /*         this.add.image(plantX, plantY + 4, seedImgKey)
         .setDepth(3).setScale(layerScale).setOrigin(0.5, 1); */
 
-        // 농작물 게임 오브젝트 추가 - 처음에는 씨앗 텍스처
-        new Crops(this, plantX, plantY, seedImgKey, seed);
+        // 농작물 게임 오브젝트 추가
+        // 컨테이너 객체는 origin이 중앙임
+        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seed);
+
+        // 캐릭터와 농작물 간의 overlap 이벤트 설정
+        // create() 이후에 overlap 이벤트 설정해도 되나봄.
+        this.physics.add.overlap(this.searchArea, crops, () => {
+/*             if(crops.state === 'harvest'){
+                console.log("검색 영역 안에 수확 가능한 농작물이 있음", crops.name);
+            } */
+
+            //console.log(this.playerObject.isHarvesting);
+            
+            if(this.playerObject.isHarvesting === true && crops.state === 'harvest'){
+                console.log("캐릭터 수확 성공", crops.name);
+                crops.harvest();
+            }
+        });
+
+        
 
         // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
         plantTile.properties.plantable = false
@@ -714,6 +789,9 @@ class SelectBox extends Phaser.GameObjects.Container {
         super(scene, x, y);
 
         scene.add.existing(this);
+        // 씬의 물리 시스템에 추가하여 물리적 상호작용을 가능하게 한다.
+        // 디버그용
+        //scene.physics.add.existing(this);
 
         this.setDepth(depth);
         

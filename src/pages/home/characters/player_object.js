@@ -20,6 +20,8 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
     // 캐릭터가 바라보고 있는 방향
     playerDirection;
 
+    // 수확중인지 여부
+    isHarvesting = false;
 
     constructor(scene, x, y) {
         // 상속받은 부모 클래스의 생성자
@@ -43,7 +45,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         this.setDepth(10);
 
         // 컨테이너 클래스의 특징
-        // 컨테이너의 오리진은 변경이 불가능하다. 기본값 (0,0) - 왼쪽 상단
+        // 컨테이너의 오리진은 변경이 불가능하다. 기본값 (0.5,0.5) - 중앙 위치
         // 기본 body size는 64,64px
 
         // 컨테이너의 중앙값 구하기
@@ -292,7 +294,7 @@ class MoveState extends State {
     }
 }
 
-// 땅파는 상태 -> 행동 상태로 변경
+// 행동 상태
 // 캐릭터가 현재 장착한 도구에 따라 애니메이션을 재생한다.
 class ActionState extends State {
     enter(scene, player) {
@@ -324,12 +326,24 @@ class ActionState extends State {
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
 
         }
-        // 물 뿌리개일 경우
+        // 수확일 경우
         else if (equipNumber === 1) {
 
-            let waterAnim = player.playAnimation('water', player.hairSprite);
-            // 필요하면 Anim.on('animationupdate', () => {}) 사용해서 애니메이션에 이벤트 리스너 등록
-            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(waterAnim));
+            let harvestAnim = player.playAnimation('do', player.hairSprite);
+
+            harvestAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 4) {
+                    player.isHarvesting = true;
+                    console.log("수확 애니메이션 재생중");
+                }
+            });
+            // 애니메이션 컴플리트가 안되네?
+            player.bodySprite.once('animationcomplete', (anim, frame) => {
+                player.isHarvesting = false;
+                console.log("수확 애니메이션 재생 끝");
+            });
+
+            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(harvestAnim));
         }
         // 도끼일 경우
         else if (equipNumber === 2) {
