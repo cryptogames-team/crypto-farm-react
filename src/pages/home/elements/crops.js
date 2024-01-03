@@ -80,7 +80,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         // 타이머 이벤트 추가
         // 주의 : callback 부분에 존재하지 않는 함수 등록해도 에러 발생 안됨.
         scene.time.addEvent({
-            delay: 4000, // 단위 : ms
+            delay: 1000, // 단위 : ms
             callback: this.grow1,
             callbackScope: this,
             loop: false
@@ -117,7 +117,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         // 호박 반 픽셀 왼쪽, 1픽셀 아래(-2, 8)
         if (this.name === 'pumpkin') {
-            console.log("호박 성장기 1 위치 조정");
+            //console.log("호박 성장기 1 위치 조정");
             // 타일의 이루는 픽셀의 크기는 4x4
             // 가로 길이가 홀수인 이미지는 2픽셀(반 픽셀) 만큼 빼면 밭 타일이랑 중앙에 위치됨.
             this.cropSprite.x = this.cropSprite.x - this.offsetX / 2;
@@ -125,7 +125,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         }
 
         scene.time.addEvent({
-            delay: 4000, // 단위 : ms
+            delay: 1000, // 단위 : ms
             callback: this.grow2,
             callbackScope: this,
             loop: false
@@ -150,24 +150,24 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         // 감자 1픽셀 아래
         if (this.name === 'potato') {
-            console.log("감자 성장기 2 위치 조정");
+            //console.log("감자 성장기 2 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 호박 1픽셀 왼쪽, 1픽셀 아래
         else if (this.name === 'pumpkin') {
-            console.log("호박 성장기 2 위치 조정");
+            //console.log("호박 성장기 2 위치 조정");
             this.cropSprite.x = this.cropSprite.x - this.offsetX;
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 양배추 1픽셀 아래
         else if (this.name === 'cabbage') {
-            console.log("양배추 성장기 2 위치 조정");
+            //console.log("양배추 성장기 2 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
 
 
         scene.time.addEvent({
-            delay: 4000, // 단위 : ms
+            delay: 1000, // 단위 : ms
             callback: this.growComplete,
             callbackScope: this,
             loop: false
@@ -190,18 +190,18 @@ export default class Crops extends Phaser.GameObjects.Container {
         // 수확기 이미지 위치 조정
         // 감자 반픽셀 오른쪽, 1픽셀 아래
         if (this.name === 'potato') {
-            console.log("감자 수확기 위치 조정");
+            //console.log("감자 수확기 위치 조정");
             this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 호박 1픽셀 아래
         else if (this.name === 'pumpkin') {
-            console.log("호박 수확기 위치 조정");
+            //console.log("호박 수확기 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 양배추 2픽셀 아래
         else if (this.name === 'cabbage') {
-            console.log("양배추 수확기 위치 조정");
+            //console.log("양배추 수확기 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
         }
 

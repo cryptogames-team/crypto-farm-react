@@ -334,13 +334,13 @@ class ActionState extends State {
             harvestAnim.on('animationupdate', (anim, frame) => {
                 if (frame.index === 4) {
                     player.isHarvesting = true;
-                    console.log("수확 애니메이션 재생중");
+                    //console.log("수확 애니메이션 재생중");
                 }
             });
             // 애니메이션 컴플리트가 안되네?
             player.bodySprite.once('animationcomplete', (anim, frame) => {
                 player.isHarvesting = false;
-                console.log("수확 애니메이션 재생 끝");
+                //console.log("수확 애니메이션 재생 끝");
             });
 
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(harvestAnim));
