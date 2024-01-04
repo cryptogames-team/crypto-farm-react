@@ -16,6 +16,8 @@ export default class Crops extends Phaser.GameObjects.Container {
 
     // 농작물 이름
     name = null;
+    // 농작물 제목 <- UI에 표시될 때 사용
+    title = null;
     // 농작물이 존재할 씬 객체
     scene;
 
@@ -30,11 +32,13 @@ export default class Crops extends Phaser.GameObjects.Container {
     // 처음엔 새싹 상태
     state = 'sprout';
 
-    constructor(scene, x, y, texture, seed) {
+    constructor(scene, x, y, texture, seed, title) {
         super(scene, x, y);
 
         this.name = seed;
         this.scene = scene;
+        this.title = title;
+
 
         //console.log("농작물 객체 생성 : " + this.name);
 
@@ -86,7 +90,6 @@ export default class Crops extends Phaser.GameObjects.Container {
             loop: false
         });
 
-        // 함수 연쇄 호출이 가능한가?
     }
 
     setInitialStage() {

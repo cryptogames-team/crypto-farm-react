@@ -113,13 +113,13 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
     }
 
     // 게임 캐릭터 씨앗 심는 동작 정의한 함수
-    plantSeed(scene, seed, plantTile){
+    plantSeed(scene, seed, title, plantTile){
 
             // 씨앗 심는 애니메이션이 애셋에 없어서 물 주는 애니메이션으로 대체
             let plantAnim = this.playAnimation('water', this.hairSprite);
             plantAnim.on('animationupdate', (anim, frame) => {
                 if (frame.index === 3) {
-                    scene.addSeed(seed, plantTile);
+                    scene.addSeed(seed, title, plantTile);
                 }
             });
             this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
@@ -365,7 +365,7 @@ class ActionState extends State {
             const plantTile = scene.getPlantTile();
 
             if (plantTile.properties.plantable){
-            player.plantSeed(scene, 'potato',plantTile);
+            player.plantSeed(scene, 'potato', '감자', plantTile);
             }else{
                 player.stateMachine.transition('idle');
             }
@@ -378,7 +378,7 @@ class ActionState extends State {
             const plantTile = scene.getPlantTile();
 
             if (plantTile.properties.plantable){
-            player.plantSeed(scene, 'carrot',plantTile);
+            player.plantSeed(scene, 'carrot', '당근', plantTile);
             }else{
                 player.stateMachine.transition('idle');
             }
@@ -391,7 +391,7 @@ class ActionState extends State {
             const plantTile = scene.getPlantTile();
 
             if (plantTile.properties.plantable){
-            player.plantSeed(scene, 'pumpkin',plantTile);
+            player.plantSeed(scene, 'pumpkin', '호박', plantTile);
             }else{
                 player.stateMachine.transition('idle');
             }
@@ -404,7 +404,7 @@ class ActionState extends State {
             const plantTile = scene.getPlantTile();
 
             if (plantTile.properties.plantable){
-            player.plantSeed(scene, 'cabbage',plantTile);
+            player.plantSeed(scene, 'cabbage', '양배추',plantTile);
             }else{
                 player.stateMachine.transition('idle');
             }

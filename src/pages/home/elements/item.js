@@ -12,7 +12,7 @@ export default class Item{
     // 아이템 텍스처 키 : 로드한 아이템 이미지 사용할 때 키로 사용함.
     imgKey;
     // 개수
-    amount = 1;
+    quantity;
     // 스택제한수 : 인벤토리 아이템 한 칸에 몇개까지 들어 갈 수 있는지
     // 스택이 불가능하 아이템들은 1개까지만 들어가고
     // 스택이 가능한 아이템들은 999개까지 들어간다.
@@ -32,6 +32,7 @@ export default class Item{
         this.title = title;
         this.imgKey = imgKey;
         this.stackLimit = stackLimit;
+        this.quantity = 1;
     }
 
 

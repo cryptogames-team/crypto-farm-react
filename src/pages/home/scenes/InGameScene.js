@@ -3,8 +3,7 @@ import PlayerObject from '../characters/player_object'
 import ItemSlot from '../ui/item_slot';
 import Crops from '../elements/crops';
 import Item from '../elements/item';
-import Auction from '../ui/auction';
-import Frame from '../ui/frame';
+import Inventory from '../ui/inventory';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -18,8 +17,6 @@ const layerScale = 4;
 // 실제 타일 크기에 맞게 설정해야 한다.
 const tileSize = 16 * layerScale;
 
-// 플레이어 인벤토리
-const inventory = [];
 
 // 게임에 사용할 아이템 데이터들 담는 배열
 const items = [];
@@ -59,6 +56,11 @@ export default class InGameScene extends Phaser.Scene {
 
     // 플레이어가 상호작용할 타일을 표시하는 UI 마커
     interTileMarker
+
+    // 인벤토리 객체
+    inventory;
+    // I 키 객체
+    inventoryKey;
 
     // 생성자가 왜 있지?
     constructor() {
@@ -192,6 +194,8 @@ export default class InGameScene extends Phaser.Scene {
 
         // 나가기 아이콘 exit_icon
         this.load.image("exit_icon", 'cancel.png');
+        // 인벤토리 아이콘
+        this.load.image('inven_icon', 'basket.png');
 
         // nine-slice 로드
         // 외부 박스
@@ -420,7 +424,7 @@ export default class InGameScene extends Phaser.Scene {
 
             // 퀵슬롯의 위치
             const slotX = rightX - (slotWidth * (quickSlotNumber - i));
-            const slotY = bottomY - slotHeight;
+            const slotY = bottomY - slotHeight + 2;
 
             const slotNumber = i + 1;
 
@@ -431,7 +435,7 @@ export default class InGameScene extends Phaser.Scene {
             const itemTitle = quickSlotItems[i].title;
 
             this.QuickSlots.push(new ItemSlot(this, slotX, slotY,
-                slotWidth, slotHeight, quickSlotItems[i], slotNumber));
+                slotWidth, slotHeight, 5, quickSlotItems[i], slotNumber));
         }
 
 
@@ -448,17 +452,19 @@ export default class InGameScene extends Phaser.Scene {
         this.equipMarker.setScrollFactor(0);
 
 
-        // 프레임 UI 추가
+        // 인벤토리 UI 추가
 
         // 크기
-/*         const frameWidth = 800;
-        const frameHeight = 400;
+        const invenWidth = 1200;
+        const invenHeight = 600;
 
         // UI 위치    
-        const frameX = this.cameras.main.width / 2 - frameWidth / 2;
-        const frameY = this.cameras.main.height / 2 - frameHeight / 2;      
-        this.frame =new Frame(this, frameX, frameY, 
-            frameWidth, frameHeight); */
+        const invenX = this.cameras.main.width / 2 - invenWidth / 2;
+        const invenY = this.cameras.main.height / 2 - invenHeight / 2;      
+        this.inventory = new Inventory(this, invenX, invenY, 
+            invenWidth, invenHeight);
+
+        this.inventory.disable();
 
         // 플레이어의 중앙 위치에서 바라보는 방향의 바로 앞 타일의 위치를 점으로 찍는다.
         /*         this.frontTilePoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
@@ -541,6 +547,7 @@ export default class InGameScene extends Phaser.Scene {
         this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+        this.inventoryKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
 
         // 키 입력 이벤트 리스너 등록
         // 1번 키
@@ -568,6 +575,13 @@ export default class InGameScene extends Phaser.Scene {
             debugGraphics.forEach((debugGraphic) => {
                 debugGraphic.visible = !debugGraphic.visible;
             });
+
+        });
+
+        // I키 누르면 인벤토리 Visible 토글
+        this.inventoryKey.on('down', () => {
+            // 삼항 연산자 사용한다.
+            this.inventory.visible ? this.inventory.disable() : this.inventory.enable();
 
         });
 
@@ -734,8 +748,9 @@ export default class InGameScene extends Phaser.Scene {
     }
     // 씬에 씨앗 이미지 추가 - 일단 감자만
     // seed : 심을 씨앗의 종류나 이름 넣기
+    // title : 심은 씨앗의 UI에 표시될 제목 
     // plantTile : 씨앗을 심을 타일
-    addSeed(seed, plantTile) {
+    addSeed(seed, title, plantTile) {
 
 
         // 씨앗을 심을 타일의 월드상 픽셀 위치 구하기
@@ -758,16 +773,12 @@ export default class InGameScene extends Phaser.Scene {
 
         //console.log("seedImgKey : " + seedImgKey);
 
-        // 밭 타일에 씨앗 이미지 추가
-        /*         this.add.image(plantX, plantY + 4, seedImgKey)
-                .setDepth(3).setScale(layerScale).setOrigin(0.5, 1); */
 
         // 농작물 게임 오브젝트 추가
         // 컨테이너 객체는 origin이 중앙임
-        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seed);
+        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seed, title);
 
         // 캐릭터와 농작물 간의 overlap 이벤트 설정
-        // create() 이후에 overlap 이벤트 설정해도 되나봄.
         this.physics.add.overlap(this.searchArea, crops, () => {
             /*             if(crops.state === 'harvest'){
                             console.log("검색 영역 안에 수확 가능한 농작물이 있음", crops.name);
@@ -776,31 +787,19 @@ export default class InGameScene extends Phaser.Scene {
 
             if (this.playerObject.isHarvesting === true && crops.state === 'harvest') {
                 //console.log("캐릭터 수확 성공", crops.name);
+
+                // 수확한 밭 타일을 구멍난 밭 타일로 변경한다.
+                const fieldTileX = this.interactTileX;
+                const fieldTileY = this.interactTileY;
+
+                // 구멍난 밭 타일 인덱스 1139
+                this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
+
+                const cropsImgKey = crops.name + '_05';
+                this.inventory.addItem(new Item('Crops', crops.name, crops.title, cropsImgKey));
+
+                // 씬에서 농작물 객체 제거
                 crops.harvest();
-
-                // 인벤토리 배열에 아이템 추가
-                // items는 사용안함
-
-                // 인벤토리 수확한 농작물이 있는지 확인하는 변수
-                let itemExist = false;
-
-                // 아이템 스택 기능 구현
-                // 인벤토리에 수확한 농작물이 있는지 확인한다.
-                // forEach()는 break 사용 불가
-                inventory.forEach(item => {
-                    if(item.name === crops.name){
-                        item.amount += 1;
-                        itemExist = true;
-                    }
-                });
-                // 인벤토리에 수확한 농작물이 없으면 농작물 아이템 객체를 생성해서 넣음.
-                if (itemExist === false){
-                // 농작물 아이템 객체 생성 후 인벤토리에 추가
-                // 타입, 이름, 이미지 키
-                inventory.push(new Item('Crops', crops.name, crops.name, crops.name + '_05'));
-                console.log("캐릭터 인벤토리에 " + crops.name + " 추가됨.", inventory);
-                }
-
             }
         });
 

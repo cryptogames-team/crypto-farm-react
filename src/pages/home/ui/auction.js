@@ -33,6 +33,11 @@ export default class Auction extends Frame {
             fontStyle: 'bold'
         });
 
+        this.headerLine = scene.add.image(7, 75, '9slice_tc')     
+        .setOrigin(0, 0)
+        .setDisplaySize(width+3-(this.edgeSize*2),this.edgeSize).setDepth(500);
+
+
         //나가기 X버튼
         this.exitIcon = scene.add.image(width-19, 19, "exit_icon");
         this.exitIcon.setOrigin(1,0).setDisplaySize(40, 40).setScrollFactor(0).setInteractive();

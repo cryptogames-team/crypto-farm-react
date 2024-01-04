@@ -17,6 +17,9 @@ export default class Frame extends Phaser.GameObjects.Container {
     bottomCenter;
     bottomRight;
 
+    // 테두리 크기
+    edgeSize;
+
     constructor(scene, x, y, width, height) {
 
         super(scene,x, y);
@@ -29,11 +32,11 @@ export default class Frame extends Phaser.GameObjects.Container {
 
         this.setDepth(100).setScrollFactor(0);
 
-        // 페이저는 HEX 색상 코드가 아니라 16진수 형식으로 받는다.
-
         
-        this.edge=[]
         const edgeSize=10;
+        // 자식 클래스에서도 테두리 크기 변수 사용할려고 멤버 변수화 함.
+        this.edgeSize = edgeSize;
+
         //테두리 추가
         // 사각형의 각 꼭짓점에 select box UI 추가
         this.topLeft = scene.add.image(0, 0, '9slice_tl')
@@ -78,18 +81,6 @@ export default class Frame extends Phaser.GameObjects.Container {
         .setOrigin(1, 1)
         .setDisplaySize(edgeSize,edgeSize);
 
-        this.headerLine = scene.add.image(7, 75, '9slice_tc')     
-        .setOrigin(0, 0)
-        .setDisplaySize(width+3-(edgeSize*2),edgeSize);
-
-
-        // 크립토 옥션 제목
-        this.headerText = scene.add.text(22, 22, "크립토 옥션", {
-            fontFamily: 'Arial',
-            font: '37px',
-            color: 'black',
-            fontStyle: 'bold'
-        });
 
 
         // 자식 게임 오브젝트들 컨테이너에 추가
