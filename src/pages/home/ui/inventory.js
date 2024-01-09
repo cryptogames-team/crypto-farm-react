@@ -17,22 +17,29 @@ export default class Inventory extends Frame {
     // UI 아이콘
     headerIcon;
 
-    gridRow = 2;
-    gridCol = 4;
+    // 아이템 슬롯 행, 열 개수
+    gridRow = 3;
+    gridCol = 5;
 
     // 인벤토리 크기
     size = this.gridRow * this.gridCol;
 
+    // 아이템 슬롯 배열
     itemSlots = [];
 
-    
+
     // 현재 마우스가 올려진 인벤토리 슬롯의 인덱스
-    hoverIndex;
+    hoverIndex = null;
     // 마우스로 드래그가 시작된 인벤토리 슬롯의 인덱스
     startIndex;
     // 마우스로 드래그가 끝난 인벤토리 슬롯의 인덱스
     endIndex;
 
+
+    // 디버그 영역 그리는 그래픽스 객체
+    graphics;
+
+    scene;
 
     constructor(scene, x, y, width, height) {
 
@@ -40,6 +47,8 @@ export default class Inventory extends Frame {
 
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
+
+        this.scene = scene;
 
         this.setDepth(1000).setScrollFactor(0);
 
@@ -75,14 +84,13 @@ export default class Inventory extends Frame {
         // 아이템 슬롯 추가
 
         const slotBGPad = 5;
+        // 슬롯의 크기
         const slotSize = 140;
-        const slotPadX = 40;
-        const slotPadY = 125;
-        const slotStartX = 0;
-        const slotStartY = 0;
+        // 아이템 슬롯 격자 배치의 시작 위치
+        const slotStartX = 40;
+        const slotStartY = 125;
         // 슬롯간 간격
-        const slotSpace = 0;
-        // (20, 90)
+        const slotSpacing = 0;
 
 
         // 2중 반복문을 사용하여 여러 줄 추가
@@ -93,9 +101,9 @@ export default class Inventory extends Frame {
 
                 // 인벤토리 종횡비 2:1
 
-                // 패딩 + 슬롯 길이 + 슬롯 간격
-                let slotX = slotPadX + slotSize * col + slotSpace * col;
-                let slotY = slotPadY + slotSize * row + slotSpace / 2 * row;
+                // 시작 위치 + 슬롯 길이 + 슬롯 간격
+                let slotX = slotStartX + slotSize * col + slotSpacing * col;
+                let slotY = slotStartY + slotSize * row + slotSpacing / 2 * row;
 
                 // 추가되는 아이템 슬롯의 인덱스 구하기
                 // 1차원 배열의 요소들을 격자 형태로 나열해놨으니 그거 염두해서 인덱스 구해야 됨.
@@ -104,170 +112,118 @@ export default class Inventory extends Frame {
 
 
 
-                const itemSlot = new ItemSlot(scene, slotX, slotY, slotSize, slotSize, slotBGPad
-                    , new Item('Crops', 'potato', '감자', 'potato_05'));
+                const itemSlot = new ItemSlot(scene, slotX, slotY, slotSize, slotSize, slotBGPad);
 
+
+                // new Item('Crops', 'potato', '감자', 'potato_05')
                 // 디버그 그래픽 표시 보기 위해서 뎁스 설정
-                itemSlot.setDepth(1001);
+                //itemSlot.setDepth(1001);
                 itemSlot.index = slotIndex;
 
-
-                // 아이템 슬롯에 상호작용 영역 설정하고 
-                // 아이템 이미지 드래그 가능하게 하고 드래그하면 아이템 이미지가 움직이게 하기
-                // 상호 작용 영역 명시적으로 설정
+                // 아이템 슬롯에 상호작용 영역 설정
                 itemSlot.setInteractive(new Phaser.Geom.Rectangle(70, 70, itemSlot.width, itemSlot.height),
                     Phaser.Geom.Rectangle.Contains);
 
-                // 상호작용 영역이 꼭 같아야하나...?
-                // 마우스 빠르게 움직이면 슬롯 인덱스를 못 가져온다.
-                // 이벤트 전파를 관리하는 방식 조정?
+                itemSlot.setDepth(1001).setScrollFactor(0);
 
-                // 여러 상호작용이 가능한 객체들이 겹쳐있을 때 가장 상위에 있는 객체에만 이벤트를 전달한다.
+                this.scene.input.enableDebug(itemSlot);
 
-                // 아이템 이미지 드래그 가능하게 변경
-                itemSlot.itemImg.setInteractive(new Phaser.Geom.Rectangle(-5, -5, itemSlot.itemImg.width * 2, itemSlot.itemImg.height * 2),
-                Phaser.Geom.Rectangle.Contains);
+                // Phaser에선 겹치는 개체들 중에서 가장 상위 객체(마지막에 추가된 객체)에만 
+                // 이벤트를 전달하는 기본동작을 가진다고 한다.
 
-                //itemSlot.itemImg.setInteractive();
-
-                scene.input.setDraggable(itemSlot.itemImg);
-                itemSlot.itemImg
-                .setDepth(1001)
-                .setScrollFactor(0);
-
-                // 상호작용 영역끼리 서로 간섭한다. 뎁스는 상관 없음.
+                // 아이템 슬롯 객체가 생성될 때 컨테이너가 만들어지고
+                // 거기에 자식 객체들이 생성되고 추가되는 방식이라서 그런가 봄.
 
 
-
-                //상호작용 영역 보기
-                scene.input.enableDebug(itemSlot);
-                scene.input.enableDebug(itemSlot.itemImg);
-                // 물리 바디 영역 보기
-                //scene.physics.add.existing(itemSlot);
-
-/*                 // Graphics 객체 생성
-                // 디버그 영역 표시
-                let graphics = scene.add.graphics();
-                graphics.lineStyle(1, 0xff0000, 1.0); // 빨간색 선으로 설정
-                // 게임 화면 상의 위치를 구하려면 인벤토리의 오리진에서 상대 위치를 더해야 한다.
-                console.log("인벤의 게임화면 위치", this.x, this.y);
-                // 아이템 슬롯 게임 화면 상의 원점 찍기
-                graphics.fillStyle(0xff0000);
-                graphics.fillCircle(this.x + itemSlot.x, this.y + itemSlot.y, 3).setDepth(1001).setScrollFactor(0);
-                // 실제 영역 보기
-                graphics.strokeRect(this.x + itemSlot.x, this.y + itemSlot.y, itemSlot.width, itemSlot.height)
-                    .setDepth(1001).setScrollFactor(0); */
-
-
-
-                // 마우스 오버
-                itemSlot.on('pointerover', () => {
+                // 아이템 슬롯 마우스 오버
+                itemSlot.on('pointerover', (pointer) => {
 
                     //console.log("아이템 슬롯 포인터 오버");
                     this.hoverIndex = itemSlot.index;
                     console.log("마우스 올린 슬롯의 인덱스 : ", this.hoverIndex);
 
                 });
-                // 마우스 오버 해제
-                itemSlot.on('pointerout', () => {
-                    //console.log("아이템 슬롯 포인터 아웃");
+                // 포인터 아웃
+                itemSlot.on('pointerout', (pointer) => {
+
+                    console.log("아이템 슬롯 포인터 아웃");
+                    this.hoverIndex = null;
+
                 });
 
-
-
-                // 아이템 이미지 드래그
-                itemSlot.itemImg.on("dragstart", (pointer) => {
-                    this.startIndex = this.hoverIndex;
-                    console.log("씬에서 드래그 시작 startIndex : " , this.startIndex);
-
-                    // 아이템 슬롯의 이벤트 실행
-                    itemSlot.emit('pointerover', pointer);
-                });
-fsdasdf
-                // 드래그 위치 점으로 찍기
-                let graphics = scene.add.graphics();
-                graphics.fillStyle(0xff0000);
-
-        // 디버그 텍스트 추가
-        // 텍스트 스타일 객체
-        const txtStyle = {
-            fontFamily: 'Arial',
-            fontSize: 30,
-            backgroundColor: '#000000',
-            align: 'center'
-        };
-
-
-            let dragText = scene.add.text(0, 0, 'dragXY', txtStyle);
-            dragText.setScrollFactor(0).setOrigin(0,0).setDepth(100);
-
-/*                 // 드래그 시작 이벤트
-                itemSlot.on('dragstart', function (pointer) {
-                    console.log("아이템 슬롯 드래그 시작");
-
-                    graphics.clear();
-                    graphics.fillStyle(0xff0000);
-                    graphics.fillCircle(pointer.x, pointer.y , 3).setDepth(1001).setScrollFactor(0);
+                // 슬롯 이미지 마우스 오버
+                /* itemSlot.itemImg.on('pointerover', (pointer) => {
+                    console.log("슬롯 이미지 포인터 오버");
+                    //itemSlot.emit('pointerover', pointer);
                 }); */
 
-                // 드래그 중 이벤트
+                // 슬롯 이미지 드래그
+                itemSlot.itemImg.on("dragstart", (pointer) => {
+                    let itemImg = itemSlot.itemImg;
+
+                    this.startIndex = this.hoverIndex;
+                    console.log("아이템 이미지 드래그 시작 startIndex : ", this.startIndex);
+
+                    // 일시적으로 컨테이너 자식에서 해제하고 depth 설정하기 
+                    itemSlot.remove(itemImg, false);
+                    itemSlot.setDepth(2000);
+
+                    // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
+                    itemImg.x = pointer.x;
+                    itemImg.y = pointer.y;
+
+                });
+
+                // 컨테이너 클래스의 자식 게임 오브젝트들은 setdepth에 영향 받지 않는다.
+                // bringToTop and sendToBack 사용
+
+
+                // 슬롯 이미지 드래그
                 // pointer : 현재 활성화된 포인터 객체 <- 마우스 포인터
                 // dragX : 드래그 중인 객체의 현재 x 위치
                 // dragY : 드래그 중인 객체의 현재 y 위치
                 // 절대 위치나 컨테이너에 있으면 상대 위치를 나타낸다.
-/*                 itemSlot.on('drag', function (pointer, dragX, dragY) {
-                    // 아이템의 위치를 마우스 포인터 위치로 업데이트
-                    console.log("아이템 슬롯 드래그 중");
+                itemSlot.itemImg.on("drag", (pointer, dragX, dragY) => {
 
-                    graphics.clear();
-                    graphics.fillStyle(0xff0000);
-                    graphics.fillCircle(dragX, dragY , 3).setDepth(1001);
-                    graphics.fillCircle(pointer.x, pointer.y , 3).setDepth(1001).setScrollFactor(0);
-                    dragText.setText('dragX : ' + dragX + '\n dragY : ' + dragY);
-
-                    // 그냥 아이템 이미지만 생각대로 움직이면 됨.
-                    // GameObject.getLocalPoint() : 전역 좌표를 게임 오브젝트의 로컬 좌표계료 변환한다.
+                    let itemImg = itemSlot.itemImg;
 
 
-                    // 마우스 포인터 위치(전역 좌표)를 아이템 오브젝트의 로컬 좌표계로 변환하기도 안됨.
-                    let localPoint = this.itemImg.getLocalPoint(pointer.x, pointer.y);
-                    dragText.setText('localX : ' + localPoint.x + '\n localY : ' + localPoint.y);
+                    // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
+                    console.log("아이템 이미지 드래그 중");
+                    itemImg.x = pointer.x;
+                    itemImg.y = pointer.y;
 
-                    //this.itemImg.x = localPoint.x;
-                    //this.itemImg.y = localPoint.y;
-
-
-                    //this.itemImg.x = dragX;
-                    //this.itemImg.y = dragY;
-
-                    //this.itemImg.x = pointer.x;
-                    //this.itemImg.y = pointer.y;
-
-
-                    //this.x = dragX;
-                    //this.y = dragY;
                 });
 
-                // 드래그 종료 이벤트
-                itemSlot.on('dragend', function (pointer) {
-                    // 드래그 종료 시 처리할 내용
-                    // 예: 아이템의 새 위치 결정, 위치 교환, 인벤토리 데이터 업데이트 등
-                    graphics.clear();
-                    console.log("아이템 슬롯 드래그 종료");
+                // 슬롯 이미지 드래그 종료
+                itemSlot.itemImg.on("dragend", (pointer) => {
+
+                    let itemImg = itemSlot.itemImg;
+
+                    this.endIndex = this.hoverIndex;
+                    console.log("아이템 이미지 드래그 끝 endIndex : " + this.endIndex);
+
+                    // 아이템 슬롯 안인지 밖인지 파악하기
+                    // hoverIndex가 undefined나 null이면 아이템 슬롯 바깥임
+                    // 아이템 슬롯 바깥으로 포인터가 나가면 hoverIndex = null이 되게 설정했음.
+
+                    // 원래 아이템 슬롯으로 복귀~
+                    itemSlot.add(itemImg);
+                    itemImg.x = itemSlot.width / 2;
+                    itemImg.y = itemSlot.height / 2;
+                });
 
 
-
-                }); */
                 this.add(itemSlot);
                 this.itemSlots.push(itemSlot);
             }
         }
 
-        // 드래깅
-/*         scene.input.on("dragstart", (pointer) => {
-            this.startIndex = this.hoverIndex;
-            console.log("씬에서 드래그 시작 startIndex : " , this.startIndex);
-        }); */
+
+
+        // 아이템 슬롯에 새 아이템이 추가될 때 마다 상호작용 설정한다.
+        this.itemSlots[0].setSlotItem(new Item('Crops', 'potato', '감자', 'potato_05'));
+        this.itemSlots[10].setSlotItem(new Item('Crops', 'potato', '감자', 'potato_05'));
 
     }
 
@@ -327,11 +283,51 @@ fsdasdf
 
     enable() {
         this.setVisible(true);
+        // setTopOnly : 여러 대화형 오브젝트가 겹쳐져 있는 경우 입력 이벤트를 어떻게 처리할 지 결정한다.
+        // true : 가장 상위의 오브젝트에 대해서만 입력 이벤트를 처리함.
+        // false : 겹쳐 있는 모든 대화형 오브젝트가 이벤트를 받을 수 있음.
+        this.scene.input.setTopOnly(false);
     }
     disable() {
-
         //console.log("인벤 닫음");
         this.setVisible(false);
+        this.scene.input.setTopOnly(true);
+    }
+
+    // 디버그 영역 표시
+    drawDebugArea(x, y, width, height) {
+
+        let graphics = this.graphics;
+        let scene = this.scene;
+
+        if (!graphics) {
+            graphics = scene.add.graphics();
+            //console.log("그래픽스 객체 생성");
+        }
+
+        // 빨간색 선
+        graphics.lineStyle(1, 0xff0000, 1.0);
+        // 디버그 영역을 빈 사각형으로 표시한다.
+        graphics.strokeRect(x, y, width, height)
+            .setDepth(1001).setScrollFactor(0);
+        // 점 찍고 싶으면 사용
+        /* graphics.fillStyle(0xff0000);
+        graphics.fillCircle(this.x + itemSlot.x, this.y + itemSlot.y, 3).setDepth(1001).setScrollFactor(0); */
+
+    }
+
+    drawDebugTxt() {
+        // 디버그 텍스트 추가
+        // 텍스트 스타일 객체
+        const txtStyle = {
+            fontFamily: 'Arial',
+            fontSize: 30,
+            backgroundColor: '#000000',
+            align: 'center'
+        };
+
+        let dragText = this.scene.add.text(0, 0, 'dragXY', txtStyle);
+        dragText.setScrollFactor(0).setOrigin(0, 0).setDepth(100);
     }
 
 

@@ -467,7 +467,7 @@ export default class InGameScene extends Phaser.Scene {
         const invenX = this.cameras.main.width / 2 - invenWidth / 2;
         const invenY = this.cameras.main.height / 2 - invenHeight / 2;
 
-        console.log("invenX, invenY : ", invenX, invenY);
+        //console.log("invenX, invenY : ", invenX, invenY);
 
         this.inventory = new Inventory(this, invenX, invenY,
             invenWidth, invenHeight);

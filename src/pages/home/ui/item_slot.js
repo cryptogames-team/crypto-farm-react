@@ -35,6 +35,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     // 아이템 슬롯의 인벤토리 내의 인덱스
     index;
 
+    scene;
+
     // 아이템과 슬롯 번호에 디폴트 매개변수 적용
     // 아이템 슬롯, 빈 아이템 슬롯, 퀵슬롯, 빈 퀵슬롯으로 사용 가능함
     constructor(scene, x, y, width, height, bgPad = 5,
@@ -57,6 +59,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 슬롯의 길이 높이 설정
         this.width = width;
         this.height = height;
+        this.scene = scene;
 
         //console.log("아이템 슬롯의 길이와 높이 : " , width, height);
 
@@ -81,7 +84,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             this.itemQuantity = item.quantity;
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
-            this.itemImg = scene.add.image(width / 2, height / 2, item.imgKey);
+            this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);
             this.itemImg.setDisplaySize(width / 2, height / 2)
             //.setSize(width / 2, height / 2);
 
@@ -93,14 +96,17 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             this.itemQuantity = undefined;
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
-            this.itemImg = scene.add.image(width / 2, height / 2, null);
+            this.itemImg = scene.add.sprite(width / 2, height / 2, null);
             this.itemImg.setDisplaySize(width / 2, height / 2)
-            //.setSize(width / 2, height / 2)
-            .setVisible(false);
-            
+                .setVisible(false);
+
+            // 스프라이트 오리진도 생각해야한다.
+            // 오리진은 시각 영역에 있나?
+
+            // setSize() 설정하면 바뀌던데
         }
 
-        
+
 
         let txtConfig = {
             fontFamily: 'Arial',
@@ -152,6 +158,27 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             .setDisplaySize(this.width / 2, this.height / 2);
         this.itemNameTxt.setText(item.title);
         this.itemStackTxt.setText(item.quantity);
+
+        // 아이템 이미지가 표시되니까 드래그 이벤트 설정
+
+        // 아이템 이미지 상호작용 영역 설정
+        this.itemImg.setInteractive(new Phaser.Geom.Rectangle(-this.itemImg.width / 2,
+            -this.itemImg.height / 2, this.itemImg.width * 2, this.itemImg.height * 2),
+            Phaser.Geom.Rectangle.Contains);
+
+        /* this.itemImg.setInteractive(); */
+
+        // 아이템 이미지 드래그 가능하게 설정
+        this.scene.input.setDraggable(this.itemImg);
+        this.itemImg.setScrollFactor(0)
+            .setDepth(1002);
+
+
+        //상호작용 영역 보기
+        this.scene.input.enableDebug(this);
+        this.scene.input.enableDebug(this.itemImg);
+
+
     }
 
     // 아이템 슬롯에서 빈 아이템 슬롯으로 변경한다.
