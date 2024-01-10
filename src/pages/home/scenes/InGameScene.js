@@ -424,8 +424,8 @@ export default class InGameScene extends Phaser.Scene {
         // Origin 기본값 (0,0) 으로 왼쪽 상단임
         // 게임 화면 오른쪽 하단에 위치시키는 코드
         for (let i = 0; i < quickSlotNumber; i++) {
-            const slotWidth = 150;
-            const slotHeight = 150;
+            const slotWidth = 100;
+            const slotHeight = 100;
 
             // 퀵슬롯의 위치
             const slotX = rightX - (slotWidth * (quickSlotNumber - i));
@@ -452,7 +452,7 @@ export default class InGameScene extends Phaser.Scene {
         // 사각형 그리기 시작 위치 왼쪽 상단
         this.equipMarker.strokeRect(this.QuickSlots[this.equipNumber].x + 3
             , this.QuickSlots[this.equipNumber].y + 3,
-            144, 144);
+            100 - 3 * 2, 100 - 3 * 2);
         this.equipMarker.setDepth(100);
         this.equipMarker.setScrollFactor(0);
 
@@ -460,8 +460,8 @@ export default class InGameScene extends Phaser.Scene {
         // 인벤토리 UI 추가
 
         // 크기
-        const invenWidth = 1200;
-        const invenHeight = 600;
+        const invenWidth = 1000;
+        const invenHeight = 500;
 
         // UI 위치 화면 중앙에 배치됨.
         const invenX = this.cameras.main.width / 2 - invenWidth / 2;
@@ -746,7 +746,7 @@ export default class InGameScene extends Phaser.Scene {
         this.equipMarker.lineStyle(4, 0xFF0000, 1);
         this.equipMarker.strokeRect(this.QuickSlots[equipNumber].x + 3
             , this.QuickSlots[equipNumber].y + 3,
-            144, 144);
+            100 - 3 * 2, 100 - 3 * 2);
     }
 
     // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
