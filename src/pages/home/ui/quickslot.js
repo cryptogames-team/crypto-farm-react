@@ -256,9 +256,13 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
 
         // 퀵슬롯 아이템 하드코딩으로 추가하기
         this.quickSlots[0].setSlotItem(new Item('Tool', 'shovel', '삽', 'shovel_icon'));
-        this.quickSlots[3].setSlotItem(new Item('Tool', 'harvest', '수확하기', 'harvest_icon'));
-        this.quickSlots[5].setSlotItem(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00'));
-
+        this.quickSlots[1].setSlotItem(new Item('Tool', 'harvest', '수확하기', 'harvest_icon'));
+        this.quickSlots[2].setSlotItem(new Item('Tool', 'axe', '도끼', 'axe_icon'));
+        this.quickSlots[3].setSlotItem(new Item('Tool', 'pickaxe', '곡괭이', 'pickaxe_icon'));
+        this.quickSlots[4].setSlotItem(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00'));
+        this.quickSlots[5].setSlotItem(new Item('Seed', 'carrot_seed', '당근 씨앗', 'carrot_00'));
+        this.quickSlots[6].setSlotItem(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
+        this.quickSlots[7].setSlotItem(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
 
         // 아이템 목록
         /* new Item('Tool', 'shovel', '삽', 'shovel_icon');

@@ -311,10 +311,14 @@ class ActionState extends State {
 
         // 씬에 퀵슬롯이 있음
 
+        if( equipItem === null){
+            player.stateMachine.transition('idle');
+            return;
+        }
+
+
+
         // 일단은 장착한 아이템 이름에 따라 동작 실행
-
-        
-
         // 삽일 경우 땅 파는 애니메이션 실행
         if (equipItem.name === 'shovel') {
 
@@ -354,20 +358,20 @@ class ActionState extends State {
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(harvestAnim));
         }
         // 도끼일 경우
-        else if (equipNumber === 2) {
+        else if (equipItem.name === 'axe') {
             
             let axeAnim = player.playAnimation('axe', player.hairSprite);
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(axeAnim));
         }
         // 곡괭이일 경우
-        else if (equipNumber === 3) {
+        else if (equipItem.name === 'pickaxe') {
 
             let mineAnim = player.playAnimation('mine', player.hairSprite);
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(mineAnim));
         }
         // 감자 씨앗인 경우
         // 나중에 씨앗 아이템을 장착한 경우로 변경하기
-        else if (equipNumber === 4) {
+        else if (equipItem.name === 'potato_seed') {
 
             // 씨앗을 심을 타일 구하기
             const plantTile = scene.getPlantTile();
@@ -380,7 +384,7 @@ class ActionState extends State {
 
         }
         // 당근 씨앗
-        else if (equipNumber === 5) {
+        else if (equipItem.name === 'carrot_seed') {
 
             // 씨앗을 심을 타일 구하기
             const plantTile = scene.getPlantTile();
@@ -393,7 +397,7 @@ class ActionState extends State {
 
         }
         // 호박 씨앗
-        else if (equipNumber === 6) {
+        else if (equipItem.name === 'pumpkin_seed') {
 
             // 씨앗을 심을 타일 구하기
             const plantTile = scene.getPlantTile();
@@ -406,7 +410,7 @@ class ActionState extends State {
 
         }
         // 양배추 씨앗
-        else if (equipNumber === 7) {
+        else if (equipItem.name === 'cabbage_seed') {
 
             // 씨앗을 심을 타일 구하기
             const plantTile = scene.getPlantTile();
