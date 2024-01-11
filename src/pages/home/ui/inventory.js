@@ -86,7 +86,6 @@ export default class Inventory extends Frame {
             .setScrollFactor(0).setInteractive().setDepth(1001);
         this.exitIcon.on('pointerup', (event) => this.disable());
 
-        //scene.input.enableDebug(this.exitIcon);
 
         this.add([this.headerLine, this.headerText, this.headerIcon, this.exitIcon]);
 
@@ -95,8 +94,7 @@ export default class Inventory extends Frame {
         this.setInteractive(new Phaser.Geom.Rectangle(this.width / 2, this.height / 2,
             this.width, this.height),
             Phaser.Geom.Rectangle.Contains);
-        // 디버그 영역 재설정
-        this.scene.input.enableDebug(this);
+
 
         // 겹치는 오브젝트 전체에게 이벤트 전송
         this.on('pointerover', (pointer) => {
@@ -155,7 +153,7 @@ export default class Inventory extends Frame {
 
                 // 디버그 그래픽 보기 위해서 뎁스 설정
                 itemSlot.setDepth(1001).setScrollFactor(0);
-                //this.scene.input.enableDebug(itemSlot);
+
 
                 // Phaser에선 겹치는 개체들 중에서 가장 상위 객체(마지막에 추가된 객체)에만 
                 // 이벤트를 전달하는 기본동작을 가진다고 한다.
@@ -396,8 +394,6 @@ export default class Inventory extends Frame {
         // 이미지의 상호작용 영역 크기를 아이템 슬롯에 맞춤.
         endSlot.setImgHitArea();
 
-        // 디버그 영역 재설정
-        this.scene.input.enableDebug(endSlot.itemImg);
 
 
         // 드래그 시작 슬롯의 아이템을 드랍 슬롯의 아이템으로 교체하기
@@ -411,8 +407,6 @@ export default class Inventory extends Frame {
 
         startSlot.setImgHitArea();
 
-        // 디버그 영역 재설정
-        this.scene.input.enableDebug(startSlot.itemImg);
 
 
     }
