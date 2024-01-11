@@ -155,9 +155,12 @@ function CharSelectWindow({accountName, onCharSelect}) {
     try {
       const response = await fetch(serverURL, {
         // 요청 방식
+        // API 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
+          // 액세스 토큰 값 보내기
+          //Authorization : JWTAcesstoken
         },
         // asset id
         // 서버에 없는 asset id 보내면 아무것도 안온다.

@@ -301,14 +301,22 @@ class ActionState extends State {
 
         const equipNumber = scene.equipNumber;
 
+        const equipItem = scene.quickSlotUI.quickSlots[equipNumber].item;
+
         // 캐릭터 이동 강제 정지
         player.body.setVelocity(0);
 
-        // 캐릭터가 현재 장착한 도구 확인
-        //console.log("캐릭터가 현재 장착한 도구 인덱스 " + scene.equipNumber);
+        console.log("캐릭터가 현재 장착중인 퀵슬롯 아이템 ",
+        equipItem);
+
+        // 씬에 퀵슬롯이 있음
+
+        // 일단은 장착한 아이템 이름에 따라 동작 실행
+
+        
 
         // 삽일 경우 땅 파는 애니메이션 실행
-        if (equipNumber === 0) {
+        if (equipItem.name === 'shovel') {
 
             let digAnim = player.playAnimation('dig', player.hairSprite);
             // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
@@ -327,7 +335,7 @@ class ActionState extends State {
 
         }
         // 수확일 경우
-        else if (equipNumber === 1) {
+        else if (equipItem.name === 'harvest') {
 
             let harvestAnim = player.playAnimation('do', player.hairSprite);
 

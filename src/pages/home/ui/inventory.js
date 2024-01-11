@@ -36,6 +36,15 @@ export default class Inventory extends Frame {
     endIndex;
 
 
+    // 인벤토리의 아이템을 퀵슬롯에 드래그 앤 드랍 한 거 알아내는 법
+    // 1. 인벤토리와 퀵슬롯은 같은 씬에 있음.
+    // 2. 퀵슬롯에 마우스 오버하면 그 퀵슬롯의 인덱스를 알아내줌.
+    // 인게임 씬에서 호버 인덱스 관리하기?
+    // 호버, 시작, 끝 인덱스를 객체 타입으로 구조 변경
+    // 어디의 몇번 인덱스라고 알려주면 됨.
+
+
+
     // 디버그 영역 그리는 그래픽스 객체
     graphics;
 
@@ -51,6 +60,7 @@ export default class Inventory extends Frame {
         this.scene = scene;
 
         this.setDepth(1000).setScrollFactor(0);
+        this.setSize(width, height);
 
         this.headerLine = scene.add.image(7, 75, '9slice_tc')
             .setOrigin(0, 0)
@@ -81,8 +91,31 @@ export default class Inventory extends Frame {
         this.add([this.headerLine, this.headerText, this.headerIcon, this.exitIcon]);
 
 
-        // 아이템 슬롯 추가
+        // 인벤토리에 상호작용 영역 설정하기
+        this.setInteractive(new Phaser.Geom.Rectangle(this.width / 2, this.height / 2,
+            this.width, this.height),
+            Phaser.Geom.Rectangle.Contains);
+        // 디버그 영역 재설정
+        this.scene.input.enableDebug(this);
 
+        // 겹치는 오브젝트 전체에게 이벤트 전송
+        this.on('pointerover', (pointer) => {
+            scene.input.setTopOnly(false);
+            console.log("겹치는 오브젝트들 상호작용 가능함.");
+        });
+
+        // 퀵슬롯 컨테이너에서 마우스 해제하면 겹치는 대화형 오브젝트 중 가장 상위한테만 
+        // 이벤트 전송
+        this.on('pointerout', (pointer) => {
+
+            if(!scene.isDragging){
+            scene.input.setTopOnly(true);
+            console.log("겹치는 오브젝트들 상호작용 불가능함.");
+            }
+        });
+
+
+        // 아이템 슬롯 추가
         const slotBGPad = 5;
         // 슬롯의 크기
         const slotSize = 100;
@@ -139,6 +172,10 @@ export default class Inventory extends Frame {
                     this.hoverIndex = itemSlot.index;
                     //console.log("마우스 올린 슬롯의 인덱스 : ", this.hoverIndex);
 
+                    scene.hoverSlot = itemSlot;
+
+                    scene.input.setTopOnly(false);
+
                 });
                 // 포인터 아웃
                 itemSlot.on('pointerout', (pointer) => {
@@ -146,12 +183,26 @@ export default class Inventory extends Frame {
                     //console.log("아이템 슬롯 포인터 아웃");
                     this.hoverIndex = null;
 
+                    scene.hoverSlot = null;
+
                 });
 
                 // 아이템 슬롯 이미지 이벤트 추가
+                itemSlot.itemImg.on('pointerover', (pointer) => {
+
+                    scene.input.setTopOnly(false);
+                    //console.log("겹치는 오브젝트들 상호작용 가능함.");
+                });
+
+
+
+
                 // 슬롯 이미지 드래그
                 itemSlot.itemImg.on("dragstart", (pointer) => {
                     let itemImg = itemSlot.itemImg;
+
+                    // 객체 참조 조심
+                    scene.startSlot = scene.hoverSlot;
 
                     this.startIndex = this.hoverIndex;
                     console.log("아이템 이미지 드래그 시작 startIndex : ", this.startIndex);
@@ -161,11 +212,16 @@ export default class Inventory extends Frame {
                     itemSlot.remove(itemImg, false);
                     itemImg.setDepth(2000);
 
+                    
+                    itemSlot.itemNameTxt.setVisible(false);
+                    itemSlot.itemStackTxt.setVisible(false);
 
 
                     // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
                     itemImg.x = pointer.x;
                     itemImg.y = pointer.y;
+
+                    scene.isDragging = true;
 
                 });
 
@@ -193,6 +249,34 @@ export default class Inventory extends Frame {
 
                     this.endIndex = this.hoverIndex;
                     console.log("아이템 이미지 드래그 끝 endIndex : " + this.endIndex);
+
+                    // 드랍한 슬롯의 정보
+                    scene.endSlot = scene.hoverSlot;
+
+                    // 아이템 슬롯에 드랍했는지 확인하기
+                    if(scene.endSlot){
+                    console.log("드랍한 슬롯의 정보 : " , scene.endSlot.type, scene.endSlot.index);
+
+                    // 퀵슬롯에 아이템 옮기기 구현
+                    if( scene.endSlot.type === 1){
+
+
+                        if( scene.endSlot.item){
+                            console.log("퀵슬롯에 인벤 아이템 넣음");
+
+                            this.swapItem(scene.startSlot, scene.endSlot);
+                        }
+                        else{
+                            console.log("빈 퀵슬롯에 인벤 아이템 넣음");
+
+
+                            // 아이템 객체 참조만 정확하게 할당하면 됨.
+                            scene.endSlot.setSlotItem(scene.startSlot.item);
+                            scene.startSlot.removeItem();
+                        }
+                    }
+                }
+
 
                     // 아이템 슬롯 안인지 밖인지 파악하기
                     // hoverIndex가 null이면 아이템 슬롯 바깥임
@@ -252,11 +336,16 @@ export default class Inventory extends Frame {
                         this.returnImg(itemSlot, itemImg);
                     }
 
+                    itemSlot.itemNameTxt.setVisible(true);
+                    itemSlot.itemStackTxt.setVisible(true);
+
                 });
 
 
                 this.add(itemSlot);
                 this.itemSlots.push(itemSlot);
+
+                scene.isDragging = false;
             }
         }
 
@@ -388,12 +477,12 @@ export default class Inventory extends Frame {
         // setTopOnly : 여러 대화형 오브젝트가 겹쳐져 있는 경우 입력 이벤트를 어떻게 처리할 지 결정한다.
         // true : 가장 상위의 오브젝트에 대해서만 입력 이벤트를 처리함.
         // false : 겹쳐 있는 모든 대화형 오브젝트가 이벤트를 받을 수 있음.
-        this.scene.input.setTopOnly(false);
+        //this.scene.input.setTopOnly(false);
     }
     disable() {
         //console.log("인벤 닫음");
         this.setVisible(false);
-        this.scene.input.setTopOnly(true);
+        //this.scene.input.setTopOnly(true);
     }
 
     // 디버그 영역 표시

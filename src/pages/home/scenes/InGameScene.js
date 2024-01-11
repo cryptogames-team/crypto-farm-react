@@ -4,6 +4,7 @@ import ItemSlot from '../ui/item_slot';
 import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
+import QuickSlot from '../ui/quickslot';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -62,10 +63,21 @@ export default class InGameScene extends Phaser.Scene {
     // I 키 객체
     inventoryKey;
 
+
+    // 현재 마우스가 올려진 슬롯
+    hoverSlot = null;
+    startSlot;
+    endSlot;
+
+    // 드래그 상태 추적
+    isDragging = false;
+
     // 생성자가 왜 있지?
     // 씬 등록하는건가?
     constructor() {
         super('InGameScene');
+
+        //console.log(process.env.HOST);
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -423,7 +435,7 @@ export default class InGameScene extends Phaser.Scene {
         // 퀵슬롯 UI 생성 컨테이너 클래스는 Origin 설정 불가능함.
         // Origin 기본값 (0,0) 으로 왼쪽 상단임
         // 게임 화면 오른쪽 하단에 위치시키는 코드
-        for (let i = 0; i < quickSlotNumber; i++) {
+        /* for (let i = 0; i < quickSlotNumber; i++) {
             const slotWidth = 100;
             const slotHeight = 100;
 
@@ -433,29 +445,28 @@ export default class InGameScene extends Phaser.Scene {
 
             const slotNumber = i + 1;
 
-            /*             const iconKey = this.iconLoadConfigs[i].key;
-                        const itemTitle = this.iconLoadConfigs[i].title; */
-
             const iconKey = quickSlotItems[i].imgKey;
             const itemTitle = quickSlotItems[i].title;
 
             this.QuickSlots.push(new ItemSlot(this, slotX, slotY,
                 slotWidth, slotHeight, 5, quickSlotItems[i], slotNumber));
-        }
+        } */
 
+
+        // 퀵슬롯 클래스 객체 생성하고 추가
+        this.quickSlotUI = new QuickSlot(this, 0, 0);
+        // 화면 중앙 하단에 배치
+        this.quickSlotUI.x = this.cameras.main.width / 2 - this.quickSlotUI.width / 2;
+        this.quickSlotUI.y = this.cameras.main.height - this.quickSlotUI.height + 1;
+        
+        /* console.log("퀵슬롯 컨테이너의 길이와 크기", this.quickSlotUI.width, this.quickSlotUI.height)
+        console.log("퀵슬롯 컨테이너의 display 길이와 크기", 
+        this.quickSlotUI.displayWidth, this.quickSlotUI.displayHeight); */
 
         // 그래픽스 객체 추가
         // 현재 장착중인 도구 슬롯 표시하는 사각형 객체
         this.equipMarker = this.add.graphics();
-        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려진다.
-        this.equipMarker.lineStyle(4, 0xFF0000, 1);
-        // 사각형 그리기 시작 위치 왼쪽 상단
-        this.equipMarker.strokeRect(this.QuickSlots[this.equipNumber].x + 3
-            , this.QuickSlots[this.equipNumber].y + 3,
-            100 - 3 * 2, 100 - 3 * 2);
-        this.equipMarker.setDepth(100);
-        this.equipMarker.setScrollFactor(0);
-
+        this.equipQuickSlot(0);
 
         // 인벤토리 UI 추가
 
@@ -505,22 +516,6 @@ export default class InGameScene extends Phaser.Scene {
 /*         this.frontTilePoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
                 this.frontTilePoint.fillCircle(playerCenterX, playerCenterY, 1);
                 this.frontTilePoint.setDepth(100);  */
-
-
-        // 서로 겹치는 영역의 스프라이트       
-/*         var sprite1 = this.add.sprite(500, 500, 'carrot_05').setInteractive().setDepth(3);
-        sprite1.on('pointerdown', function() {
-            console.log('Sprite 1 클릭됨');
-            // 여기서 stopPropagation을 호출하지 않음
-        });
-    
-        // 두 번째 스프라이트 생성 (겹치는 위치에 배치)
-        var sprite2 = this.add.sprite(500, 500, 'carrot_05').setInteractive().setDepth(3);
-        sprite2.on('pointerdown', function() {
-            console.log('Sprite 2 클릭됨');
-            // 여기서 stopPropagation을 호출하지 않음
-        }); */
-        // Sprite 2 클릭됨만 뜨네
 
         // 충돌 영역에 대한 디버그 그래픽 설정
         // 각 레이어의 충돌 영역을 그린다.
@@ -617,7 +612,7 @@ export default class InGameScene extends Phaser.Scene {
         // 8번 키
         this.numberKeys.eight.on('down', (event) => this.equipQuickSlot(7));
         // 9번 키
-        //this.numberKeys.nine.on('down', (event) => this.equipQuickSlot(8));
+        this.numberKeys.nine.on('down', (event) => this.equipQuickSlot(8));
 
         // 'C' 키 입력 이벤트 리스너
         toggleDebugKey.on('down', function () {
@@ -741,12 +736,26 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
     equipQuickSlot(equipNumber) {
 
+        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려지는거 아닌가?
+        // 선 두께가 1 초과하면 두께 절반만큼 더하거나 빼야되나?
+        // 이걸 어떻게 설명하지
+
+        // 선 굵기가 굵어지면 top-left 기준점에서 어느 방향으로 굵어지는가
+        // 밖으로 굵어지나? 아니면 안밖으로 굵어지나
+
+
+        const lineWidth = 5;
+
+        const x = this.quickSlotUI.x + 100 * equipNumber + lineWidth / 2;
+        const y = this.quickSlotUI.y + lineWidth / 2;
+
+
         this.equipNumber = equipNumber;
         this.equipMarker.clear();
-        this.equipMarker.lineStyle(4, 0xFF0000, 1);
-        this.equipMarker.strokeRect(this.QuickSlots[equipNumber].x + 3
-            , this.QuickSlots[equipNumber].y + 3,
-            100 - 3 * 2, 100 - 3 * 2);
+        this.equipMarker.lineStyle(lineWidth, 0xFF0000, 1);
+        this.equipMarker.setDepth(100).setScrollFactor(0);
+        this.equipMarker.strokeRect(x , y, 100 - lineWidth , 100 - lineWidth );
+        
     }
 
     // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.

@@ -9,6 +9,9 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     slotNumberTxt;
     // 퀵슬롯으로 사용 시 슬롯 번호
     slotNumber;
+    // 아이템 슬롯의 타입 : 어느 UI의 슬롯인지 나타낸다.
+    // 기본값 0 - 인벤토리
+    type = 0;
 
     // 아이템 제목
     itemTitle;
@@ -126,11 +129,17 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             this.slotNumberTxt.setDepth(100).setOrigin(0);
             this.add(this.slotNumberTxt);
 
+
+            // 빈 퀵슬롯인지 확인
+            if(item){
             // 아이템 타입이 'Tool'이 아니면
             if (item.type !== 'Tool') {
                 // 아이템 수량 표시
                 this.itemStackTxt.setText('50');
             }
+            }
+            this.type = 1;
+
 
         }
 
