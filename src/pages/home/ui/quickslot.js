@@ -237,8 +237,7 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             this.width, this.height),
             Phaser.Geom.Rectangle.Contains);
 
-        // 퀵슬롯 컨테이너 상호작용 영역 표시하기
-        scene.input.enableDebug(this);
+
 
         // 개별 퀵슬롯이나 퀵슬롯 아이템 이미지에 가려진다.
         // setTopOnly(false) 트리거를 개별 퀵슬롯이나 퀵슬롯 아이템 이미지에 설정한다.

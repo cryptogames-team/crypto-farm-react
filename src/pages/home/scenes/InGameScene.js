@@ -5,6 +5,7 @@ import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
+import Auction from '../ui/auction';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -204,12 +205,26 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("selectbox_br", 'selectbox_br.png');
         this.load.image("selectbox_tl", 'selectbox_tl.png');
         this.load.image("selectbox_tr", 'selectbox_tr.png');
+        //골드 아이콘
+        this.load.image("goldIcon", 'goldIcon.svg');
+        this.load.image("searchBox", 'searchBox.png');
+
+        this.load.image("indicator", 'indicator.png');
+        this.load.image("next", 'arrow_right.png');
+        this.load.image("before", 'arrow_left.png');
 
         // 나가기 아이콘 exit_icon
         this.load.image("exit_icon", 'cancel.png');
         // 인벤토리 아이콘
         this.load.image('inven_icon', 'basket.png');
+        this.load.image("auction_exit", 'cancel.png');
 
+        //농작물 이미지
+        this.load.path = "assets/Crops/";
+        this.load.image("Potato Seed", 'seeds_generic.png');
+        this.load.image("Potato", 'potato_05.png');
+
+        
         // nine-slice 로드
         // 외부 박스
         this.load.path = "assets/UI/9slice_box_white/"
@@ -223,6 +238,16 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("9slice_bc", 'dt_box_9slice_bc.png');
         this.load.image("9slice_br", 'dt_box_9slice_br.png');
 
+        //lt 탭메뉴 용
+        this.load.image("tab_9slice_bc", 'lt_box_9slice_bc.png');
+        this.load.image("tab_9slice_bl", 'lt_box_9slice_bl.png');
+        this.load.image("tab_9slice_br", 'lt_box_9slice_br.png');
+        this.load.image("tab_9slice_c", 'lt_box_9slice_c.png');
+        this.load.image("tab_9slice_lc", 'lt_box_9slice_lc.png');
+        this.load.image("tab_9slice_rc", 'lt_box_9slice_rc.png');
+        this.load.image("tab_9slice_tc", 'lt_box_9slice_tc.png');
+        this.load.image("tab_9slice_tl", 'lt_box_9slice_tl.png');
+        this.load.image("tab_9slice_tr", 'lt_box_9slice_tr.png');
 
         // { key: "water_icon", url: "assets/UI/water.png" }
         this.load.path = "";
@@ -457,26 +482,16 @@ export default class InGameScene extends Phaser.Scene {
         quickSlotItems.push(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
         quickSlotItems.push(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
 
-        // 퀵슬롯 UI 생성 컨테이너 클래스는 Origin 설정 불가능함.
-        // Origin 기본값 (0,0) 으로 왼쪽 상단임
-        // 게임 화면 오른쪽 하단에 위치시키는 코드
-        /* for (let i = 0; i < quickSlotNumber; i++) {
-            const slotWidth = 100;
-            const slotHeight = 100;
+       //옥션 UI 생성
+        //크기
+        const auctionWidth = 1400;
+        const auctionHeight = 800;
 
-            // 퀵슬롯의 위치
-            const slotX = rightX - (slotWidth * (quickSlotNumber - i));
-            const slotY = bottomY - slotHeight + 2;
-
-            const slotNumber = i + 1;
-
-            const iconKey = quickSlotItems[i].imgKey;
-            const itemTitle = quickSlotItems[i].title;
-
-            this.QuickSlots.push(new ItemSlot(this, slotX, slotY,
-                slotWidth, slotHeight, 5, quickSlotItems[i], slotNumber));
-        } */
-
+        // 옥션의 위치    
+        const autionX = this.cameras.main.width/2-auctionWidth/2;
+        const autionY = this.cameras.main.height/2-auctionHeight/2;      
+        this.auction=new Auction(this, autionX, autionY, 
+            auctionWidth, auctionHeight); 
 
         // 퀵슬롯 클래스 객체 생성하고 추가
         this.quickSlotUI = new QuickSlot(this, 0, 0);
@@ -511,39 +526,8 @@ export default class InGameScene extends Phaser.Scene {
         this.inventory.disable();
 
 
-/*         // 그래픽스 객체로 컨테이너 영역 시각화
-        // 컨테이너 객체 추가해보기
-        let container = this.add.container(600, 600).setDepth(10).setSize(150, 150);
-        this.physics.world.enable(container);
-        //container.body.setSize(50, 50);
-        let sprite = this.add.sprite(0, 0, 'potato_05');
-        container.add(sprite);
-
-        container.body.setOffset(75,75);
-
-        // Graphics 객체 생성
-        let graphics = this.add.graphics();
-        graphics.lineStyle(2, 0xff0000, 1.0); // 빨간색 선으로 설정
-
-        // 컨테이너의 시각적 경계 계산
-        let bounds = container.getBounds();
-
-        // 경계 그리기
-        graphics.strokeRectShape(bounds).setDepth(200);
 
 
-        // 600, 600 위치에 점 찍기
-        let originPoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
-        originPoint.fillCircle(600, 600, 3).setDepth(20); */
-
-
-        // 플레이어의 중앙 위치에서 바라보는 방향의 바로 앞 타일의 위치를 점으로 찍는다.
-/*         this.frontTilePoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
-                this.frontTilePoint.fillCircle(playerCenterX, playerCenterY, 1);
-                this.frontTilePoint.setDepth(100);  */
-
-        // 충돌 영역에 대한 디버그 그래픽 설정
-        // 각 레이어의 충돌 영역을 그린다.
         const debugGraphics = [];
 
         // 타일 맵 생성

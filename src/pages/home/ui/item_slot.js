@@ -173,7 +173,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         // 아이템 이미지 상호작용 영역 보기
         this.itemImg.setDepth(1500);
-        this.scene.input.enableDebug(this.itemImg);
+
 
 
     }
