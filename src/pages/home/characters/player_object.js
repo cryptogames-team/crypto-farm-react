@@ -20,6 +20,8 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
     // 캐릭터가 바라보고 있는 방향
     playerDirection;
 
+    // 수확중인지 여부
+    isHarvesting = false;
 
     constructor(scene, x, y) {
         // 상속받은 부모 클래스의 생성자
@@ -43,7 +45,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         this.setDepth(10);
 
         // 컨테이너 클래스의 특징
-        // 컨테이너의 오리진은 변경이 불가능하다. 기본값 (0,0) - 왼쪽 상단
+        // 컨테이너의 오리진은 변경이 불가능하다. 기본값 (0.5,0.5) - 중앙 위치
         // 기본 body size는 64,64px
 
         // 컨테이너의 중앙값 구하기
@@ -108,6 +110,20 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         this.bodySprite.anims.play(state + '_body', true);
         // return 이 있는 이유 특정 애니메이션에 이벤트 리스너 달아야해서
         return this.handSprite.anims.play(state + '_hand', true);
+    }
+
+    // 게임 캐릭터 씨앗 심는 동작 정의한 함수
+    plantSeed(scene, seed, title, plantTile){
+
+            // 씨앗 심는 애니메이션이 애셋에 없어서 물 주는 애니메이션으로 대체
+            let plantAnim = this.playAnimation('water', this.hairSprite);
+            plantAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 3) {
+                    scene.addSeed(seed, title, plantTile);
+                }
+            });
+            this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
+
     }
 
     // 캐릭터 대기 상태로 전환
@@ -228,8 +244,8 @@ class MoveState extends State {
         }
 
 
-        const runSpeed = 250;
-        const walkSpeed = 150;
+        const runSpeed = 350;
+        const walkSpeed = 200;
         let currentSpeed = 0;
 
         // 달리는지 걷는지 체크
@@ -278,21 +294,29 @@ class MoveState extends State {
     }
 }
 
-// 땅파는 상태 -> 행동 상태로 변경
+// 행동 상태
 // 캐릭터가 현재 장착한 도구에 따라 애니메이션을 재생한다.
 class ActionState extends State {
     enter(scene, player) {
 
         const equipNumber = scene.equipNumber;
 
+        const equipItem = scene.quickSlotUI.quickSlots[equipNumber].item;
+
         // 캐릭터 이동 강제 정지
         player.body.setVelocity(0);
 
-        // 캐릭터가 현재 장착한 도구 확인
-        //console.log("캐릭터가 현재 장착한 도구 인덱스 " + scene.equipNumber);
+        console.log("캐릭터가 현재 장착중인 퀵슬롯 아이템 ",
+        equipItem);
+
+        // 씬에 퀵슬롯이 있음
+
+        // 일단은 장착한 아이템 이름에 따라 동작 실행
+
+        
 
         // 삽일 경우 땅 파는 애니메이션 실행
-        if (equipNumber === 0) {
+        if (equipItem.name === 'shovel') {
 
             let digAnim = player.playAnimation('dig', player.hairSprite);
             // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
@@ -310,12 +334,24 @@ class ActionState extends State {
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
 
         }
-        // 물 뿌리개일 경우
-        else if (equipNumber === 1) {
+        // 수확일 경우
+        else if (equipItem.name === 'harvest') {
 
-            let waterAnim = player.playAnimation('water', player.hairSprite);
-            // 필요하면 Anim.on('animationupdate', () => {}) 사용해서 애니메이션에 이벤트 리스너 등록
-            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(waterAnim));
+            let harvestAnim = player.playAnimation('do', player.hairSprite);
+
+            harvestAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 4) {
+                    player.isHarvesting = true;
+                    //console.log("수확 애니메이션 재생중");
+                }
+            });
+            // 애니메이션 컴플리트가 안되네?
+            player.bodySprite.once('animationcomplete', (anim, frame) => {
+                player.isHarvesting = false;
+                //console.log("수확 애니메이션 재생 끝");
+            });
+
+            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(harvestAnim));
         }
         // 도끼일 경우
         else if (equipNumber === 2) {
@@ -328,6 +364,62 @@ class ActionState extends State {
 
             let mineAnim = player.playAnimation('mine', player.hairSprite);
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(mineAnim));
+        }
+        // 감자 씨앗인 경우
+        // 나중에 씨앗 아이템을 장착한 경우로 변경하기
+        else if (equipNumber === 4) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'potato', '감자', plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        // 당근 씨앗
+        else if (equipNumber === 5) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'carrot', '당근', plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        // 호박 씨앗
+        else if (equipNumber === 6) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'pumpkin', '호박', plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        // 양배추 씨앗
+        else if (equipNumber === 7) {
+
+            // 씨앗을 심을 타일 구하기
+            const plantTile = scene.getPlantTile();
+
+            if (plantTile.properties.plantable){
+            player.plantSeed(scene, 'cabbage', '양배추',plantTile);
+            }else{
+                player.stateMachine.transition('idle');
+            }
+
+        }
+        else{
+            player.stateMachine.transition('idle');
         }
 
     }

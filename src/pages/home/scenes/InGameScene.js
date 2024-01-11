@@ -1,8 +1,10 @@
 import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
-import QuickSlot from '../ui/quick_slot';
-import Auction from '../ui/auction';
-import Frame from '../ui/frame';
+import ItemSlot from '../ui/item_slot';
+import Crops from '../elements/crops';
+import Item from '../elements/item';
+import Inventory from '../ui/inventory';
+import QuickSlot from '../ui/quickslot';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -17,13 +19,15 @@ const layerScale = 4;
 const tileSize = 16 * layerScale;
 
 
+// 게임에 사용할 아이템 데이터들 담는 배열
+const items = [];
+
+
 
 export default class InGameScene extends Phaser.Scene {
 
-
-
-    // 플레이어 현재 위치한 타일의 인덱스
-    playerTileIndexText;
+    // 플레이어가 상호작용할 타일의 인덱스
+    interactTileIndexTxt;
     // 게임 캐릭터의 정보 - 캐릭터 외형, 레벨, 소지금등을 포함한다.
     characterInfo;
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
@@ -39,18 +43,41 @@ export default class InGameScene extends Phaser.Scene {
     marker;
     controls;
     shiftKey;
-    closeBracketKey;
-    // 플레이어가 현재 위치한 타일의 X,Y 좌표 위치?
-    playerTileX;
-    playerTileY;
+
+    // 플레이어가 상호작용할 타일의 위치
+    interactTileX;
+    interactTileY;
 
     // getMousePointerTile()에서 사용할 멤버 변수
     tileIndexText;
     mouseLocationText;
 
+    // 농작물 검색 영역
+    searchArea;
+
+    // 플레이어가 상호작용할 타일을 표시하는 UI 마커
+    interTileMarker
+
+    // 인벤토리 객체
+    inventory;
+    // I 키 객체
+    inventoryKey;
+
+
+    // 현재 마우스가 올려진 슬롯
+    hoverSlot = null;
+    startSlot;
+    endSlot;
+
+    // 드래그 상태 추적
+    isDragging = false;
+
     // 생성자가 왜 있지?
+    // 씬 등록하는건가?
     constructor() {
         super('InGameScene');
+
+        //console.log(process.env.HOST);
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -93,6 +120,7 @@ export default class InGameScene extends Phaser.Scene {
             hairPath.axe = 'AXE/longhair_axe_strip10.png';
             hairPath.water = 'WATERING/longhair_watering_strip5.png';
             hairPath.mine = 'MINING/longhair_mining_strip10.png';
+            hairPath.do = 'DOING/longhair_doing_strip8.png';
         } else if (this.characterInfo.name === 'curly') {
             hairPath.idle = 'IDLE/curlyhair_idle_strip9.png';
             hairPath.walk = 'WALKING/curlyhair_walk_strip8.png';
@@ -101,6 +129,7 @@ export default class InGameScene extends Phaser.Scene {
             hairPath.axe = 'AXE/curlyhair_axe_strip10.png';
             hairPath.water = 'WATERING/curlyhair_watering_strip5.png';
             hairPath.mine = 'MINING/curlyhair_mining_strip10.png';
+            hairPath.do = 'DOING/curlyhair_doing_strip8.png';
         }
         // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
         else if (this.characterInfo.name === 'bow' || this.characterInfo.name === undefined) {
@@ -111,6 +140,7 @@ export default class InGameScene extends Phaser.Scene {
             hairPath.axe = 'AXE/bowlhair_axe_strip10.png';
             hairPath.water = 'WATERING/bowlhair_watering_strip5.png';
             hairPath.mine = 'MINING/bowlhair_mining_strip10.png';
+            hairPath.do = 'DOING/bowlhair_doing_strip8.png';
         }
 
 
@@ -144,6 +174,11 @@ export default class InGameScene extends Phaser.Scene {
             { name: 'player_mine_hair', path: hairPath.mine },
             { name: 'player_mine_body', path: 'MINING/base_mining_strip10.png' },
             { name: 'player_mine_hand', path: 'MINING/tools_mining_strip10.png' },
+            // 행동 스프라이트 시트
+            { name: 'player_do_hair', path: hairPath.do },
+            { name: 'player_do_body', path: 'DOING/base_doing_strip8.png' },
+            { name: 'player_do_hand', path: 'DOING/tools_doing_strip8.png' },
+
         ];
 
         // 상대 경로 설정
@@ -170,32 +205,134 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("selectbox_tl", 'selectbox_tl.png');
         this.load.image("selectbox_tr", 'selectbox_tr.png');
 
-        //골드 아이콘
-        this.load.image("goldIcon", 'goldIcon.svg');
-        this.load.image("searchBox", 'searchBox.png');
-        //.load.bitmapFont("yeongdeokFont", "Yeongdeok Snow Crab.ttf", "Yeongdeok Snow Crab.png");
+        // 나가기 아이콘 exit_icon
+        this.load.image("exit_icon", 'cancel.png');
+        // 인벤토리 아이콘
+        this.load.image('inven_icon', 'basket.png');
 
-        this.load.image("indicator", 'indicator.png');
-        this.load.image("next", 'arrow_right.png');
-        this.load.image("before", 'arrow_left.png');
+        // nine-slice 로드
+        // 외부 박스
+        this.load.path = "assets/UI/9slice_box_white/"
+        this.load.image("9slice_tl", 'dt_box_9slice_tl.png');
+        this.load.image("9slice_tc", 'dt_box_9slice_tc.png');
+        this.load.image("9slice_tr", 'dt_box_9slice_tr.png');
+        this.load.image("9slice_lc", 'dt_box_9slice_lc.png');
+        this.load.image("9slice_rc", 'dt_box_9slice_rc.png');
+        this.load.image("9slice_c", 'dt_box_9slice_c.png');
+        this.load.image("9slice_bl", 'dt_box_9slice_bl.png');
+        this.load.image("9slice_bc", 'dt_box_9slice_bc.png');
+        this.load.image("9slice_br", 'dt_box_9slice_br.png');
+
+
+        // { key: "water_icon", url: "assets/UI/water.png" }
+        this.load.path = "";
         // 로드할 아이콘 이미지 정보를 담은 객체 배열
-        this.iconLoadConfigs = [
-            { key: "shovel_icon", url: "shovel.png" },
-            { key: "water_icon", url: "water.png" },
-            { key: "axe_icon", url: "axe.png" },
-            { key: "pickaxe_icon", url: "pickaxe.png" },
+        // 여기에 아이콘 제목을 넣어서 퀵슬롯에서 아이템 이름이 표시되게 해봄.
+        /*         this.iconLoadConfigs = [
+                    // 도구 아이콘들
+                    { title: '삽', key: "shovel_icon", url: "assets/UI/shovel.png" },
+                    { title: '수확하기', key: "harvest_icon", url: "assets/UI/hand_open_02.png" },
+                    { title: '도끼', key: "axe_icon", url: "assets/UI/axe.png" },
+                    { title: '곡괭이', key: "pickaxe_icon", url: "assets/UI/pickaxe.png" },
+                    // 씨앗 아이콘들
+                    { title: '감자 씨앗', key: "potato_icon", url: "assets/Elements/Crops/potato_00.png" },
+                    { title: '당근 씨앗', key: "carrot_icon", url: "assets/Elements/Crops/carrot_00.png" },
+                    { title: '호박 씨앗', key: "pumpkin_icon", url: "assets/Elements/Crops/pumpkin_00.png" },
+                    { title: '양배추 씨앗', key: "cabbage_icon", url: "assets/Elements/Crops/cabbage_00.png" },
+                ]; */
+        // 퀵슬롯에 사용할 아이콘들 로드
+        /*         this.iconLoadConfigs.forEach((iconLoadConfig) => {
+                    this.load.image(iconLoadConfig.key, iconLoadConfig.url);
+                }); */
+
+        // 씨앗 아이콘 -> 씨앗 아이템
+        // 도구 아이콘 -> 도구 아이템
+
+        // 농작물 아이템 정보 객체 배열
+        const cropsLoadPath = "assets/Elements/Crops/"
+        const cropsInfoConfigs = [
+            { type: 'Crops', name: 'potato', title: '감자', key: 'potato_05', url: "potato_05.png", stackLimit: 999, price: 5 },
+            { type: 'Crops', name: 'carrot', title: '당근', key: 'carrot_05', url: "carrot_05.png", stackLimit: 999, price: 10 },
+            { type: 'Crops', name: 'pumpkin', title: '호박', key: 'pumpkin_05', url: "pumpkin_05.png", stackLimit: 999, price: 15 },
+            { type: 'Crops', name: 'cabbage', title: '양배추', key: 'cabbage_05', url: "cabbage_05.png", stackLimit: 999, price: 45 },
+        ]
+
+        // 농작물 아이템 이미지 로드
+        this.load.path = cropsLoadPath;
+        cropsInfoConfigs.forEach((itemInfoConfig) => {
+            this.load.image(itemInfoConfig.key, itemInfoConfig.url);
+        });
+
+        // 씨앗 아이템 정보 객체 배열
+        const seedLoadPath = "assets/Elements/Crops/"
+        const seedInfoConfigs = [
+            { type: 'Seed', name: 'potato_seed', title: '감자 씨앗', key: 'potato_00', url: "potato_00.png", stackLimit: 999, price: 2 },
+            { type: 'Seed', name: 'carrot_seed', title: '당근 씨앗', key: 'carrot_00', url: "carrot_00.png", stackLimit: 999, price: 4 },
+            { type: 'Seed', name: 'pumpkin_seed', title: '호박 씨앗', key: 'pumpkin_00', url: "pumpkin_00.png", stackLimit: 999, price: 8 },
+            { type: 'Seed', name: 'cabbage_seed', title: '양배추 씨앗', key: 'cabbage_00', url: "cabbage_00.png", stackLimit: 999, price: 16 },
         ];
-        // 도구 아이콘들 로드
-        this.iconLoadConfigs.forEach((iconLoadConfig) => {
-            this.load.image(iconLoadConfig.key, iconLoadConfig.url);
-        })
-        this.load.image("auction_exit", 'cancel.png');
 
-        //농작물 이미지
-        this.load.path = "assets/Crops/";
-        this.load.image("Potato Seed", 'seeds_generic.png');
-        this.load.image("Potato", 'potato_05.png');
+        // 씨앗 아이템 이미지 로드
+        this.load.path = seedLoadPath;
+        seedInfoConfigs.forEach((itemInfoConfig) => {
+            this.load.image(itemInfoConfig.key, itemInfoConfig.url);
+        });
 
+        // 도구 아이템 정보 객체 배열
+        const toolLoadPath = "assets/UI/"
+        this.toolInfoConfigs = [
+            { type: 'Tool', name: 'shovel', title: '삽', key: 'shovel_icon', url: toolLoadPath + "shovel.png", stackLimit: 1, price: 2 },
+            { type: 'Tool', name: 'harvest', title: '수확하기', key: 'harvest_icon', url: toolLoadPath + "hand_open_02.png", stackLimit: 1, price: 4 },
+            { type: 'Tool', name: 'axe', title: '도끼', key: 'axe_icon', url: toolLoadPath + "axe.png", stackLimit: 1, price: 8 },
+            { type: 'Tool', name: 'pickaxe', title: '곡괭이', key: 'pickaxe_icon', url: toolLoadPath + "pickaxe.png", stackLimit: 1, price: 16 },
+        ];
+
+        // 도구 아이템 이미지 로드
+        this.load.path = "";
+        this.toolInfoConfigs.forEach((itemInfoConfig) => {
+            this.load.image(itemInfoConfig.key, itemInfoConfig.url);
+        });
+
+
+        // 아이템 정보 객체 배열
+        // 각 타입의 아이템 정보 배열들을 전부 저장한다.
+        const itemInfoConfigs = [];
+        itemInfoConfigs.push(cropsInfoConfigs, seedInfoConfigs, this.toolInfoConfigs);
+
+
+        //console.log("전체 아이템 정보 객체 배열", itemInfoConfigs);
+
+        // 농작물 이미지 로드
+        this.load.path = "assets/Elements/Crops/"
+        // 감자 이미지
+        // 새싹
+        this.load.image('potato_01', "potato_01.png");
+        // 성장기
+        this.load.image('potato_02', "potato_02.png");
+        this.load.image('potato_03', "potato_03.png");
+        // 수확기
+        this.load.image('potato_04', "potato_04.png");
+        // 열매 
+        this.load.image('potato_05', "potato_05.png");
+        // 당근
+        this.load.image('carrot_01', "carrot_01.png");
+        this.load.image('carrot_02', "carrot_02.png");
+        this.load.image('carrot_03', "carrot_03.png");
+        this.load.image('carrot_04', "carrot_04.png");
+        this.load.image('carrot_05', "carrot_05.png");
+        // 호박
+        this.load.image('pumpkin_01', "pumpkin_01.png");
+        this.load.image('pumpkin_02', "pumpkin_02.png");
+        this.load.image('pumpkin_03', "pumpkin_03.png");
+        this.load.image('pumpkin_04', "pumpkin_04.png");
+        this.load.image('pumpkin_05', "pumpkin_05.png");
+
+        // 양배추
+        this.load.image('cabbage_01', "cabbage_01.png");
+        this.load.image('cabbage_02', "cabbage_02.png");
+        this.load.image('cabbage_03', "cabbage_03.png");
+        this.load.image('cabbage_04', "cabbage_04.png");
+        this.load.image('cabbage_05', "cabbage_05.png");
 
 
         //dt frame 용
@@ -266,7 +403,13 @@ export default class InGameScene extends Phaser.Scene {
             { key: 'mine_hair', frames: this.anims.generateFrameNumbers('player_mine_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
             { key: 'mine_body', frames: this.anims.generateFrameNumbers('player_mine_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
             { key: 'mine_hand', frames: this.anims.generateFrameNumbers('player_mine_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
+            // 행동 애니메이션 8 프레임
+            { key: 'do_hair', frames: this.anims.generateFrameNumbers('player_do_hair', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+            { key: 'do_body', frames: this.anims.generateFrameNumbers('player_do_body', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+            { key: 'do_hand', frames: this.anims.generateFrameNumbers('player_do_hand', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
         ];
+
+
 
 
         // 스프라이트 로더 클래스에 애니메이션 정보 전달해서 씬에서 애니메이션 생성하기
@@ -276,57 +419,128 @@ export default class InGameScene extends Phaser.Scene {
         // 컨테이너 클래스의 오리진은 변경이 불가능하다.
         this.playerObject = new PlayerObject(this, 500, 600);
 
+        // 플레이어 캐릭터 디버그 표시 해제
+        this.playerObject.body.debugShowBody = false;
+        this.playerObject.body.debugShowVelocity = false;
+
+        // 플레이어가 상호작용할 타일 안에 있는 농작물을 검색하는 물리 객체
+        // 스프라이트 키에 null 넣으면 이미지가 표시되지 않음.
+        // setSize() 이거 좀 귀찮은 메소드네...
+        this.searchArea = this.physics.add.sprite(500, 500, null);
+        this.searchArea.setDisplaySize(tileSize, tileSize).setOrigin(0, 0);
+        this.searchArea.body.debugShowBody = false;
+
+        // setSize() 하니까 갑자기 물리 바디 오리진이 0,0에서 0.5, 0.5가 됨.
+
+
         // 플레이어 캐릭터의 중앙값 구하기
         // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
         const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
         // 퀵슬롯 UI 생성 코드
-        // 퀵슬롯 UI 객체 배열
+        // 생성된 퀵슬롯 UI 객체들을 담을 배열
         this.QuickSlots = [];
         // 퀵슬롯의 개수
-        const quickSlotNumber = 4;
+        const quickSlotNumber = 8;
+
+        // 퀵슬롯에 들어가는 아이템 담는 배열
+        const quickSlotItems = [];
+
+        quickSlotItems.push(new Item('Tool', 'shovel', '삽', 'shovel_icon'));
+        quickSlotItems.push(new Item('Tool', 'harvest', '수확하기', 'harvest_icon'));
+        quickSlotItems.push(new Item('Tool', 'axe', '도끼', 'axe_icon'));
+        quickSlotItems.push(new Item('Tool', 'pickaxe', '곡괭이', 'pickaxe_icon'));
+
+        quickSlotItems.push(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00'));
+        quickSlotItems.push(new Item('Seed', 'carrot_seed', '당근 씨앗', 'carrot_00'));
+        quickSlotItems.push(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
+        quickSlotItems.push(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
 
         // 퀵슬롯 UI 생성 컨테이너 클래스는 Origin 설정 불가능함.
         // Origin 기본값 (0,0) 으로 왼쪽 상단임
         // 게임 화면 오른쪽 하단에 위치시키는 코드
-        for (let i = 0; i < quickSlotNumber; i++) {
-            const slotWidth = 150;
-            const slotHeight = 150;
+        /* for (let i = 0; i < quickSlotNumber; i++) {
+            const slotWidth = 100;
+            const slotHeight = 100;
 
             // 퀵슬롯의 위치
             const slotX = rightX - (slotWidth * (quickSlotNumber - i));
-            const slotY = bottomY - slotHeight;
-            
+            const slotY = bottomY - slotHeight + 2;
+
             const slotNumber = i + 1;
-            const iconKey = this.iconLoadConfigs[i].key;        
-            const quickSlot=new QuickSlot(this, slotX, slotY, 
-                slotWidth, slotHeight, slotNumber, iconKey);
+
+            const iconKey = quickSlotItems[i].imgKey;
+            const itemTitle = quickSlotItems[i].title;
+
+            this.QuickSlots.push(new ItemSlot(this, slotX, slotY,
+                slotWidth, slotHeight, 5, quickSlotItems[i], slotNumber));
+        } */
+
+
+        // 퀵슬롯 클래스 객체 생성하고 추가
+        this.quickSlotUI = new QuickSlot(this, 0, 0);
+        // 화면 중앙 하단에 배치
+        this.quickSlotUI.x = this.cameras.main.width / 2 - this.quickSlotUI.width / 2;
+        this.quickSlotUI.y = this.cameras.main.height - this.quickSlotUI.height + 1;
         
-            this.QuickSlots.push(quickSlot);
-            quickSlot.toolIcon.setInteractive()
-            quickSlot.toolIcon.on('pointerup', (event) => this.equipQuickSlot(i));
-             
-        }
-        
+        /* console.log("퀵슬롯 컨테이너의 길이와 크기", this.quickSlotUI.width, this.quickSlotUI.height)
+        console.log("퀵슬롯 컨테이너의 display 길이와 크기", 
+        this.quickSlotUI.displayWidth, this.quickSlotUI.displayHeight); */
 
         // 그래픽스 객체 추가
         // 현재 장착중인 도구 슬롯 표시하는 사각형 객체
         this.equipMarker = this.add.graphics();
-        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려진다.
-        this.equipMarker.lineStyle(4, 0xFF0000, 1);
-        // 사각형 그리기 시작 위치 왼쪽 상단
-        this.equipMarker.strokeRect(this.QuickSlots[this.equipNumber].x + 3
-            , this.QuickSlots[this.equipNumber].y + 3,
-            144, 144);
-        this.equipMarker.setDepth(101);
-        this.equipMarker.setScrollFactor(0);
+        this.equipQuickSlot(0);
+
+        // 인벤토리 UI 추가
+
+        // 크기
+        const invenWidth = 1000;
+        const invenHeight = 500;
+
+        // UI 위치 화면 중앙에 배치됨.
+        const invenX = this.cameras.main.width / 2 - invenWidth / 2;
+        const invenY = this.cameras.main.height / 2 - invenHeight / 2;
+
+        //console.log("invenX, invenY : ", invenX, invenY);
+
+        this.inventory = new Inventory(this, invenX, invenY,
+            invenWidth, invenHeight);
+
+        this.inventory.disable();
+
+
+/*         // 그래픽스 객체로 컨테이너 영역 시각화
+        // 컨테이너 객체 추가해보기
+        let container = this.add.container(600, 600).setDepth(10).setSize(150, 150);
+        this.physics.world.enable(container);
+        //container.body.setSize(50, 50);
+        let sprite = this.add.sprite(0, 0, 'potato_05');
+        container.add(sprite);
+
+        container.body.setOffset(75,75);
+
+        // Graphics 객체 생성
+        let graphics = this.add.graphics();
+        graphics.lineStyle(2, 0xff0000, 1.0); // 빨간색 선으로 설정
+
+        // 컨테이너의 시각적 경계 계산
+        let bounds = container.getBounds();
+
+        // 경계 그리기
+        graphics.strokeRectShape(bounds).setDepth(200);
+
+
+        // 600, 600 위치에 점 찍기
+        let originPoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
+        originPoint.fillCircle(600, 600, 3).setDepth(20); */
+
 
         // 플레이어의 중앙 위치에서 바라보는 방향의 바로 앞 타일의 위치를 점으로 찍는다.
 /*         this.frontTilePoint = this.add.graphics({ fillStyle: { color: 0xff0000 } });
-        this.frontTilePoint.fillCircle(playerCenterX, playerCenterY, 1);
-        this.frontTilePoint.setDepth(100); */
-
+                this.frontTilePoint.fillCircle(playerCenterX, playerCenterY, 1);
+                this.frontTilePoint.setDepth(100);  */
 
         // 충돌 영역에 대한 디버그 그래픽 설정
         // 각 레이어의 충돌 영역을 그린다.
@@ -386,32 +600,48 @@ export default class InGameScene extends Phaser.Scene {
         // 키보드 키 입력 설정
         // 방향키, 쉬프트, 스페이스바 키 객체 생성
         this.cursorsKeys = this.input.keyboard.createCursorKeys();
-        // 숫자 키 객체 생성 1~4
+        // 숫자 키 객체 생성 1~5 나중에 9번까지
         this.numberKeys = this.input.keyboard.addKeys({
             'one': 'ONE',
             'two': 'TWO',
             'three': 'THREE',
-            'four': 'FOUR'
-        });        
-        
+            'four': 'FOUR',
+            'five': 'FIVE',
+            'six': 'SIX',
+            'seven': 'SEVEN',
+            'eight': 'EIGHT',
+            'nine': 'NINE',
+        });
 
         // addKeys() : 특정 키 또는 여러 키에 대한 Phaser Key 객체를 생성한다.
         this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+        this.inventoryKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
 
         //]키 경매장 UI오픈
         this.closeBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
 
         // 키 입력 이벤트 리스너 등록
-        // 1번키
+        // 1번 키
         this.numberKeys.one.on('down', (event) => this.equipQuickSlot(0));
-        // 2번키
+        // 2번 키
         this.numberKeys.two.on('down', (event) => this.equipQuickSlot(1));
-        // 3번키
+        // 3번 키
         this.numberKeys.three.on('down', (event) => this.equipQuickSlot(2));
-        // 4번키
+        // 4번 키
         this.numberKeys.four.on('down', (event) => this.equipQuickSlot(3));
+        // 5번 키
+        this.numberKeys.five.on('down', (event) => this.equipQuickSlot(4));
+        // 6번 키
+        this.numberKeys.six.on('down', (event) => this.equipQuickSlot(5));
+        // 7번 키
+        this.numberKeys.seven.on('down', (event) => this.equipQuickSlot(6));
+        // 8번 키
+        this.numberKeys.eight.on('down', (event) => this.equipQuickSlot(7));
+        // 9번 키
+        this.numberKeys.nine.on('down', (event) => this.equipQuickSlot(8));
+
         // 'C' 키 입력 이벤트 리스너
         toggleDebugKey.on('down', function () {
             // 디버그 그래픽 표시 상태 토글
@@ -421,13 +651,17 @@ export default class InGameScene extends Phaser.Scene {
 
         });
 
-        // 4번키
-        this.numberKeys.four.on('down', (event) => this.equipQuickSlot(3));
+        // I키 누르면 인벤토리 Visible 토글
+        this.inventoryKey.on('down', () => {
+            // 삼항 연산자 사용한다.
+            this.inventory.visible ? this.inventory.disable() : this.inventory.enable();
+
+        });
 
         // 게임 시작시 디버그 그래픽 숨기기
-        /*         debugGraphics.forEach((debugGraphic) => {
-                    debugGraphic.visible = false;  
-                }); */
+        debugGraphics.forEach((debugGraphic) => {
+            debugGraphic.visible = false;
+        });
 
 
         // 카메라 참조
@@ -443,39 +677,25 @@ export default class InGameScene extends Phaser.Scene {
         // 디버그 텍스트 추가
         // 텍스트 스타일 객체
         const txtStyle = {
-            fontFamily : 'Arial',
-            fontSize : 30,
+            fontFamily: 'Arial',
+            fontSize: 30,
             backgroundColor: '#000000',
             align: 'center'
         };
 
-        // 현재 플레이어가 위치한 타일의 인덱스 표시하고 화면 중앙 아래쪽에 배치한다.        
-        this.playerTileIndexText = this.add.text(centerX, bottomY, 'player tile index',txtStyle);
-        this.playerTileIndexText.setScrollFactor(0).setOrigin(0.5, 1).setDepth(100);
+        // 현재 플레이어가 위치한 타일의 인덱스 표시하고 화면 왼쪽 아래에 배치     
+        /* this.interactTileIndexTxt = this.add.text(0, bottomY, 'interact tile index', txtStyle);
+        this.interactTileIndexTxt.setScrollFactor(0).setOrigin(0, 1).setDepth(100);
+        
+        this.interactPropsTxt = this.add.text(centerX, 0, 'interact tile Properties', txtStyle);
+        this.interactPropsTxt.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100); */
 
         // 박스의 스케일과 뎁스
         const selectBoxScale = 2;
         const selectBoxDepth = 3;
 
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
-        this.frontTileMarker = new SelectBox(this, 550, 550 , tileSize , tileSize, selectBoxScale, selectBoxDepth);
-
-        
-
-        //옥션 UI 생성
-        //크기
-        const auctionWidth = 1400;
-        const auctionHeight = 800;
-
-        // 옥션의 위치    
-        const autionX = this.cameras.main.width/2-auctionWidth/2;
-        const autionY = this.cameras.main.height/2-auctionHeight/2;      
-        this.auction=new Auction(this, autionX, autionY, 
-            auctionWidth, auctionHeight);      
-        
-            
-            
-        
+        this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize, selectBoxScale, selectBoxDepth);
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -506,30 +726,38 @@ export default class InGameScene extends Phaser.Scene {
         }
 
         // 플레이어 중앙 위치의 바로 앞 타일의 위치를 찍는다.
-/*         this.frontTilePoint.clear();
-        this.frontTilePoint.fillCircle(pointX, playerCenterY, 2);
- */
-
+        /*         this.frontTilePoint.clear();
+                this.frontTilePoint.fillCircle(pointX, playerCenterY, 2);
+         */
+        // 캐릭터가 상호작용할 타일의 인덱스 구하기
         // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
-        // 캐릭터 중앙 위치가 기준점
-        const playerTileX = this.ingameMap.worldToTileX(pointX);
-        const playerTileY = this.ingameMap.worldToTileY(playerCenterY);
-        this.playerTileX = playerTileX;
-        this.playerTileY = playerTileY;
+        const interactTileX = this.ingameMap.worldToTileX(pointX);
+        const interactTileY = this.ingameMap.worldToTileY(playerCenterY);
+        this.interactTileX = interactTileX;
+        this.interactTileY = interactTileY;
 
-
+        const interactTile = this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1);
         // 구한 타일의 인덱스를 텍스트 표시 
-        this.playerTileIndexText.setText("PlayerTileIndex X : " + playerTileX +
-            "\nPlayerTileIndex Y : " + playerTileY);
+        /*         this.interactTileIndexTxt.setText("InteractTileIndex X : " + interactTileX +
+                    "\nInteractTileIndex Y : " + interactTileY); */
+
+        // 맵 바깥에는 타일이 없어서 null들어감.
+        /*         if (interactTile)
+                    // 상호작용할 타일의 프로퍼티 표시
+                    this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable); */
 
 
-        // 캐릭터 바로 앞 타일의 월드 상의 위치
-        const frontTileX = this.ingameMap.tileToWorldX(playerTileX);
-        const frontTileY = this.ingameMap.tileToWorldX(playerTileY);
+        // 캐릭터가 상호작용할 타일의 월드 상의 위치
+        const frontTileX = this.ingameMap.tileToWorldX(interactTileX);
+        const frontTileY = this.ingameMap.tileToWorldY(interactTileY);
 
-        // 상호작용 할 타일 마커 위치 업데이트
-        this.frontTileMarker.x = frontTileX;
-        this.frontTileMarker.y = frontTileY;
+        // 상호작용 할 타일 표시 UI 마커 위치 업데이트
+        this.interTileMarker.x = frontTileX;
+        this.interTileMarker.y = frontTileY;
+
+        // 검색 영역 위치도 업데이트
+        this.searchArea.x = frontTileX;
+        this.searchArea.y = frontTileY;
 
         //]키 눌렀는지 체크 경매장 UI열어줌.
         if (this.closeBracketKey.isDown)
@@ -542,30 +770,53 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
     equipQuickSlot(equipNumber) {
 
+        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려지는거 아닌가?
+        // 선 두께가 1 초과하면 두께 절반만큼 더하거나 빼야되나?
+        // 이걸 어떻게 설명하지
+
+        // 선 굵기가 굵어지면 top-left 기준점에서 어느 방향으로 굵어지는가
+        // 밖으로 굵어지나? 아니면 안밖으로 굵어지나
+
+
+        const lineWidth = 5;
+
+        const x = this.quickSlotUI.x + 100 * equipNumber + lineWidth / 2;
+        const y = this.quickSlotUI.y + lineWidth / 2;
+
+
         this.equipNumber = equipNumber;
         this.equipMarker.clear();
-        this.equipMarker.lineStyle(4, 0xFF0000, 1);
-        this.equipMarker.strokeRect(this.QuickSlots[equipNumber].x + 3
-            , this.QuickSlots[equipNumber].y + 3,
-            144, 144);
+        this.equipMarker.lineStyle(lineWidth, 0xFF0000, 1);
+        this.equipMarker.setDepth(100).setScrollFactor(0);
+        this.equipMarker.strokeRect(x , y, 100 - lineWidth , 100 - lineWidth );
+        
     }
 
     // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
     // 캐릭터 땅파기 애니메이션에 실행될 콜백 함수
     paintTiles() {
+
+        const interactTileX = this.interactTileX;
+        const interactTileY = this.interactTileY;
+        const ingameMap = this.ingameMap;
+
         // 타일 인덱스를 전달, 페이저 타일 인덱스는 1부터 시작한다.
         // 전체 레이어의 타일 변경
-        // 68 : 갈색 땅 타일 1011 : 밭 타일 -1 : 빈 타일 인덱스
-        this.ingameMap.putTileAt(68, this.playerTileX, this.playerTileY, true, 0);
-        this.ingameMap.putTileAt(1011, this.playerTileX, this.playerTileY, true, 1);
-        this.ingameMap.putTileAt(-1, this.playerTileX, this.playerTileY, true, 2);
+        // 68 : 갈색 땅 타일 819 : 밭 타일 -1 : 빈 타일 인덱스
+        ingameMap.putTileAt(68, interactTileX, interactTileY, true, 0);
+        ingameMap.putTileAt(819, interactTileX, interactTileY, true, 1);
+        ingameMap.putTileAt(-1, interactTileX, interactTileY, true, 2);
 
 
         // 변경한 레이어의 타일들을 배열에 넣음
         let tiles = [];
-        tiles.push(this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 0));
-        tiles.push(this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 1));
-        tiles.push(this.ingameMap.getTileAt(this.playerTileX, this.playerTileY, true, 2));
+        tiles.push(ingameMap.getTileAt(interactTileX, interactTileY, true, 0));
+        tiles.push(ingameMap.getTileAt(interactTileX, interactTileY, true, 1));
+        tiles.push(ingameMap.getTileAt(interactTileX, interactTileY, true, 2));
+
+
+        // 변경한 타일의 Ground 2 Layer의 프로퍼티를 수정하여 재배 가능한 타일이라고 나타내기
+        tiles[1].properties.plantable = true;
 
         // 각 레이어의 타일의 회전 제거
         tiles.forEach((tile) => {
@@ -579,6 +830,78 @@ export default class InGameScene extends Phaser.Scene {
         });
     }
 
+    // 씨앗을 심을 타일 구하기
+    getPlantTile() {
+        const interactTileX = this.interactTileX;
+        const interactTileY = this.interactTileY;
+
+        // 씨앗을 심을 타일
+        const plantTile = this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1);
+        return plantTile;
+    }
+    // 씬에 씨앗 이미지 추가 - 일단 감자만
+    // seed : 심을 씨앗의 종류나 이름 넣기
+    // title : 심은 씨앗의 UI에 표시될 제목 
+    // plantTile : 씨앗을 심을 타일
+    addSeed(seed, title, plantTile) {
+
+
+        // 씨앗을 심을 타일의 월드상 픽셀 위치 구하기
+        const plantTileX = this.ingameMap.tileToWorldX(plantTile.x);
+        const plantTileY = this.ingameMap.tileToWorldX(plantTile.y);
+
+        // 씨앗 이미지가 추가될 월드상의 위치
+        // 타일의 중앙 위치에 배치
+        const plantX = plantTileX + tileSize / 2;
+        const plantY = plantTileY + tileSize / 2;
+
+
+        // 지금 타일맵 레이어 스케일이 4니까 이미지 원래 크기의 4배하면 크기 비율이 맞음
+        // 위치 조정
+
+        // y축 위치를 1픽셀 만큼 내려야 함.
+        // 지금 맵 크기가 4배 커져있으니 총 4픽셀만큼 내려야된다.
+
+        const seedImgKey = seed + '_01';
+
+        //console.log("seedImgKey : " + seedImgKey);
+
+
+        // 농작물 게임 오브젝트 추가
+        // 컨테이너 객체는 origin이 중앙임
+        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seed, title);
+
+        crops.body.debugShowBody = false;
+
+        // 캐릭터와 농작물 간의 overlap 이벤트 설정
+        this.physics.add.overlap(this.searchArea, crops, () => {
+            /*             if(crops.state === 'harvest'){
+                            console.log("검색 영역 안에 수확 가능한 농작물이 있음", crops.name);
+                        } */
+            //console.log(this.playerObject.isHarvesting);
+
+            if (this.playerObject.isHarvesting === true && crops.state === 'harvest') {
+                //console.log("캐릭터 수확 성공", crops.name);
+
+                // 수확한 밭 타일을 구멍난 밭 타일로 변경한다.
+                const fieldTileX = this.interactTileX;
+                const fieldTileY = this.interactTileY;
+
+                // 구멍난 밭 타일 인덱스 1139
+                this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
+
+                const cropsImgKey = crops.name + '_05';
+                this.inventory.addItem(new Item('Crops', crops.name, crops.title, cropsImgKey));
+
+                // 씬에서 농작물 객체 제거
+                crops.harvest();
+            }
+        });
+
+        // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
+        plantTile.properties.plantable = false
+
+    }
 
     // 마우스 포인터가 위치한 타일의 픽셀 위치를 구하는 함수
     getMousePointerTile() {
@@ -680,23 +1003,26 @@ class SpriteLoader {
 
 // 플레이어가 상호작용할 타일을 표시하거나 선택한 아이템을 표시하는 UI 박스
 class SelectBox extends Phaser.GameObjects.Container {
-    
+
     topLeft;
     topRight;
     bottomLeft;
     bottomRight;
-    
+
     // scene : 박스 UI가 추가될 씬
     // x, y 박스 위치 시작점
     // width, height 박스의 길이와 높이
     // scale : 박스를 구성하는 UI들의 스케일
-    constructor(scene, x, y, width, height, scale, depth){
+    constructor(scene, x, y, width, height, scale, depth) {
         super(scene, x, y);
 
         scene.add.existing(this);
+        // 씬의 물리 시스템에 추가하여 물리적 상호작용을 가능하게 한다.
+        // 디버그용
+        //scene.physics.add.existing(this);
 
         this.setDepth(depth);
-        
+
         // 사각형의 각 꼭짓점에 select box UI 추가
         this.topLeft = scene.add.image(0, 0, 'selectbox_tl');
         this.topLeft.setOrigin(0, 0).setScale(scale);
@@ -711,10 +1037,9 @@ class SelectBox extends Phaser.GameObjects.Container {
         this.bottomRight.setOrigin(1, 1).setScale(scale);
 
 
-        this.add(this.topLeft);
-        this.add(this.topRight);
-        this.add(this.bottomLeft);
-        this.add(this.bottomRight);
+
+        this.add([this.topLeft, this.topRight, this.bottomLeft, this.bottomRight]);
+
     }
 gb
 }
