@@ -55,8 +55,8 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         // 도구 아이콘 추가하고 컨테이너에 중앙 배치
         this.toolIcon = scene.add.image(width / 2, height / 2, toolIcon);
         this.toolIcon.setDisplaySize(width * 0.75, height * 0.75);
-
-
+        this.toolIcon.setScrollFactor(0);
+        this.toolIcon.setSize(width / 2, height / 2);
 
         // 자식 게임 오브젝트들 컨테이너에 추가
         this.add([this.slotBackground,this.toolIcon,this.slotNumberTxt]);

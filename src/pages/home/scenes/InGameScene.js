@@ -1,6 +1,8 @@
 import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
 import QuickSlot from '../ui/quick_slot';
+import Auction from '../ui/auction';
+import Frame from '../ui/frame';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -37,7 +39,7 @@ export default class InGameScene extends Phaser.Scene {
     marker;
     controls;
     shiftKey;
-
+    closeBracketKey;
     // 플레이어가 현재 위치한 타일의 X,Y 좌표 위치?
     playerTileX;
     playerTileY;
@@ -65,12 +67,12 @@ export default class InGameScene extends Phaser.Scene {
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
         //this.characterInfo.name = 'curly';
-
     }
 
     // 애셋 로드
     preload() {
 
+       
         // 헤어 애셋 경로 객체
         const hairPath = {
             idle: "",
@@ -168,6 +170,14 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("selectbox_tl", 'selectbox_tl.png');
         this.load.image("selectbox_tr", 'selectbox_tr.png');
 
+        //골드 아이콘
+        this.load.image("goldIcon", 'goldIcon.svg');
+        this.load.image("searchBox", 'searchBox.png');
+        //.load.bitmapFont("yeongdeokFont", "Yeongdeok Snow Crab.ttf", "Yeongdeok Snow Crab.png");
+
+        this.load.image("indicator", 'indicator.png');
+        this.load.image("next", 'arrow_right.png');
+        this.load.image("before", 'arrow_left.png');
         // 로드할 아이콘 이미지 정보를 담은 객체 배열
         this.iconLoadConfigs = [
             { key: "shovel_icon", url: "shovel.png" },
@@ -179,8 +189,39 @@ export default class InGameScene extends Phaser.Scene {
         this.iconLoadConfigs.forEach((iconLoadConfig) => {
             this.load.image(iconLoadConfig.key, iconLoadConfig.url);
         })
+        this.load.image("auction_exit", 'cancel.png');
+
+        //농작물 이미지
+        this.load.path = "assets/Crops/";
+        this.load.image("Potato Seed", 'seeds_generic.png');
+        this.load.image("Potato", 'potato_05.png');
 
 
+
+        //dt frame 용
+        this.load.path = "assets/UI/9slice_box_white/";
+        this.load.image("9slice_bc", 'dt_box_9slice_bc.png');
+        this.load.image("9slice_bl", 'dt_box_9slice_bl.png');
+        this.load.image("9slice_br", 'dt_box_9slice_br.png');
+        this.load.image("9slice_c", 'dt_box_9slice_c.png');
+        this.load.image("9slice_lc", 'dt_box_9slice_lc.png');
+        this.load.image("9slice_rc", 'dt_box_9slice_rc.png');
+        this.load.image("9slice_tc", 'dt_box_9slice_tc.png');
+        this.load.image("9slice_tl", 'dt_box_9slice_tl.png');
+        this.load.image("9slice_tr", 'dt_box_9slice_tr.png');
+
+        //lt 탭메뉴 용
+        this.load.image("tab_9slice_bc", 'lt_box_9slice_bc.png');
+        this.load.image("tab_9slice_bl", 'lt_box_9slice_bl.png');
+        this.load.image("tab_9slice_br", 'lt_box_9slice_br.png');
+        this.load.image("tab_9slice_c", 'lt_box_9slice_c.png');
+        this.load.image("tab_9slice_lc", 'lt_box_9slice_lc.png');
+        this.load.image("tab_9slice_rc", 'lt_box_9slice_rc.png');
+        this.load.image("tab_9slice_tc", 'lt_box_9slice_tc.png');
+        this.load.image("tab_9slice_tl", 'lt_box_9slice_tl.png');
+        this.load.image("tab_9slice_tr", 'lt_box_9slice_tr.png');
+
+        
     }
 
     create() {
@@ -256,14 +297,18 @@ export default class InGameScene extends Phaser.Scene {
             // 퀵슬롯의 위치
             const slotX = rightX - (slotWidth * (quickSlotNumber - i));
             const slotY = bottomY - slotHeight;
-
+            
             const slotNumber = i + 1;
-            const iconKey = this.iconLoadConfigs[i].key;
-
-            this.QuickSlots.push(new QuickSlot(this, slotX, slotY, 
-                slotWidth, slotHeight, slotNumber, iconKey));
+            const iconKey = this.iconLoadConfigs[i].key;        
+            const quickSlot=new QuickSlot(this, slotX, slotY, 
+                slotWidth, slotHeight, slotNumber, iconKey);
+        
+            this.QuickSlots.push(quickSlot);
+            quickSlot.toolIcon.setInteractive()
+            quickSlot.toolIcon.on('pointerup', (event) => this.equipQuickSlot(i));
+             
         }
-
+        
 
         // 그래픽스 객체 추가
         // 현재 장착중인 도구 슬롯 표시하는 사각형 객체
@@ -348,11 +393,15 @@ export default class InGameScene extends Phaser.Scene {
             'three': 'THREE',
             'four': 'FOUR'
         });        
+        
 
         // addKeys() : 특정 키 또는 여러 키에 대한 Phaser Key 객체를 생성한다.
         this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+
+        //]키 경매장 UI오픈
+        this.closeBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
 
         // 키 입력 이벤트 리스너 등록
         // 1번키
@@ -371,6 +420,9 @@ export default class InGameScene extends Phaser.Scene {
             });
 
         });
+
+        // 4번키
+        this.numberKeys.four.on('down', (event) => this.equipQuickSlot(3));
 
         // 게임 시작시 디버그 그래픽 숨기기
         /*         debugGraphics.forEach((debugGraphic) => {
@@ -407,6 +459,23 @@ export default class InGameScene extends Phaser.Scene {
 
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
         this.frontTileMarker = new SelectBox(this, 550, 550 , tileSize , tileSize, selectBoxScale, selectBoxDepth);
+
+        
+
+        //옥션 UI 생성
+        //크기
+        const auctionWidth = 1400;
+        const auctionHeight = 800;
+
+        // 옥션의 위치    
+        const autionX = this.cameras.main.width/2-auctionWidth/2;
+        const autionY = this.cameras.main.height/2-auctionHeight/2;      
+        this.auction=new Auction(this, autionX, autionY, 
+            auctionWidth, auctionHeight);      
+        
+            
+            
+        
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -461,6 +530,12 @@ export default class InGameScene extends Phaser.Scene {
         // 상호작용 할 타일 마커 위치 업데이트
         this.frontTileMarker.x = frontTileX;
         this.frontTileMarker.y = frontTileY;
+
+        //]키 눌렀는지 체크 경매장 UI열어줌.
+        if (this.closeBracketKey.isDown)
+        {
+            this.auction.enable();
+        }
 
     }
 
@@ -641,5 +716,5 @@ class SelectBox extends Phaser.GameObjects.Container {
         this.add(this.bottomLeft);
         this.add(this.bottomRight);
     }
-
+gb
 }

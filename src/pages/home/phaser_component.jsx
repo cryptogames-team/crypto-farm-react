@@ -5,7 +5,7 @@ import { eventSystem } from './event_system';
 // import Phaser Scene
 import LoginScene from './scenes/LoginScene';
 import InGameScene from './scenes/InGameScene';
-
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin'
 // 게임에서 사용할 이미지는 public에 넣을 것
 
 function PhaserGameComponent() {
@@ -42,9 +42,22 @@ function PhaserGameComponent() {
           default: 'arcade',
           arcade: {
             // 디버그 모드
-            debug: true
+            debug: false
           }
-        }
+        },
+        dom: {
+        createContainer: true
+    },
+	plugins: {
+		scene: [
+			{
+				key: 'rexUI',
+				plugin: RexUIPlugin,
+				mapping: 'rexUI'
+			}
+		]
+    }
+    
     }
     // Phaser 게임 인스턴스 생성
     const game = new Phaser.Game(config);
