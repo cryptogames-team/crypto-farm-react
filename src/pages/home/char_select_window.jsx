@@ -10,11 +10,11 @@ import CharCreateModal from './char_create_modal';
 import addIcon from '../../assets/add_character.png'
 
 
-
+let nodeURL = process.env.REACT_APP_NODE;
 
 // Rpc : 메인넷에 있는 노드 하나의 주소
 // EOS 블록체인 네트워크와의 통신을 담당한다.
-const rpc = new JsonRpc('http://14.63.34.160:8888');
+const rpc = new JsonRpc(nodeURL);
 
 const serverURL = 'http://221.148.25.234:1234/user/all';
 

@@ -28,12 +28,13 @@ export default class Inventory extends Frame {
     itemSlots = [];
 
 
-    // 현재 마우스가 올려진 인벤토리 슬롯의 인덱스
-    hoverIndex = null;
-    // 마우스로 드래그가 시작된 인벤토리 슬롯의 인덱스
-    startIndex;
-    // 마우스로 드래그가 끝난 인벤토리 슬롯의 인덱스
-    endIndex;
+    // 인벤토리 시작 인덱스
+    startIndex = 9;
+    // 인벤토리 끝 인덱스
+    endIndex = this.startIndex + this.size - 1;
+
+    // 퀵슬롯 크기
+    quickSize = 9;
 
 
     // 인벤토리의 아이템을 퀵슬롯에 드래그 앤 드랍 한 거 알아내는 법
@@ -146,13 +147,10 @@ export default class Inventory extends Frame {
 
                 itemSlot.index = slotIndex;
 
-                // 아이템 슬롯에 상호작용 영역 설정
-                itemSlot.setInteractive(new Phaser.Geom.Rectangle(itemSlot.width / 2, itemSlot.height / 2,
-                 itemSlot.width, itemSlot.height),
-                    Phaser.Geom.Rectangle.Contains);
 
                 // 디버그 그래픽 보기 위해서 뎁스 설정
-                itemSlot.setDepth(1001).setScrollFactor(0);
+                //itemSlot.setDepth(1001).setScrollFactor(0);
+                //scene.input.enableDebug(itemSlot);
 
 
                 // Phaser에선 겹치는 개체들 중에서 가장 상위 객체(마지막에 추가된 객체)에만 
@@ -162,198 +160,20 @@ export default class Inventory extends Frame {
                 // 거기에 자식 객체들이 생성되고 추가되는 방식이라서 그런가 봄.
 
 
-                // 아이템 슬롯 이벤트 추가
-                // 아이템 슬롯 마우스 오버
-                itemSlot.on('pointerover', (pointer) => {
-
-                    //console.log("아이템 슬롯 포인터 오버");
-                    this.hoverIndex = itemSlot.index;
-                    //console.log("마우스 올린 슬롯의 인덱스 : ", this.hoverIndex);
-
-                    scene.hoverSlot = itemSlot;
-
-                    scene.input.setTopOnly(false);
-
-                });
-                // 포인터 아웃
-                itemSlot.on('pointerout', (pointer) => {
-
-                    //console.log("아이템 슬롯 포인터 아웃");
-                    this.hoverIndex = null;
-
-                    scene.hoverSlot = null;
-
-                });
-
-                // 아이템 슬롯 이미지 이벤트 추가
-                itemSlot.itemImg.on('pointerover', (pointer) => {
-
-                    scene.input.setTopOnly(false);
-                    //console.log("겹치는 오브젝트들 상호작용 가능함.");
-                });
-
-
-
-
-                // 슬롯 이미지 드래그
-                itemSlot.itemImg.on("dragstart", (pointer) => {
-                    let itemImg = itemSlot.itemImg;
-
-                    // 객체 참조 조심
-                    scene.startSlot = scene.hoverSlot;
-
-                    this.startIndex = this.hoverIndex;
-                    console.log("아이템 이미지 드래그 시작 startIndex : ", this.startIndex);
-                    console.log("드래그 시작한 슬롯의 아이템 정보 : ", this.itemSlots[this.startIndex].item);
-
-                    // 일시적으로 컨테이너 자식에서 해제하고 depth 설정하기 
-                    itemSlot.remove(itemImg, false);
-                    itemImg.setDepth(2000);
-
-                    
-                    itemSlot.itemNameTxt.setVisible(false);
-                    itemSlot.itemStackTxt.setVisible(false);
-
-
-                    // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
-                    itemImg.x = pointer.x;
-                    itemImg.y = pointer.y;
-
-                    scene.isDragging = true;
-
-                });
-
-                // 슬롯 이미지 드래그
-                // pointer : 현재 활성화된 포인터 객체 <- 마우스 포인터
-                // dragX : 드래그 중인 객체의 현재 x 위치
-                // dragY : 드래그 중인 객체의 현재 y 위치
-                // 절대 위치나 컨테이너에 있으면 상대 위치를 나타낸다.
-                itemSlot.itemImg.on("drag", (pointer, dragX, dragY) => {
-
-                    let itemImg = itemSlot.itemImg;
-
-                    // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
-                    //console.log("아이템 이미지 드래그 중");
-                    itemImg.x = pointer.x;
-                    itemImg.y = pointer.y;
-
-                });
-
-                // 슬롯 이미지 드래그 종료
-                itemSlot.itemImg.on("dragend", (pointer) => {
-
-                    let itemImg = itemSlot.itemImg;
-                    let itemSlots = this.itemSlots;
-
-                    this.endIndex = this.hoverIndex;
-                    console.log("아이템 이미지 드래그 끝 endIndex : " + this.endIndex);
-
-                    // 드랍한 슬롯의 정보
-                    scene.endSlot = scene.hoverSlot;
-
-                    // 아이템 슬롯에 드랍했는지 확인하기
-                    if(scene.endSlot){
-                    console.log("드랍한 슬롯의 정보 : " , scene.endSlot.type, scene.endSlot.index);
-
-                    // 퀵슬롯에 아이템 옮기기 구현
-                    if( scene.endSlot.type === 1){
-
-
-                        if( scene.endSlot.item){
-                            console.log("퀵슬롯에 인벤 아이템 넣음");
-
-                            this.swapItem(scene.startSlot, scene.endSlot);
-                        }
-                        else{
-                            console.log("빈 퀵슬롯에 인벤 아이템 넣음");
-
-
-                            // 아이템 객체 참조만 정확하게 할당하면 됨.
-                            scene.endSlot.setSlotItem(scene.startSlot.item);
-                            scene.startSlot.removeItem();
-                        }
-                    }
-                }
-
-
-                    // 아이템 슬롯 안인지 밖인지 파악하기
-                    // hoverIndex가 null이면 아이템 슬롯 바깥임
-                    // 아이템 슬롯 바깥으로 포인터가 나가면 hoverIndex = null이 되게 설정했음.
-
-                    // 아이템 슬롯 안에 넣었을 경우
-                    if (this.hoverIndex !== null) {
-
-                        // 드래그가 시작된 아이템 슬롯
-                        let startSlot = itemSlots[this.startIndex];
-                        // 드래그 종료시 마우스 포인터가 위치한 아이템 슬롯
-                        let hoverSlot = itemSlots[this.hoverIndex];
-
-                        // 마우스 포인터가 위치한 슬롯의 아이템이 존재하는지 체크한다.
-                        let isItemExist = false;
-                        hoverSlot.item ? isItemExist = true : isItemExist = false;
-
-                        // 아이템이 존재하는 슬롯인지 체그한다.
-                        if (isItemExist) {
-
-                            // 드래그 앤 드랍한 슬롯이 드래그가 시작된 아이템 슬롯이면
-                            if (this.startIndex === this.hoverIndex) {
-                                // 원래 아이템 슬롯으로 복귀
-                                this.returnImg(startSlot, itemImg);
-                            }
-                            else {
-
-                                // 아이템 교체
-                                // 드래그 시작 슬롯과 드래그 끝난 슬롯의 아이템이 바뀌어야 한다.
-                                // 아이템 이미지는 원래대로 돌아가고 
-                                // 슬롯의 아이템만 바뀌게 한다.
-                                console.log("아이템 교체");
-                                this.swapItem(startSlot, hoverSlot);
-      
-                            // 아이템 이미지는 원래 아이템 슬롯으로 복귀~
-                            this.returnImg(itemSlot, itemImg);
-
-                            }
-
-                        }
-                        // 빈 아이템 슬롯이면
-                        else {
-
-                            // 빈 슬롯으로 아이템이 옮겨진다.
-                            hoverSlot.setSlotItem(startSlot.item);
-                            startSlot.removeItem();
-
-                            // 아이템 이미지는 원래 아이템 슬롯으로 복귀~
-                            this.returnImg(itemSlot, itemImg);
-
-                        }
-
-                    }
-                    // 아이템 슬롯이 아닌 곳에 넣었을 경우
-                    else {
-                        // 원래 아이템 슬롯으로 복귀~
-                        this.returnImg(itemSlot, itemImg);
-                    }
-
-                    itemSlot.itemNameTxt.setVisible(true);
-                    itemSlot.itemStackTxt.setVisible(true);
-
-                });
-
-
                 this.add(itemSlot);
                 this.itemSlots.push(itemSlot);
 
-                scene.isDragging = false;
             }
         }
 
+        this.initInventory(scene.own_items);
 
 
         // 하드 코딩으로 아이템 추가하기
         // 아이템 슬롯에 새 아이템이 추가될 때 마다 상호작용 설정한다.
-        this.itemSlots[0].setSlotItem(new Item('Crops', 'potato', '감자', 'potato_05'));
+        /* this.itemSlots[0].setSlotItem(new Item('Crops', 'potato', '감자', 'potato_05'));
         this.itemSlots[10].setSlotItem(new Item('Crops', 'carrot', '당근', 'carrot_05'));
-        this.itemSlots[14].setSlotItem(new Item('Crops', 'cabbage', '양배추', 'cabbage_05'));
+        this.itemSlots[14].setSlotItem(new Item('Crops', 'cabbage', '양배추', 'cabbage_05')); */
 
     }
 
@@ -365,49 +185,29 @@ export default class Inventory extends Frame {
         //returnImg.setDepth(0);
     }
 
+    initInventory(own_items){
 
+        own_items.forEach((own_item, index) =>{
 
-    // 드래그 시작 슬롯과 드래그 종료 슬롯에 있는 아이템을 서로 교체한다.
-    swapItem(startSlot, endSlot){
+            const { item, item_count, item_index } = own_item;
+           
+            // 아이템 인덱스 범위가 9~35인지 확인하기
+            if( item_index >= this.startIndex && item_index <= this.endIndex){
+                //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
 
+                console.log("인벤에 들어갈 아이템 정보", item);
+                const type = item.item_type;
+                const name = item.item_name;
+                const count = item_count;
 
+                // 서버의 item_index는 퀵슬롯 인벤 구별하지 않음.
+                // 0~8는 퀵슬롯에 할당되고 9부터 인벤에 할당되는거라서
+                // 인벤에 아이템 들어갈 때 퀵슬롯 크기만큼 빼줘야 함.
+                this.itemSlots[item_index - this.quickSize].setSlotItem(new Item(type, name, count));
 
-        // 객체의 참조와 할당, 얕은 복사 깊은 복사
-        // 변수에 객체를 참조하고 값을 변경하면 원본 객체 값도 변경되지만
-        // 새로운 객체를 할당하면 기존 객체와 독립적인 참조가 된다.
-       
-        let hoverItem = JSON.parse(JSON.stringify(endSlot.item));
-
-        console.log("드랍 슬롯의 원본 아이템 : ", hoverItem);
-        console.log("시작 슬롯의 아이템 : ", startSlot.item);
-
-        // 드랍 슬롯의 아이템을 드래그 시작 슬롯의 아이템으로 교체
-        endSlot.item = Object.assign({}, startSlot.item);
-        endSlot.itemImg.setTexture(endSlot.item.imgKey)
-        .setDisplaySize(endSlot.width / 2, endSlot.height / 2);
-        endSlot.itemNameTxt.setText(endSlot.item.title);
-        endSlot.itemStackTxt.setText(endSlot.item.quantity);
-
-        console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
-
-        // HitArea 변경으로 원본 텍스처가 달라져 크기가 변경되도
-        // 이미지의 상호작용 영역 크기를 아이템 슬롯에 맞춤.
-        endSlot.setImgHitArea();
-
-
-
-        // 드래그 시작 슬롯의 아이템을 드랍 슬롯의 아이템으로 교체하기
-        // 드랍 슬롯 아이템 객체의 복사본이 필요하다.
-        // Js에서 클래스 객체를 대입하면 객체에 대한 참조가 전달된다.
-        startSlot.item = hoverItem;
-        startSlot.itemImg.setTexture(startSlot.item.imgKey)
-        .setDisplaySize(startSlot.width / 2, startSlot.height / 2);
-        startSlot.itemNameTxt.setText(startSlot.item.title);
-        startSlot.itemStackTxt.setText(startSlot.item.quantity);
-
-        startSlot.setImgHitArea();
-
-
+                //console.log(this.quickSlots[item.item_index].item.type);
+            }
+        });
 
     }
 

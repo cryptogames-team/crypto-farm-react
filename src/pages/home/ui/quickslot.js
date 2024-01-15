@@ -13,6 +13,12 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
     // 퀵슬롯 개수
     size = this.row * this.col;
 
+    // 퀵슬롯 시작 인덱스
+    startIndex = 0;
+
+    // 퀵슬롯 끝 인덱스
+    endIndex = this.size - 1;
+
     // 퀵슬롯 크기 100x100
     slotSize = 100;
 
@@ -20,12 +26,6 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
     // 퀵슬롯 배열
     quickSlots = [];
 
-    // 현재 마우스 올려진 퀵슬롯의 인덱스
-    hoverIndex = null;
-    // 마우스로 드래그가 시작된 퀵슬롯의 인덱스
-    startIndex;
-    // 마우스로 드래그가 끝난 퀵슬롯의 인덱스
-    endIndex;
 
     // 퀵슬롯 컨테이너의 길이와 크기
     //width;
@@ -68,164 +68,15 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             // 퀵슬롯마다 인덱스 부여
             quickSlot.index = col;
 
-            // 개별 퀵슬롯에 상호작용 영역 설정
-            quickSlot.setInteractive(new Phaser.Geom.Rectangle(quickSlot.width / 2, quickSlot.height / 2,
-                quickSlot.width, quickSlot.height),
-                Phaser.Geom.Rectangle.Contains);
 
             // 상호작용 영역 디버그 그래픽으로 표시
-            quickSlot.setDepth(0).setScrollFactor(0);
-            //scene.input.enableDebug(quickSlot);
+            /* quickSlot.setDepth(100).setScrollFactor(0);
+            scene.input.enableDebug(quickSlot); */
 
-
-            // 개별 퀵슬롯에 이벤트 리스너 추가
-            quickSlot.on('pointerover', (pointer) => {
-                this.hoverIndex = quickSlot.index;
-
-                scene.hoverSlot = quickSlot;
-
-                //console.log("마우스 올린 퀵슬롯의 인덱스 : ", this.hoverIndex);
-
-                scene.input.setTopOnly(false);
-                //console.log("겹치는 오브젝트들 상호작용 가능함.");
-            });
-
-            quickSlot.on('pointerout', (pointer) => {
-                this.hoverIndex = null;
-                //console.log("퀵슬롯 포인터 아웃");
-
-                scene.hoverSlot = null;
-            });
-
-
-            // 퀵슬롯 아이템 이미지 이벤트 리스너 추가
-            // 퀵슬롯 아이템 이미지에 마우스 올리면 겹치는 대화형 오브젝트 전부에게 이벤트 전송
-            quickSlot.itemImg.on('pointerover', (pointer) => {
-
-                scene.input.setTopOnly(false);
-                //console.log("겹치는 오브젝트들 상호작용 가능함.");
-            });
-
-            // 여기도 예외 처리가 필요하네
-            /* quickSlot.itemImg.on('pointerout', (pointer) => {
-                scene.input.setTopOnly(true);
-                console.log("겹치는 오브젝트들 상호작용 불가능함.");
-            }); */
-
-            // 드래그 이벤트 리스너
-            quickSlot.itemImg.on('dragstart', (pointer) => {
-                // 아이템 이미지 객체 참조
-                let itemImg = quickSlot.itemImg;
-
-                // 드래그 시작한 슬롯의 참조 씬에 저장한다.
-                scene.startSlot = scene.hoverSlot;
-
-                this.startIndex = this.hoverIndex;
-                console.log("아이템 이미지 드래그 시작 startIndex : ", this.startIndex);
-                console.log("드래그 시작한 슬롯의 아이템 정보 : ", this.quickSlots[this.startIndex].item);
-                
-                // 일시적으로 퀵슬롯 자식에서 해제
-                quickSlot.remove(itemImg, false);
-                itemImg.setDepth(2000);
-
-                // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
-                itemImg.x = pointer.x;
-                itemImg.y = pointer.y;
-
-                quickSlot.itemNameTxt.setVisible(false);
-                quickSlot.itemStackTxt.setVisible(false);
-
-                scene.isDragging = true;
-            });
-
-            quickSlot.itemImg.on('drag', (pointer, dragX, dragY) => {
-                // 아이템 이미지 객체 참조
-                let itemImg = quickSlot.itemImg;
-
-                itemImg.x = pointer.x;
-                itemImg.y = pointer.y;
-
-            });
-
-            quickSlot.itemImg.on('dragend', (pointer) => {
-                // 아이템 이미지 객체 참조
-                let itemImg = quickSlot.itemImg;
-                let quickSlots = this.quickSlots;
-
-                this.endIndex = this.hoverIndex;
-                console.log("아이템 이미지 드래그 끝 endIndex : " + this.endIndex);
-
-
-                
-                // 드랍한 슬롯의 정보
-                scene.endSlot = scene.hoverSlot;
-
-                if(scene.endSlot){
-                // 인벤토리에 드랍 구현
-                console.log("드랍한 슬롯의 정보 : " , scene.endSlot.type, scene.endSlot.index);
-
-                if( scene.endSlot.type === 0){
-
-                    if( scene.endSlot.item){
-                        console.log("인벤에 퀵슬롯 아이템 넣음");
-
-                        this.swapItem(scene.startSlot, scene.endSlot);
-                    }
-                    else{
-                        console.log("빈 인벤 슬롯에 퀵슬롯 아이템 넣음");
-
-
-                        // 아이템 객체 참조만 정확하게 할당하면 됨.
-                        scene.endSlot.setSlotItem(scene.startSlot.item);
-                        scene.startSlot.removeItem();
-                    }
-                }
-            }
-
-                if( this.hoverIndex !== null){
-                    // 드래그가 시작된 아이템 슬롯
-                    let startSlot = quickSlots[this.startIndex];
-                    // 드래그 종료시 마우스 포인터가 위치한 아이템 슬롯
-                    let hoverSlot = quickSlots[this.hoverIndex];
-
-                    // 드래그 종료 슬롯의 아이템이 존재하는지 체크한다.
-                    let isItemExist = false;
-                    hoverSlot.item ? isItemExist = true : isItemExist = false;
-
-                    if(isItemExist){
-                        //console.log("퀵슬롯에 아이템이 존재함.");
-
-                        if(this.startIndex !== this.hoverIndex)
-                        {
-                            //console.log("아이템 교체");
-                            this.swapItem(startSlot, hoverSlot);
-                        }
-                    }
-                    else{
-
-                        //console.log("빈 퀵슬롯임.");
-                        // 빈 슬롯으로 아이템이 옮겨진다.
-                        hoverSlot.setSlotItem(startSlot.item);
-                        startSlot.removeItem();
-                    }
-
-                }
-
-                // 아이템 이미지는 원래 퀵슬롯으로 돌아간다.
-                this.returnImg(quickSlot, itemImg);
-
-                // 슬롯의 텍스트 다시 보여지게 하기
-                quickSlot.itemNameTxt.setVisible(true);
-                quickSlot.itemStackTxt.setVisible(true);
-
-                scene.isDragging = false;
-
-            });
 
             // 생성된 퀵슬롯을 퀵슬롯 컨테이너에 자식으로 추가한다.
             this.quickSlots.push(quickSlot);
             this.add(quickSlot);
-
             
         }
 
@@ -252,16 +103,19 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             }
         });
 
+        
+        // 서버에서 받아온 소유 아이템들을 퀵슬롯에 추가하여 퀵슬롯 초기화
+        this.initQuick(scene.own_items);
 
         // 퀵슬롯 아이템 하드코딩으로 추가하기
-        this.quickSlots[0].setSlotItem(new Item('Tool', 'shovel', '삽', 'shovel_icon'));
+        /* this.quickSlots[0].setSlotItem(new Item('Tool', 'shovel', '삽', 'shovel_icon'));
         this.quickSlots[1].setSlotItem(new Item('Tool', 'harvest', '수확하기', 'harvest_icon'));
         this.quickSlots[2].setSlotItem(new Item('Tool', 'axe', '도끼', 'axe_icon'));
         this.quickSlots[3].setSlotItem(new Item('Tool', 'pickaxe', '곡괭이', 'pickaxe_icon'));
-        this.quickSlots[4].setSlotItem(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00'));
-        this.quickSlots[5].setSlotItem(new Item('Seed', 'carrot_seed', '당근 씨앗', 'carrot_00'));
-        this.quickSlots[6].setSlotItem(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
-        this.quickSlots[7].setSlotItem(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
+        this.quickSlots[4].setSlotItem(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00', 4));
+        this.quickSlots[5].setSlotItem(new Item('Seed', 'carrot_seed', '당근 씨앗', 'carrot_00', 1));
+        this.quickSlots[6].setSlotItem(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00', 2));
+        this.quickSlots[7].setSlotItem(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00',3 )); */
 
         // 아이템 목록
         /* new Item('Tool', 'shovel', '삽', 'shovel_icon');
@@ -275,6 +129,58 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'); */
     }
 
+    // 서버에서 받아온 소유 아이템들을 퀵슬롯에 추가하기
+    initQuick(own_items){
+
+        own_items.forEach((own_item, index) =>{
+            // 구조 분해 할당 
+            const { item, item_count, item_index } = own_item;
+            
+
+            // 아이템 인덱스 범위가 0~8인지 확인하기
+            if( item_index >= this.startIndex && item_index <= this.endIndex){
+                //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
+                console.log("퀵슬롯에 들어갈 아이템 정보", item);
+
+                const type = item.item_type;
+                const name = item.item_name;
+                const count = item_count;
+
+                this.quickSlots[item_index].setSlotItem(new Item(type, name, count));
+
+                //console.log(this.quickSlots[item.item_index].item.type);
+            }
+        });
+
+    }
+
+    // 중복 아이템이 있는지 확인한다.
+    findDupItem(item){
+        // 얻은 아이템이 인벤토리에 이미 존재하는지 탐색
+        const itemExist = this.quickSlots.some((itemSlot, index) => {
+
+            console.log("퀵슬롯에 중복 아이템 발견 수량 증가");
+
+            // 빈 아이템 슬롯인지 체크
+            if (itemSlot.item === null) {
+                return false;
+            } else {
+                // 아이템 슬롯의 아이템의 타입과 이름을 비교해서 중복되는 아이템을 먹었는지 확인.
+                if (itemSlot.item.type === item.type && itemSlot.item.name === item.name) {
+
+                    console.log("퀵슬롯에 중복 아이템 발견 수량 증가");
+                    // 중복 아이템의 수량 증가
+                    itemSlot.item.count += 1;
+                    itemSlot.setSlotItem(itemSlot.item);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+
+        return itemExist;
+    }
 
     // 드래그 할 때 슬롯 자식에서 해제된 이미지를 다시 자식으로 되돌린다.
     returnImg(returnSlot, returnImg) {
@@ -296,6 +202,14 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         endSlot.itemImg.setTexture(endSlot.item.imgKey)
             .setDisplaySize(endSlot.width / 2, endSlot.height / 2);
         endSlot.itemNameTxt.setText(endSlot.item.title);
+
+
+        //endSlot.itemStackTxt.setText(endSlot.item.quantity);
+
+        // 아이템 타입이 tool이면 수량 텍스트 표시 안함.
+        if(endSlot.item.type === 'Tool')
+        endSlot.itemStackTxt.setText(undefined);
+        else
         endSlot.itemStackTxt.setText(endSlot.item.quantity);
 
         console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
@@ -305,7 +219,7 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         endSlot.setImgHitArea();
 
         // 디버그 영역 재설정
-        this.scene.input.enableDebug(endSlot.itemImg);
+        //this.scene.input.enableDebug(endSlot.itemImg);
 
 
         // 드래그 시작 슬롯의 아이템을 드랍 슬롯의 아이템으로 교체하기
@@ -315,12 +229,20 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         startSlot.itemImg.setTexture(startSlot.item.imgKey)
             .setDisplaySize(startSlot.width / 2, startSlot.height / 2);
         startSlot.itemNameTxt.setText(startSlot.item.title);
+
+
+        //startSlot.itemStackTxt.setText(startSlot.item.quantity);
+
+        // 아이템 타입이 tool이면 수량 텍스트 표시 안함.
+        if(startSlot.item.type === 'Tool')
+        startSlot.itemStackTxt.setText(undefined);
+        else
         startSlot.itemStackTxt.setText(startSlot.item.quantity);
 
         startSlot.setImgHitArea();
 
         // 디버그 영역 재설정
-        this.scene.input.enableDebug(startSlot.itemImg);
+        //this.scene.input.enableDebug(startSlot.itemImg);
     }
 
 }

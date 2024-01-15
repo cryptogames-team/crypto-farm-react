@@ -20,9 +20,11 @@ const layerScale = 4;
 const tileSize = 16 * layerScale;
 
 
-// 게임에 사용할 아이템 데이터들 담는 배열
-const items = [];
+// 게임 오브젝트 위치 저장
+const objects = [];
 
+
+let APIUrl = process.env.REACT_APP_API;
 
 
 export default class InGameScene extends Phaser.Scene {
@@ -64,8 +66,11 @@ export default class InGameScene extends Phaser.Scene {
     // I 키 객체
     inventoryKey;
 
+    // E 키 객체
+    harvestKey;
 
-    // 현재 마우스가 올려진 슬롯
+
+    // 현재 마우스가 올려진 슬롯 참조
     hoverSlot = null;
     startSlot;
     endSlot;
@@ -73,12 +78,51 @@ export default class InGameScene extends Phaser.Scene {
     // 드래그 상태 추적
     isDragging = false;
 
+    // JWT 액세스 토큰
+    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1MzAwMDM5LCJleHAiOjE3MDUzMDM2Mzl9.mtOX86kovk7GbKT6b1J5M7WNFXg5ZLVDeyp3mKe0f3c";
+    // 플레이어 소유 아이템 목록
+    own_items;
+
     // 생성자가 왜 있지?
     // 씬 등록하는건가?
     constructor() {
         super('InGameScene');
 
-        //console.log(process.env.HOST);
+        //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
+
+        this.getItem();
+    }
+
+    // 서버로부터 내 아이템 목록 받아오기
+    async getItem() {
+
+        const user_id = '1'
+
+        try {
+
+            // GET 메소드에 바디를 포함할 수 없음
+            const response = await fetch(APIUrl + 'item/own-item/' + user_id, {
+
+                // 요청 방식
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // 액세스 토큰 값 보내기
+                    //Authorization : JWTAcesstoken
+                },
+            });
+
+            // 여기서 서버 응답을 받는다.
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            this.own_items = await response.json();
+
+            // 서버로부터 받은 유저 아이템 정보들
+            //console.log('유저 아이템 목록', this.own_items);
+
+        } catch (error) {
+            console.error('getItem() Error : ', error);
+        }
+
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -100,7 +144,7 @@ export default class InGameScene extends Phaser.Scene {
     // 애셋 로드
     preload() {
 
-       
+
         // 헤어 애셋 경로 객체
         const hairPath = {
             idle: "",
@@ -219,12 +263,18 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image('inven_icon', 'basket.png');
         this.load.image("auction_exit", 'cancel.png');
 
+
+        // 도구 아이콘
+        this.load.image("삽", 'shovel.png');
+        this.load.image("곡괭이", 'pickaxe.png');
+        this.load.image("도끼", 'axe.png');
+
         //농작물 이미지
         this.load.path = "assets/Crops/";
         this.load.image("Potato Seed", 'seeds_generic.png');
         this.load.image("Potato", 'potato_05.png');
 
-        
+
         // nine-slice 로드
         // 외부 박스
         this.load.path = "assets/UI/9slice_box_white/"
@@ -253,79 +303,7 @@ export default class InGameScene extends Phaser.Scene {
         this.load.path = "";
         // 로드할 아이콘 이미지 정보를 담은 객체 배열
         // 여기에 아이콘 제목을 넣어서 퀵슬롯에서 아이템 이름이 표시되게 해봄.
-        /*         this.iconLoadConfigs = [
-                    // 도구 아이콘들
-                    { title: '삽', key: "shovel_icon", url: "assets/UI/shovel.png" },
-                    { title: '수확하기', key: "harvest_icon", url: "assets/UI/hand_open_02.png" },
-                    { title: '도끼', key: "axe_icon", url: "assets/UI/axe.png" },
-                    { title: '곡괭이', key: "pickaxe_icon", url: "assets/UI/pickaxe.png" },
-                    // 씨앗 아이콘들
-                    { title: '감자 씨앗', key: "potato_icon", url: "assets/Elements/Crops/potato_00.png" },
-                    { title: '당근 씨앗', key: "carrot_icon", url: "assets/Elements/Crops/carrot_00.png" },
-                    { title: '호박 씨앗', key: "pumpkin_icon", url: "assets/Elements/Crops/pumpkin_00.png" },
-                    { title: '양배추 씨앗', key: "cabbage_icon", url: "assets/Elements/Crops/cabbage_00.png" },
-                ]; */
-        // 퀵슬롯에 사용할 아이콘들 로드
-        /*         this.iconLoadConfigs.forEach((iconLoadConfig) => {
-                    this.load.image(iconLoadConfig.key, iconLoadConfig.url);
-                }); */
-
-        // 씨앗 아이콘 -> 씨앗 아이템
-        // 도구 아이콘 -> 도구 아이템
-
-        // 농작물 아이템 정보 객체 배열
-        const cropsLoadPath = "assets/Elements/Crops/"
-        const cropsInfoConfigs = [
-            { type: 'Crops', name: 'potato', title: '감자', key: 'potato_05', url: "potato_05.png", stackLimit: 999, price: 5 },
-            { type: 'Crops', name: 'carrot', title: '당근', key: 'carrot_05', url: "carrot_05.png", stackLimit: 999, price: 10 },
-            { type: 'Crops', name: 'pumpkin', title: '호박', key: 'pumpkin_05', url: "pumpkin_05.png", stackLimit: 999, price: 15 },
-            { type: 'Crops', name: 'cabbage', title: '양배추', key: 'cabbage_05', url: "cabbage_05.png", stackLimit: 999, price: 45 },
-        ]
-
-        // 농작물 아이템 이미지 로드
-        this.load.path = cropsLoadPath;
-        cropsInfoConfigs.forEach((itemInfoConfig) => {
-            this.load.image(itemInfoConfig.key, itemInfoConfig.url);
-        });
-
-        // 씨앗 아이템 정보 객체 배열
-        const seedLoadPath = "assets/Elements/Crops/"
-        const seedInfoConfigs = [
-            { type: 'Seed', name: 'potato_seed', title: '감자 씨앗', key: 'potato_00', url: "potato_00.png", stackLimit: 999, price: 2 },
-            { type: 'Seed', name: 'carrot_seed', title: '당근 씨앗', key: 'carrot_00', url: "carrot_00.png", stackLimit: 999, price: 4 },
-            { type: 'Seed', name: 'pumpkin_seed', title: '호박 씨앗', key: 'pumpkin_00', url: "pumpkin_00.png", stackLimit: 999, price: 8 },
-            { type: 'Seed', name: 'cabbage_seed', title: '양배추 씨앗', key: 'cabbage_00', url: "cabbage_00.png", stackLimit: 999, price: 16 },
-        ];
-
-        // 씨앗 아이템 이미지 로드
-        this.load.path = seedLoadPath;
-        seedInfoConfigs.forEach((itemInfoConfig) => {
-            this.load.image(itemInfoConfig.key, itemInfoConfig.url);
-        });
-
-        // 도구 아이템 정보 객체 배열
-        const toolLoadPath = "assets/UI/"
-        this.toolInfoConfigs = [
-            { type: 'Tool', name: 'shovel', title: '삽', key: 'shovel_icon', url: toolLoadPath + "shovel.png", stackLimit: 1, price: 2 },
-            { type: 'Tool', name: 'harvest', title: '수확하기', key: 'harvest_icon', url: toolLoadPath + "hand_open_02.png", stackLimit: 1, price: 4 },
-            { type: 'Tool', name: 'axe', title: '도끼', key: 'axe_icon', url: toolLoadPath + "axe.png", stackLimit: 1, price: 8 },
-            { type: 'Tool', name: 'pickaxe', title: '곡괭이', key: 'pickaxe_icon', url: toolLoadPath + "pickaxe.png", stackLimit: 1, price: 16 },
-        ];
-
-        // 도구 아이템 이미지 로드
-        this.load.path = "";
-        this.toolInfoConfigs.forEach((itemInfoConfig) => {
-            this.load.image(itemInfoConfig.key, itemInfoConfig.url);
-        });
-
-
-        // 아이템 정보 객체 배열
-        // 각 타입의 아이템 정보 배열들을 전부 저장한다.
-        const itemInfoConfigs = [];
-        itemInfoConfigs.push(cropsInfoConfigs, seedInfoConfigs, this.toolInfoConfigs);
-
-
-        //console.log("전체 아이템 정보 객체 배열", itemInfoConfigs);
+    
 
         // 농작물 이미지 로드
         this.load.path = "assets/Elements/Crops/"
@@ -383,7 +361,31 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("tab_9slice_tl", 'lt_box_9slice_tl.png');
         this.load.image("tab_9slice_tr", 'lt_box_9slice_tr.png');
 
-        
+
+        this.load.path = "assets/Elements/Crops/"
+        this.load.image("감자 씨앗", 'potato_00.png');
+        this.load.image("호박 씨앗", 'pumpkin_00.png');
+        this.load.image("당근 씨앗", 'carrot_00.png');
+        this.load.image("양배추 씨앗", 'cabbage_00.png');
+        this.load.image("사탕무 씨앗", 'beetroot_00.png')
+        this.load.image("무 씨앗", 'radish_00.png');
+        this.load.image("케일 씨앗", 'kale_00.png')
+        this.load.image("밀 씨앗", 'wheat_00.png')
+
+        this.load.image("감자", 'potato_05.png');
+        this.load.image("호박", 'pumpkin_05.png')
+        this.load.image("당근", 'carrot_05.png');
+        this.load.image("양배추", 'cabbage_05.png')
+        this.load.image("사탕무", 'beetroot_05.png')
+        this.load.image("무", 'radish_05.png');
+        this.load.image("케일", 'kale_05.png')
+
+        this.load.image("나무", 'wood.png');
+        this.load.image("바위", 'rock.png')
+        this.load.image("달걀", 'egg.png');
+        this.load.image("우유", 'milk.png')
+        this.load.image("물고기", 'fish.png');
+
     }
 
     create() {
@@ -482,23 +484,25 @@ export default class InGameScene extends Phaser.Scene {
         quickSlotItems.push(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
         quickSlotItems.push(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
 
-       //옥션 UI 생성
+        //옥션 UI 생성
         //크기
         const auctionWidth = 1400;
         const auctionHeight = 800;
 
         // 옥션의 위치    
-        const autionX = this.cameras.main.width/2-auctionWidth/2;
-        const autionY = this.cameras.main.height/2-auctionHeight/2;      
-        this.auction=new Auction(this, autionX, autionY, 
-            auctionWidth, auctionHeight); 
+        const autionX = this.cameras.main.width / 2 - auctionWidth / 2;
+        const autionY = this.cameras.main.height / 2 - auctionHeight / 2;
+        this.auction = new Auction(this, autionX, autionY,
+            auctionWidth, auctionHeight);
+
+        this.auction.setVisible(false);
 
         // 퀵슬롯 클래스 객체 생성하고 추가
         this.quickSlotUI = new QuickSlot(this, 0, 0);
         // 화면 중앙 하단에 배치
         this.quickSlotUI.x = this.cameras.main.width / 2 - this.quickSlotUI.width / 2;
         this.quickSlotUI.y = this.cameras.main.height - this.quickSlotUI.height + 1;
-        
+
         /* console.log("퀵슬롯 컨테이너의 길이와 크기", this.quickSlotUI.width, this.quickSlotUI.height)
         console.log("퀵슬롯 컨테이너의 display 길이와 크기", 
         this.quickSlotUI.displayWidth, this.quickSlotUI.displayHeight); */
@@ -603,6 +607,9 @@ export default class InGameScene extends Phaser.Scene {
         let toggleDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
         this.inventoryKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
 
+        this.harvestKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
+
         //]키 경매장 UI오픈
         this.closeBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
 
@@ -634,6 +641,8 @@ export default class InGameScene extends Phaser.Scene {
             });
 
         });
+
+
 
         // I키 누르면 인벤토리 Visible 토글
         this.inventoryKey.on('down', () => {
@@ -744,12 +753,13 @@ export default class InGameScene extends Phaser.Scene {
         this.searchArea.y = frontTileY;
 
         //]키 눌렀는지 체크 경매장 UI열어줌.
-        if (this.closeBracketKey.isDown)
-        {
+        if (this.closeBracketKey.isDown) {
             this.auction.enable();
         }
 
     }
+
+
 
     // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
     equipQuickSlot(equipNumber) {
@@ -772,8 +782,8 @@ export default class InGameScene extends Phaser.Scene {
         this.equipMarker.clear();
         this.equipMarker.lineStyle(lineWidth, 0xFF0000, 1);
         this.equipMarker.setDepth(100).setScrollFactor(0);
-        this.equipMarker.strokeRect(x , y, 100 - lineWidth , 100 - lineWidth );
-        
+        this.equipMarker.strokeRect(x, y, 100 - lineWidth, 100 - lineWidth);
+
     }
 
     // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
@@ -823,12 +833,10 @@ export default class InGameScene extends Phaser.Scene {
         const plantTile = this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1);
         return plantTile;
     }
-    // 씬에 씨앗 이미지 추가 - 일단 감자만
-    // seed : 심을 씨앗의 종류나 이름 넣기
-    // title : 심은 씨앗의 UI에 표시될 제목 
+    // 씬에 농작물 오브젝트 추가
+    // seedName : 심을 씨앗의 이름
     // plantTile : 씨앗을 심을 타일
-    addSeed(seed, title, plantTile) {
-
+    addSeed(seedName, plantTile) {
 
         // 씨앗을 심을 타일의 월드상 픽셀 위치 구하기
         const plantTileX = this.ingameMap.tileToWorldX(plantTile.x);
@@ -846,14 +854,14 @@ export default class InGameScene extends Phaser.Scene {
         // y축 위치를 1픽셀 만큼 내려야 함.
         // 지금 맵 크기가 4배 커져있으니 총 4픽셀만큼 내려야된다.
 
-        const seedImgKey = seed + '_01';
+        const seedImgKey = seedName + '_01';
 
         //console.log("seedImgKey : " + seedImgKey);
 
 
         // 농작물 게임 오브젝트 추가
         // 컨테이너 객체는 origin이 중앙임
-        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seed, title);
+        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seedName);
 
         crops.body.debugShowBody = false;
 
@@ -865,7 +873,7 @@ export default class InGameScene extends Phaser.Scene {
             //console.log(this.playerObject.isHarvesting);
 
             if (this.playerObject.isHarvesting === true && crops.state === 'harvest') {
-                //console.log("캐릭터 수확 성공", crops.name);
+                console.log("캐릭터 수확 성공", crops.name);
 
                 // 수확한 밭 타일을 구멍난 밭 타일로 변경한다.
                 const fieldTileX = this.interactTileX;
@@ -874,8 +882,14 @@ export default class InGameScene extends Phaser.Scene {
                 // 구멍난 밭 타일 인덱스 1139
                 this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
 
-                const cropsImgKey = crops.name + '_05';
-                this.inventory.addItem(new Item('Crops', crops.name, crops.title, cropsImgKey));
+                const cropsImgKey = crops.name;
+
+                // 먼저 퀵슬롯에 중복 아이템이 있는지 확인한다.
+                const quickSlotExist = this.quickSlotUI.findDupItem(new Item(1, crops.name));
+
+                // 퀵슬롯에 중복 아이템이 없으면 인벤에 아이템 추가 시도
+                if (!quickSlotExist)
+                    this.inventory.addItem(new Item(1, crops.name));
 
                 // 씬에서 농작물 객체 제거
                 crops.harvest();
@@ -946,6 +960,7 @@ export default class InGameScene extends Phaser.Scene {
         }
         return image;
     }
+
 
 }
 
@@ -1025,5 +1040,5 @@ class SelectBox extends Phaser.GameObjects.Container {
         this.add([this.topLeft, this.topRight, this.bottomLeft, this.bottomRight]);
 
     }
-gb
+
 }
