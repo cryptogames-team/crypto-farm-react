@@ -5,6 +5,8 @@ export default class Item{
 
     // 아이템의 종류 : 씨앗, 도구, 농작물 등
     type;
+    // 아이템 id : 서버에 아이템 관련 요청할 때 사용할 아이템 구별자
+    id;
     // 아이템 이름 : 아이템을 구별하고 슬롯에서 보여질 아이템 이름이자 이미지 텍스처 키로 사용된다.
     name;
     // 아이템 제목 : UI상에서 보여질 아이템의 이름 한글로 적기
@@ -30,10 +32,11 @@ export default class Item{
     // 주의 : 디폴트 매개변수는 해당 매개변수에 'undefined'가 전달되었을 때 사용된다.
     // null, 0, ''과 같은 falsy 값들은 디폴트 매개변수를 대체한다.
     // 근데 이 기능은 ES6에서 도입된 거라서 구형 브라우저에서는 지원되지 않을 수 있음.
-    constructor(type, name, count = 1, stackLimit = 999){
+    constructor(type, id, name, count = 1, stackLimit = 999){
 
         // name, title, imgKey를 통합
         this.type = type;
+        this.id = id;
         this.name = name;
         this.stackLimit = stackLimit;
         this.count = count;

@@ -79,7 +79,7 @@ export default class InGameScene extends Phaser.Scene {
     isDragging = false;
 
     // JWT 액세스 토큰
-    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1MzAwMDM5LCJleHAiOjE3MDUzMDM2Mzl9.mtOX86kovk7GbKT6b1J5M7WNFXg5ZLVDeyp3mKe0f3c";
+    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NDAzMTYxLCJleHAiOjE3MDU0MzkxNjF9.V2iDB1zolVL3U5d5sqggD9Jd3LztIi1q3N0QTGDVUWI";
     // 플레이어 소유 아이템 목록
     own_items;
 
@@ -90,29 +90,31 @@ export default class InGameScene extends Phaser.Scene {
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-        this.getItem();
+        this.serverGetItem();
+
+        // 테스트 계정의 감자 갯수 증가 시키기
+        //this.serverAddItem(9, 1, 3);
     }
 
-    // 서버로부터 내 아이템 목록 받아오기
-    async getItem() {
+    // 서버로부터 로그인한 유저의 아이템 목록 받아오기
+    async serverGetItem() {
 
         const user_id = '1'
+        const requestURL = APIUrl + 'item/own-item/' + user_id;
 
         try {
 
             // GET 메소드에 바디를 포함할 수 없음
-            const response = await fetch(APIUrl + 'item/own-item/' + user_id, {
+            const response = await fetch(requestURL, {
 
                 // 요청 방식
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
-                    // 액세스 토큰 값 보내기
-                    //Authorization : JWTAcesstoken
+
                 },
             });
 
-            // 여기서 서버 응답을 받는다.
             // .json() : 받은 응답을 JSON 형식으로 변환한다.
             this.own_items = await response.json();
 
@@ -120,7 +122,83 @@ export default class InGameScene extends Phaser.Scene {
             //console.log('유저 아이템 목록', this.own_items);
 
         } catch (error) {
-            console.error('getItem() Error : ', error);
+            console.error('serverGetItem() Error : ', error);
+        }
+
+    }
+
+
+    // 서버에 로그인 한 유저에게 새 아이템 추가, 기존 아이템 수량 증가 요청하는 함수
+    // 액세스 토큰 필요함
+    // 아이템 클래스와 매개변수를 맞춰야 하나?
+    async serverAddItem(item_id, item_count, item_index) {
+
+
+        const requestURL = APIUrl + 'item/add/';
+
+        const requestBody = {
+            'item_id': item_id,
+            'item_count': item_count,
+            'item_index': item_index
+        }
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //액세스 토큰 값 보내기
+                    Authorization: 'Bearer ' + this.acessToken
+                },
+
+                // 바디 필요함.
+                body: JSON.stringify(requestBody)
+            });
+
+            // .text() : 받은 응답을 text 형식으로 변환한다.
+            // 성공 시 결과값 'success'로 감
+            const data = await response.text();
+
+            //console.log("받은 응답 헤더의 콘텐츠 타입", response.headers.get("content-type"));
+            console.log('서버 아이템 추가 결과', data);
+
+            // 요청이 성공하면 새 아이템, 혹은 중복 아이템의 수량 증가한다.
+            if( data === 'success'){
+
+                // 아이템이 추가되거나 수량증가할 슬롯의 타입
+                let slotType = null;
+                // 아이템이 추가되거나 수량이 증가할 슬롯의 참조
+                let slot = null;
+
+                // item_index로 인벤의 슬롯인지 퀵슬롯의 슬롯인지 확인한다.
+                // 퀵슬롯 0~8 
+                // 인벤토리 9~35
+                if( item_index >= 0 && item_index <= 8){
+                    slotType = 1;
+                }
+                else if( item_index >= 9 && item_index <= 35){
+                    slotType = 0;
+                }
+
+                // 그 아이템 슬롯이 비었는지 중복 아이템이 존재하는지 확인한다.
+
+                if( slotType === 0 ){
+                    slot = this.inventory[item_index - this.quickSlotUI.size];
+
+                // 비었으면 새 아이템 추가
+                
+                // 중복 아이템이 존재하면 수량 증가           
+
+                }
+
+
+            }
+
+        } catch (error) {
+            console.error('serverAddItem() Error : ', error);
         }
 
     }
@@ -303,40 +381,6 @@ export default class InGameScene extends Phaser.Scene {
         this.load.path = "";
         // 로드할 아이콘 이미지 정보를 담은 객체 배열
         // 여기에 아이콘 제목을 넣어서 퀵슬롯에서 아이템 이름이 표시되게 해봄.
-    
-
-        // 농작물 이미지 로드
-        this.load.path = "assets/Elements/Crops/"
-        // 감자 이미지
-        // 새싹
-        this.load.image('potato_01', "potato_01.png");
-        // 성장기
-        this.load.image('potato_02', "potato_02.png");
-        this.load.image('potato_03', "potato_03.png");
-        // 수확기
-        this.load.image('potato_04', "potato_04.png");
-        // 열매 
-        this.load.image('potato_05', "potato_05.png");
-        // 당근
-        this.load.image('carrot_01', "carrot_01.png");
-        this.load.image('carrot_02', "carrot_02.png");
-        this.load.image('carrot_03', "carrot_03.png");
-        this.load.image('carrot_04', "carrot_04.png");
-        this.load.image('carrot_05', "carrot_05.png");
-        // 호박
-        this.load.image('pumpkin_01', "pumpkin_01.png");
-        this.load.image('pumpkin_02', "pumpkin_02.png");
-        this.load.image('pumpkin_03', "pumpkin_03.png");
-        this.load.image('pumpkin_04', "pumpkin_04.png");
-        this.load.image('pumpkin_05', "pumpkin_05.png");
-
-        // 양배추
-        this.load.image('cabbage_01', "cabbage_01.png");
-        this.load.image('cabbage_02', "cabbage_02.png");
-        this.load.image('cabbage_03', "cabbage_03.png");
-        this.load.image('cabbage_04', "cabbage_04.png");
-        this.load.image('cabbage_05', "cabbage_05.png");
-
 
         //dt frame 용
         this.load.path = "assets/UI/9slice_box_white/";
@@ -369,9 +413,35 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("양배추 씨앗", 'cabbage_00.png');
         this.load.image("사탕무 씨앗", 'beetroot_00.png')
         this.load.image("무 씨앗", 'radish_00.png');
-        this.load.image("케일 씨앗", 'kale_00.png')
-        this.load.image("밀 씨앗", 'wheat_00.png')
+        this.load.image("케일 씨앗", 'kale_00.png');
+        this.load.image("밀 씨앗", 'wheat_00.png');
 
+        // 농작물 밭에 심었을 때 이미지 로드
+        // 감자 
+        this.load.image('감자_01', "potato_01.png");
+        this.load.image('감자_02', "potato_02.png");
+        this.load.image('감자_03', "potato_03.png");
+        this.load.image('감자_04', "potato_04.png");
+
+        // 당근
+        this.load.image('당근_01', "carrot_01.png");
+        this.load.image('당근_02', "carrot_02.png");
+        this.load.image('당근_03', "carrot_03.png");
+        this.load.image('당근_04', "carrot_04.png");
+
+        // 호박
+        this.load.image('호박_01', "pumpkin_01.png");
+        this.load.image('호박_02', "pumpkin_02.png");
+        this.load.image('호박_03', "pumpkin_03.png");
+        this.load.image('호박_04', "pumpkin_04.png");
+
+        // 양배추
+        this.load.image('양배추_01', "cabbage_01.png");
+        this.load.image('양배추_02', "cabbage_02.png");
+        this.load.image('양배추_03', "cabbage_03.png");
+        this.load.image('양배추_04', "cabbage_04.png");
+
+        // 농작물 열매 이미지
         this.load.image("감자", 'potato_05.png');
         this.load.image("호박", 'pumpkin_05.png')
         this.load.image("당근", 'carrot_05.png');
@@ -385,6 +455,7 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("달걀", 'egg.png');
         this.load.image("우유", 'milk.png')
         this.load.image("물고기", 'fish.png');
+
 
     }
 
@@ -471,18 +542,6 @@ export default class InGameScene extends Phaser.Scene {
         // 퀵슬롯의 개수
         const quickSlotNumber = 8;
 
-        // 퀵슬롯에 들어가는 아이템 담는 배열
-        const quickSlotItems = [];
-
-        quickSlotItems.push(new Item('Tool', 'shovel', '삽', 'shovel_icon'));
-        quickSlotItems.push(new Item('Tool', 'harvest', '수확하기', 'harvest_icon'));
-        quickSlotItems.push(new Item('Tool', 'axe', '도끼', 'axe_icon'));
-        quickSlotItems.push(new Item('Tool', 'pickaxe', '곡괭이', 'pickaxe_icon'));
-
-        quickSlotItems.push(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00'));
-        quickSlotItems.push(new Item('Seed', 'carrot_seed', '당근 씨앗', 'carrot_00'));
-        quickSlotItems.push(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
-        quickSlotItems.push(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
 
         //옥션 UI 생성
         //크기
@@ -882,14 +941,59 @@ export default class InGameScene extends Phaser.Scene {
                 // 구멍난 밭 타일 인덱스 1139
                 this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
 
-                const cropsImgKey = crops.name;
 
-                // 먼저 퀵슬롯에 중복 아이템이 있는지 확인한다.
-                const quickSlotExist = this.quickSlotUI.findDupItem(new Item(1, crops.name));
+                // 아이템이 추가되거나 수량이 증가할 슬롯의 인덱스
+                let item_index = null;
 
-                // 퀵슬롯에 중복 아이템이 없으면 인벤에 아이템 추가 시도
-                if (!quickSlotExist)
-                    this.inventory.addItem(new Item(1, crops.name));
+                // 아이템이 추가되거나 수량이 증가할 슬롯 인덱스를 찾아야함.
+                // 인벤토리만 생각하기
+
+
+
+                // 인벤토리에 중복 아이템(당근)이 있는지 확인하기
+                const dupIndex = this.inventory.findDupSlot(crops.name);
+                let emptyIndex = null;
+
+                // 중복 아이템이 없을 경우
+                if (dupIndex === null) {
+                    // 없으면 인벤에 빈 공간이 있는지 확인하기
+                    emptyIndex = this.inventory.findEmptySlot();
+
+                    // 인벤에 빈 공간이 있을 경우
+                    if (emptyIndex !== null) {
+                        item_index = emptyIndex;
+                    } else {
+                        console.log("인벤토리에 빈 공간이 없음.");
+                    }
+
+                } else {
+                    item_index = dupIndex;
+                }
+
+                // item_id 어디서 가져오나 일단 하드 코딩
+
+
+                if( item_index !== null)
+                this.serverAddItem(11, 1, item_index);
+
+                // 인벤토리에 새 아이템 증가나 중복 아이템 수량 증가 시켜야 됨.
+                // 이건 serverAddItem()에서 처리하게 만들기.
+
+
+                /*                 // 아이템 이름으로 찾게 해볼까?
+                                // addItem() 할 때 아이템 객체가 필요함.
+                
+                                // 먼저 퀵슬롯에 중복 아이템이 있는지 확인한다.
+                                const quickSlotExist = this.quickSlotUI.findDupItem(new Item(1, crops.name));
+                                //const quickSlotExist = this.quickSlotUI.newfindDupItem(crops.name);
+                
+                                // 퀵슬롯에 중복 아이템이 없으면 인벤에 아이템 추가 시도
+                                if (!quickSlotExist)
+                                    this.inventory.addItem(new Item(1, crops.name)); */
+
+
+
+
 
                 // 씬에서 농작물 객체 제거
                 crops.harvest();

@@ -107,9 +107,9 @@ export default class Inventory extends Frame {
         // 이벤트 전송
         this.on('pointerout', (pointer) => {
 
-            if(!scene.isDragging){
-            scene.input.setTopOnly(true);
-            console.log("겹치는 오브젝트들 상호작용 불가능함.");
+            if (!scene.isDragging) {
+                scene.input.setTopOnly(true);
+                console.log("겹치는 오브젝트들 상호작용 불가능함.");
             }
         });
 
@@ -177,33 +177,28 @@ export default class Inventory extends Frame {
 
     }
 
-    // 드래그 할 때 슬롯 자식에서 해제된 이미지를 다시 자식으로 되돌린다.
-    returnImg(returnSlot, returnImg){
-        returnSlot.add(returnImg);
-        returnImg.x = returnSlot.width / 2;
-        returnImg.y = returnSlot.height / 2;
-        //returnImg.setDepth(0);
-    }
+    // own_items : 서버에서 비동기로 받아오는 아이템 목록 배열. 
+    // 서버에서 로드되기 전에 먼저 이 함수가 실행될 수 있음.
+    initInventory(own_items) {
 
-    initInventory(own_items){
-
-        own_items.forEach((own_item, index) =>{
+        own_items.forEach((own_item, index) => {
 
             const { item, item_count, item_index } = own_item;
-           
+
             // 아이템 인덱스 범위가 9~35인지 확인하기
-            if( item_index >= this.startIndex && item_index <= this.endIndex){
+            if (item_index >= this.startIndex && item_index <= this.endIndex) {
                 //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
 
                 console.log("인벤에 들어갈 아이템 정보", item);
                 const type = item.item_type;
+                const id = item.item_id;
                 const name = item.item_name;
                 const count = item_count;
 
                 // 서버의 item_index는 퀵슬롯 인벤 구별하지 않음.
                 // 0~8는 퀵슬롯에 할당되고 9부터 인벤에 할당되는거라서
                 // 인벤에 아이템 들어갈 때 퀵슬롯 크기만큼 빼줘야 함.
-                this.itemSlots[item_index - this.quickSize].setSlotItem(new Item(type, name, count));
+                this.itemSlots[item_index - this.quickSize].setSlotItem(new Item(type, id, name, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }
@@ -212,28 +207,24 @@ export default class Inventory extends Frame {
     }
 
 
-    // 인벤토리의 아이템 슬롯에 새 아이템 추가
+    // 인벤토리에 빈 공간이 있는지 체크하고 빈 공간중에서 가장 낮은 인덱스 슬롯에 새 아이템 추가
+    // 만약에 중복 아이템이 있으면 수량 증가
     addItem(item) {
         // 이미 itemSlots 배열에 아이템 슬롯 객체들이 들어가 있어서 push는 안통함.
         // 보통 인벤토리에 아이템이 추가될 때 공간이 남아 있다면 인덱스가 가장 낮은 쪽에 추가됨.
 
+
+        // 중복 아이템이 있는지 찾고 없으면 빈 슬롯을 찾는다.
+
+
+
         // 빈 아이템 슬롯의 인덱스
-        let emptyIndex = null;
-
         // 인벤토리에 빈 공간이 있는지 체크
-        const invenSpace = this.itemSlots.some((itemSlot, index) => {
+        let emptyIndex = this.findEmptySlot();
 
-            if (itemSlot.item === null) {
-                console.log("빈 아이템 슬롯 발견 슬롯 인덱스 : " + index);
-                emptyIndex = index;
-                return true;
-            } else {
-                return false;
-            }
-        });
 
         // 인벤토리에 빈 공간 없으면 추가 안함.
-        if (!invenSpace) {
+        if (emptyIndex === null) {
             console.log("인벤토리가 꽉 차서 새 아이템 추가 불가");
         }
 
@@ -249,8 +240,8 @@ export default class Inventory extends Frame {
 
                     console.log("중복 아이템 발견 수량 증가");
                     // 중복 아이템의 수량 증가
-                    itemSlot.item.quantity += 1;
-                    itemSlot.setSlotItem(itemSlot.item);
+                    //itemSlot.item.quantity += 1;
+                    //itemSlot.setSlotItem(itemSlot.item);
                     return true;
                 } else {
                     return false;
@@ -259,11 +250,72 @@ export default class Inventory extends Frame {
         });
 
         // 먹은 아이템이 중복 아이템이 아니고 인벤토리에 공간이 있으면
-        if (itemExist === false && invenSpace) {
+        if (itemExist === false && emptyIndex !== null) {
             console.log("새 아이템 추가");
             this.itemSlots[emptyIndex].setSlotItem(item);
         }
 
+    }
+
+    // 인벤토리에 빈 공간이 있는지 체크하고 빈 공간 인덱스 리턴
+    findEmptySlot() {
+
+        // 새 아이템이 추가될 슬롯의 인덱스
+        let emptyIndex = null;
+
+        // 인벤토리에 빈 공간이 있는지 체크
+        const invenSpace = this.itemSlots.some((itemSlot, index) => {
+
+            if (itemSlot.item === null) {
+                // 서버에선 인벤토리 인덱스 시작이 9번부터임.
+                emptyIndex = index + this.quickSize;
+
+                console.log("빈 아이템 슬롯 발견 슬롯 인덱스 : " + emptyIndex);
+                return true;
+            } else {
+                return false;
+            }
+        });
+        return emptyIndex;
+    }
+
+    // 중복 아이템이 있는 아이템 슬롯 찾기
+    findDupSlot(itemName){
+
+        // 중복 아이템이 있는 슬롯
+        let dupIndex = null;
+
+        // 얻은 아이템이 인벤토리에 이미 존재하는지 탐색
+        const itemExist = this.itemSlots.some((itemSlot, index) => {
+
+            // 빈 아이템 슬롯인지 체크
+            if (itemSlot.item === null) {
+                return false;
+            } else {
+                // 아이템 슬롯의 아이템 이름을 비교해서 중복되는 아이템을 먹었는지 확인.
+                if (itemSlot.item.name === itemName) {
+
+                    console.log("중복 아이템 발견",itemSlot.item.name, itemName );
+                    console.log("중복 아이템이 있는 슬롯 인덱스", index + this.quickSize);
+
+                    dupIndex = index;
+                    // 중복 아이템의 수량 증가
+                    //itemSlot.item.quantity += 1;
+                    //itemSlot.setSlotItem(itemSlot.item);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+
+        return dupIndex;
+
+    }
+
+    // 아이템 수량 증가 
+    increaseCount(){
+        
     }
 
     enable() {
@@ -277,6 +329,14 @@ export default class Inventory extends Frame {
         //console.log("인벤 닫음");
         this.setVisible(false);
         //this.scene.input.setTopOnly(true);
+    }
+
+    // 드래그 할 때 슬롯 자식에서 해제된 이미지를 다시 자식으로 되돌린다.
+    returnImg(returnSlot, returnImg) {
+        returnSlot.add(returnImg);
+        returnImg.x = returnSlot.width / 2;
+        returnImg.y = returnSlot.height / 2;
+        //returnImg.setDepth(0);
     }
 
     // 디버그 영역 표시
