@@ -189,7 +189,7 @@ export default class Inventory extends Frame {
             if (item_index >= this.startIndex && item_index <= this.endIndex) {
                 //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
 
-                console.log("인벤에 들어갈 아이템 정보", item);
+                //console.log("인벤에 들어갈 아이템 정보", item);
                 const type = item.item_type;
                 const id = item.item_id;
                 const name = item.item_name;
@@ -261,29 +261,32 @@ export default class Inventory extends Frame {
     findEmptySlot() {
 
         // 새 아이템이 추가될 슬롯의 인덱스
-        let emptyIndex = null;
+        let emptySlot = null;
 
         // 인벤토리에 빈 공간이 있는지 체크
         const invenSpace = this.itemSlots.some((itemSlot, index) => {
 
             if (itemSlot.item === null) {
-                // 서버에선 인벤토리 인덱스 시작이 9번부터임.
-                emptyIndex = index + this.quickSize;
 
+                // 서버에선 인벤토리 인덱스 시작이 9번부터임.
+                const emptyIndex = index + this.quickSize;
                 console.log("빈 아이템 슬롯 발견 슬롯 인덱스 : " + emptyIndex);
+
+                emptySlot = itemSlot;
                 return true;
             } else {
                 return false;
             }
         });
-        return emptyIndex;
+        return emptySlot;
     }
 
     // 중복 아이템이 있는 아이템 슬롯 찾기
+    // 지금은 인덱스 반환 중
     findDupSlot(itemName){
 
         // 중복 아이템이 있는 슬롯
-        let dupIndex = null;
+        let dupSlot = null;
 
         // 얻은 아이템이 인벤토리에 이미 존재하는지 탐색
         const itemExist = this.itemSlots.some((itemSlot, index) => {
@@ -295,13 +298,14 @@ export default class Inventory extends Frame {
                 // 아이템 슬롯의 아이템 이름을 비교해서 중복되는 아이템을 먹었는지 확인.
                 if (itemSlot.item.name === itemName) {
 
-                    console.log("중복 아이템 발견",itemSlot.item.name, itemName );
-                    console.log("중복 아이템이 있는 슬롯 인덱스", index + this.quickSize);
+                    // 서버에서 인벤 인덱스 시작이 9부터임.
+                    const dupIndex = index + this.quickSize;
 
-                    dupIndex = index;
-                    // 중복 아이템의 수량 증가
-                    //itemSlot.item.quantity += 1;
-                    //itemSlot.setSlotItem(itemSlot.item);
+                    console.log("인벤에서 중복 아이템 발견",itemSlot.item.name, itemName );
+                    console.log("중복 아이템이 있는 슬롯 인덱스", dupIndex);
+
+                    // 중복 아이템 있는 슬롯 찾음
+                    dupSlot = itemSlot;
                     return true;
                 } else {
                     return false;
@@ -309,14 +313,10 @@ export default class Inventory extends Frame {
             }
         });
 
-        return dupIndex;
+        return dupSlot;
 
     }
 
-    // 아이템 수량 증가 
-    increaseCount(){
-        
-    }
 
     enable() {
         this.setVisible(true);

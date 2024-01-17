@@ -102,7 +102,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         //console.log("농작물 성장기 1");
 
         // 성장기 1에 사용되는 이미지 키는 name + '_02'이다.
-        // 예) this.name = potato면 'potato_02'
+        // 예) this.name = 감자면 '감자_02'
         const grow1ImgKey = this.name + '_02';
         const scene = this.scene;
 
@@ -118,7 +118,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
 
         // 호박 반 픽셀 왼쪽, 1픽셀 아래(-2, 8)
-        if (this.name === 'pumpkin') {
+        if (this.name === '호박') {
             //console.log("호박 성장기 1 위치 조정");
             // 타일의 이루는 픽셀의 크기는 4x4
             // 가로 길이가 홀수인 이미지는 2픽셀(반 픽셀) 만큼 빼면 밭 타일이랑 중앙에 위치됨.
@@ -151,18 +151,18 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.cropSprite.setTexture(grow2ImgKey);
 
         // 감자 1픽셀 아래
-        if (this.name === 'potato') {
+        if (this.name === '감자') {
             //console.log("감자 성장기 2 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 호박 1픽셀 왼쪽, 1픽셀 아래
-        else if (this.name === 'pumpkin') {
+        else if (this.name === '호박') {
             //console.log("호박 성장기 2 위치 조정");
             this.cropSprite.x = this.cropSprite.x - this.offsetX;
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 양배추 1픽셀 아래
-        else if (this.name === 'cabbage') {
+        else if (this.name === '양배추') {
             //console.log("양배추 성장기 2 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
@@ -191,18 +191,18 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         // 수확기 이미지 위치 조정
         // 감자 반픽셀 오른쪽, 1픽셀 아래
-        if (this.name === 'potato') {
+        if (this.name === '감자') {
             //console.log("감자 수확기 위치 조정");
             this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 호박 1픽셀 아래
-        else if (this.name === 'pumpkin') {
+        else if (this.name === '호박') {
             //console.log("호박 수확기 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY;
         }
         // 양배추 2픽셀 아래
-        else if (this.name === 'cabbage') {
+        else if (this.name === '양배추') {
             //console.log("양배추 수확기 위치 조정");
             this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
         }

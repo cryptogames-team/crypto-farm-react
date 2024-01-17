@@ -79,25 +79,31 @@ export default class InGameScene extends Phaser.Scene {
     isDragging = false;
 
     // JWT 액세스 토큰
-    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NDAzMTYxLCJleHAiOjE3MDU0MzkxNjF9.V2iDB1zolVL3U5d5sqggD9Jd3LztIi1q3N0QTGDVUWI";
+    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NDY4MDkxLCJleHAiOjE3MDU1MDQwOTF9.0lFSwZxGA-31WmFJo3ikJVKyELtazYGiAlwJxK_aLwU";
     // 플레이어 소유 아이템 목록
     own_items;
 
-    // 생성자가 왜 있지?
-    // 씬 등록하는건가?
+    // 서버에서 전체 아이템 목록을 요청한 다음 그게 배열로 오는데
+    // 해쉬 테이블에 저장시킴
+    // 모든 아이템 정보 <- 해쉬 테이블
+    allItems = new Map();
+
+    // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
         super('InGameScene');
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-        this.serverGetItem();
+        this.serverGetUserItem();
+
+        this.serverGetAllItem();
 
         // 테스트 계정의 감자 갯수 증가 시키기
         //this.serverAddItem(9, 1, 3);
     }
 
     // 서버로부터 로그인한 유저의 아이템 목록 받아오기
-    async serverGetItem() {
+    async serverGetUserItem() {
 
         const user_id = '1'
         const requestURL = APIUrl + 'item/own-item/' + user_id;
@@ -122,7 +128,53 @@ export default class InGameScene extends Phaser.Scene {
             //console.log('유저 아이템 목록', this.own_items);
 
         } catch (error) {
-            console.error('serverGetItem() Error : ', error);
+            console.error('serverGetUserItem() Error : ', error);
+        }
+
+    }
+
+    // 모든 아이템 정보 받아오기 아이템 배열로 받음
+    async serverGetAllItem() {
+
+        const requestURL = APIUrl + 'item/item/all';
+
+        try {
+
+            // GET 메소드에 바디를 포함할 수 없음
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+
+                },
+            });
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            const data = await response.json();
+
+            // 서버로부터 받은 전체 아이템 정보들
+            //console.log('전체 아이템 목록', data);
+
+            // 배열을 해쉬 테이블로 변환한다.
+
+            data.forEach((item, index) => {
+
+                // 구조 분해 할당
+                const { item_name } = item;
+                // 값 추가
+                this.allItems.set(item_name, item);
+            });
+
+            /* console.log("전체 아이템 개수",this.allItems.size);
+            console.log("감자 씨앗 있음?",this.allItems.has("감자 씨앗"));
+            console.log("당근 있음?",this.allItems.has("당근"));
+            console.log("무야호 있음?",this.allItems.has("무야호")); */
+
+
+        } catch (error) {
+            console.error('serverGetAllItem() Error : ', error);
         }
 
     }
@@ -130,9 +182,9 @@ export default class InGameScene extends Phaser.Scene {
 
     // 서버에 로그인 한 유저에게 새 아이템 추가, 기존 아이템 수량 증가 요청하는 함수
     // 액세스 토큰 필요함
-    // 아이템 클래스와 매개변수를 맞춰야 하나?
-    async serverAddItem(item_id, item_count, item_index) {
+    async serverAddItem(item_count, item_index, addItemInfo, addItemSlot) {
 
+        const { item_id, item_type, item_name } = addItemInfo;
 
         const requestURL = APIUrl + 'item/add/';
 
@@ -141,6 +193,8 @@ export default class InGameScene extends Phaser.Scene {
             'item_count': item_count,
             'item_index': item_index
         }
+
+        console.log("서버 아이템 추가 요청에 사용할 바디 ", requestBody);
 
         try {
 
@@ -163,44 +217,116 @@ export default class InGameScene extends Phaser.Scene {
             const data = await response.text();
 
             //console.log("받은 응답 헤더의 콘텐츠 타입", response.headers.get("content-type"));
-            console.log('서버 아이템 추가 결과', data);
 
-            // 요청이 성공하면 새 아이템, 혹은 중복 아이템의 수량 증가한다.
-            if( data === 'success'){
+            // 요청이 성공하면 새 아이템의 추가나 중복 아이템 수량 증가 시키기
+            if (data === 'success') {
 
-                // 아이템이 추가되거나 수량증가할 슬롯의 타입
-                let slotType = null;
-                // 아이템이 추가되거나 수량이 증가할 슬롯의 참조
-                let slot = null;
+                console.log('서버 아이템 추가 성공');
+                console.log('아이템이 추가 되거나 수량 증가할 슬롯', addItemSlot);
 
-                // item_index로 인벤의 슬롯인지 퀵슬롯의 슬롯인지 확인한다.
-                // 퀵슬롯 0~8 
-                // 인벤토리 9~35
-                if( item_index >= 0 && item_index <= 8){
-                    slotType = 1;
+                // 중복 아이템 수량 증가
+                if (addItemSlot.item !== null) {
+                    addItemSlot.item.count += 1;
+                    addItemSlot.setSlotItem(addItemSlot.item);
                 }
-                else if( item_index >= 9 && item_index <= 35){
-                    slotType = 0;
+                // 새 아이템 추가
+                else {
+                    addItemSlot.setSlotItem(new Item(item_type, item_id, item_name, item_count));
                 }
 
-                // 그 아이템 슬롯이 비었는지 중복 아이템이 존재하는지 확인한다.
-
-                if( slotType === 0 ){
-                    slot = this.inventory[item_index - this.quickSlotUI.size];
-
-                // 비었으면 새 아이템 추가
-                
-                // 중복 아이템이 존재하면 수량 증가           
-
-                }
-
-
+            }
+            else {
+                console.log('서버 아이템 추가 실패');
             }
 
         } catch (error) {
             console.error('serverAddItem() Error : ', error);
         }
 
+    }
+
+    // 서버에 로그인 한 유저의 아이템 소비 요청함.
+    async serverUseItem(item_name, item_count, useItemSlot){
+
+        const requestURL = APIUrl + 'item/use/';
+
+        const useItemInfo = this.allItems.get(item_name);
+
+        const requestBody = {
+            'item_id': useItemInfo.item_id,
+            'item_count': item_count,
+        }
+
+        console.log("서버 아이템 사용 요청에 사용할 바디 ", requestBody);
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //액세스 토큰 값 보내기
+                    Authorization: 'Bearer ' + this.acessToken
+                },
+
+                // 바디 필요함.
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.text();
+
+            // 요청이 성공하면 클라이언트에서도 아이템 소비와 삭제
+            if (data === 'use success') {
+                console.log('아이템이 소비되는 슬롯', useItemSlot);
+                
+                useItemSlot.useItem(item_count);
+            }
+            else {
+                console.log('서버 아이템 소비 실패');
+            }
+
+        } catch (error) {
+            console.error('serverUseItem() Error : ', error);
+        }
+    }
+
+    // 서버에 아이템 이동 요청
+    async serverMoveItem(item_name, item_index){
+
+        // URL에 포함시켜야함.
+
+        const useItemInfo = this.allItems.get(item_name);
+
+        const requestURL = APIUrl + 'item/move/' + useItemInfo.item_id + '/' + item_index;
+
+        try {
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //액세스 토큰 값 보내기
+                    Authorization: 'Bearer ' + this.acessToken
+                },
+
+            });
+
+            const data = await response.text();
+
+            // 요청이 성공했는지 확인
+            if (data === 'success') {
+                console.log('서버 아이템 이동 성공');
+            }
+            else {
+                console.log('서버 아이템 이동 실패');
+            }
+
+        } catch (error) {
+            console.error('serverMoveItem() Error : ', error);
+        }
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -913,14 +1039,17 @@ export default class InGameScene extends Phaser.Scene {
         // y축 위치를 1픽셀 만큼 내려야 함.
         // 지금 맵 크기가 4배 커져있으니 총 4픽셀만큼 내려야된다.
 
-        const seedImgKey = seedName + '_01';
 
+        // seedName '감자 씨앗'으로 오니까 ' 씨앗' 부분 빼야됨.
+        let newSeedName = seedName.replace(' 씨앗', '');
+
+        const seedImgKey = newSeedName + '_01';
         //console.log("seedImgKey : " + seedImgKey);
 
 
         // 농작물 게임 오브젝트 추가
         // 컨테이너 객체는 origin이 중앙임
-        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, seedName);
+        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, newSeedName);
 
         crops.body.debugShowBody = false;
 
@@ -942,58 +1071,17 @@ export default class InGameScene extends Phaser.Scene {
                 this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
 
 
-                // 아이템이 추가되거나 수량이 증가할 슬롯의 인덱스
-                let item_index = null;
 
-                // 아이템이 추가되거나 수량이 증가할 슬롯 인덱스를 찾아야함.
-                // 인벤토리만 생각하기
+                // 새 아이템이 추가되거나 중복 아이템 수량이 증가할 아이템 슬롯 찾기
+                let addItemSlot = null;
+                addItemSlot = this.findAddItemSlot(crops.name);
 
+                // 추가할 아이템 슬롯이 있으면
+                // 아이템 추가 요청할 때 필요한 데이터 모아서 서버에 아이템 추가 요청함.
+                if (addItemSlot !== null) {
 
-
-                // 인벤토리에 중복 아이템(당근)이 있는지 확인하기
-                const dupIndex = this.inventory.findDupSlot(crops.name);
-                let emptyIndex = null;
-
-                // 중복 아이템이 없을 경우
-                if (dupIndex === null) {
-                    // 없으면 인벤에 빈 공간이 있는지 확인하기
-                    emptyIndex = this.inventory.findEmptySlot();
-
-                    // 인벤에 빈 공간이 있을 경우
-                    if (emptyIndex !== null) {
-                        item_index = emptyIndex;
-                    } else {
-                        console.log("인벤토리에 빈 공간이 없음.");
-                    }
-
-                } else {
-                    item_index = dupIndex;
+                    this.sendAddItem(crops.name, addItemSlot);
                 }
-
-                // item_id 어디서 가져오나 일단 하드 코딩
-
-
-                if( item_index !== null)
-                this.serverAddItem(11, 1, item_index);
-
-                // 인벤토리에 새 아이템 증가나 중복 아이템 수량 증가 시켜야 됨.
-                // 이건 serverAddItem()에서 처리하게 만들기.
-
-
-                /*                 // 아이템 이름으로 찾게 해볼까?
-                                // addItem() 할 때 아이템 객체가 필요함.
-                
-                                // 먼저 퀵슬롯에 중복 아이템이 있는지 확인한다.
-                                const quickSlotExist = this.quickSlotUI.findDupItem(new Item(1, crops.name));
-                                //const quickSlotExist = this.quickSlotUI.newfindDupItem(crops.name);
-                
-                                // 퀵슬롯에 중복 아이템이 없으면 인벤에 아이템 추가 시도
-                                if (!quickSlotExist)
-                                    this.inventory.addItem(new Item(1, crops.name)); */
-
-
-
-
 
                 // 씬에서 농작물 객체 제거
                 crops.harvest();
@@ -1004,6 +1092,70 @@ export default class InGameScene extends Phaser.Scene {
         plantTile.properties.plantable = false
 
     }
+
+    // 아이템 이름으로 새 아이템이 추가되거나 수량이 증가할 아이템 슬롯 찾음
+    findAddItemSlot(itemName) {
+
+        let addItemSlot = null;
+
+        // 중복 아이템 찾기 퀵슬롯 -> 인벤
+        // 중복 아이템 없으면 빈 슬롯 찾기 인벤 -> 퀵슬롯
+        // 빈 슬롯 없으면 아이템 추가 X
+
+        // 퀵슬롯에 중복 아이템이 있는지 확인하기
+        addItemSlot = this.quickSlotUI.findDupSlot(itemName);
+        if (addItemSlot === null) {
+
+            // 인벤토리에 중복 아이템이 있는지 확인하기
+            addItemSlot = this.inventory.findDupSlot(itemName);
+
+
+            // 중복 아이템이 없을 경우
+            if (addItemSlot === null) {
+                // 없으면 인벤에 빈 공간이 있는지 확인하기
+                addItemSlot = this.inventory.findEmptySlot();
+
+                // 인벤에 빈 공간이 없으면
+                if (addItemSlot === null) {
+                    console.log("인벤토리에 빈 공간이 없음.");
+
+                    // 퀵슬롯에서 빈 공간 찾기
+                    addItemSlot = this.quickSlotUI.findEmptySlot();
+
+                } else {
+                    console.log("인벤토리에 빈 공간이 있음.");
+                }
+            }
+        }
+
+        return addItemSlot;
+
+    }
+
+    // 아이템 이름으로 아이템 추가 요청할 때 필요한 데이터 모아서 
+    // 서버에 아이템 추가 요청함.
+    sendAddItem(itemName, addItemSlot){
+        // 추가될 아이템 정보 객체
+        const addItemInfo = this.allItems.get(itemName);
+
+        // 아이템이 추가되거나 수량이 증가할 슬롯의 인덱스
+        // 인벤토리의 시작 인덱스는 9부터
+        // 퀵슬롯의 인덱스 범위 0~8
+
+        // 슬롯 타입에 따라 인덱스 조정시키기
+        let item_index = null;
+
+        if (addItemSlot.type === 0) {
+            item_index = addItemSlot.index + this.quickSlotUI.size;
+        } else {
+            item_index = addItemSlot.index;
+        }
+
+        console.log('추가될 아이템 정보 객체', addItemInfo);
+
+        this.serverAddItem(1, item_index, addItemInfo, addItemSlot);
+    }
+
 
     // 마우스 포인터가 위치한 타일의 픽셀 위치를 구하는 함수
     getMousePointerTile() {

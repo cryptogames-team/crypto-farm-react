@@ -134,7 +134,7 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             // 아이템 인덱스 범위가 0~8인지 확인하기
             if (item_index >= this.startIndex && item_index <= this.endIndex) {
                 //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
-                console.log("퀵슬롯에 들어갈 아이템 정보", item);
+                //console.log("퀵슬롯에 들어갈 아이템 정보", item);
 
                 const type = item.item_type;
                 const id = item.item_id;
@@ -149,10 +149,13 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
 
     }
 
-    // 퀵슬롯에 중복 아이템이 있는지 확인한다.
-    // 있으면 아이템 수량 증가 시킴.
-    findDupItem(item) {
-        // 얻은 아이템이 인벤토리에 이미 존재하는지 탐색
+    // 퀵슬롯에서 중복 아이템이 있는 슬롯 찾기
+    findDupSlot(itemName) {
+
+        // 중복 아이템이 있는 슬롯
+        let dupSlot = null;
+
+        // 얻은 아이템이 퀵슬롯에 이미 존재하는지 탐색
         const itemExist = this.quickSlots.some((itemSlot, index) => {
 
             // 빈 아이템 슬롯인지 체크
@@ -160,55 +163,43 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
                 return false;
             } else {
                 // 아이템 슬롯의 아이템의 타입과 이름을 비교해서 중복되는 아이템을 먹었는지 확인.
-                if (itemSlot.item.type === item.type && itemSlot.item.name === item.name) {
-
-                    console.log("퀵슬롯에 중복 아이템 발견 수량 증가");
-                    // 중복 아이템의 수량 증가
-                    itemSlot.item.count += 1;
-                    itemSlot.setSlotItem(itemSlot.item);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-
-        return itemExist;
-    }
-
-    // 퀵슬롯에 중복 아이템이 있는지 확인하고
-    // 있으면 그 아이템 수량 증가 시켜달라고 서버에 요청하고
-    // 성공하면 클라이언트 아이템 개수 증가시킨다.
-    newfindDupItem(itemName) {
-
-        // 얻은 아이템이 인벤토리에 이미 존재하는지 탐색
-        const itemExist = this.quickSlots.some((itemSlot, index) => {
-
-            // 빈 아이템 슬롯인지 체크
-            if (itemSlot.item === null) {
-                return false;
-            } else {
-                // 아이템 슬롯의 아이템의  이름을 비교해서 중복되는 아이템을 먹었는지 확인.
                 if (itemSlot.item.name === itemName) {
 
-                    console.log("퀵슬롯에 중복 아이템 발견 수량 증가");
-
-                    // 아이템 클래스에 id가 없음.
-                    // 크롭 클래스에도 추가해야되나?
-
-                    // 아이템 정보 기반으로 농작물 객체 생성하나?
-
-                    this.scene.serverAddItem(itemSlot.item.id, 1, 
-                        index);
-
+                    console.log("퀵슬롯에서 중복 아이템 슬롯 발견 인덱스 : ", index);
+                    
+                    dupSlot = itemSlot;
                     return true;
                 } else {
-
                     return false;
                 }
             }
         });
 
+        return dupSlot;
+    }
+
+    // 퀵슬롯에서 빈 슬롯 찾기
+    findEmptySlot(){
+
+        // 새 아이템이 추가될 슬롯의 인덱스
+        let emptySlot = null;
+
+        // 퀵슬롯에 빈 공간이 있는지 체크
+        const quickSpace = this.quickSlots.some((itemSlot, index) => {
+
+            if (itemSlot.item === null) {
+
+               
+                const emptyIndex = index;
+                console.log("빈 아이템 슬롯 발견 슬롯 인덱스 : " + emptyIndex);
+
+                emptySlot = itemSlot;
+                return true;
+            } else {
+                return false;
+            }
+        });
+        return emptySlot;
     }
 
 

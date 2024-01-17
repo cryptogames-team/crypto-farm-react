@@ -129,7 +129,10 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
             plantAnim.on('animationupdate', (anim, frame) => {
                 if (frame.index === 3) {
                     scene.addSeed(seedName, plantTile);
-                    equipSlot.useItem(1);
+                    //equipSlot.useItem(1);
+
+                    scene.serverUseItem(seedName, 1, equipSlot);
+
                 }
             });
             this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
@@ -412,24 +415,24 @@ class ActionState extends State {
             // 씨앗 심기
             // 성공할 경우 씬에 농작물 오브젝트가 추가되고
             // 실패하면 농작물 오브젝트가 추가되지 않고 캐릭터 상태가 대기로 전환됨.
-            player.plantSeed(scene, player, '감자', equipSlot);
+            player.plantSeed(scene, player, '감자 씨앗', equipSlot);
 
         }
         // 당근 씨앗
         else if (equipItem.name === '당근 씨앗') {
 
-            player.plantSeed(scene, player, '당근', equipSlot);
+            player.plantSeed(scene, player, '당근 씨앗', equipSlot);
         }
         // 호박 씨앗
         else if (equipItem.name === '호박 씨앗') {
 
-            player.plantSeed(scene, player, '호박', equipSlot);
+            player.plantSeed(scene, player, '호박 씨앗', equipSlot);
 
         }
         // 양배추 씨앗
         else if (equipItem.name === '양배추 씨앗') {
 
-            player.plantSeed(scene, player, '양배추', equipSlot);
+            player.plantSeed(scene, player, '양배추 씨앗', equipSlot);
 
         }
         else {

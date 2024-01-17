@@ -35,10 +35,13 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     // 배경 안쪽 사각형 패딩
     bgPad = 5;
 
-    // 아이템 슬롯의 인벤토리 내의 인덱스
+    // 아이템 슬롯의 인벤토리나 퀵슬롯 내의 인덱스
     index;
 
     scene;
+
+    // 퀵슬롯 크기 서버에서 인벤 인덱스는 9부터임
+    quickSize = 9;
 
     // 아이템과 슬롯 번호에 디폴트 매개변수 적용
     // 아이템 슬롯, 빈 아이템 슬롯, 퀵슬롯, 빈 퀵슬롯으로 사용 가능함
@@ -76,7 +79,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 아이템 객체를 받아서 아이템 슬롯으로 사용 시
         if (item) {
             this.itemTitle = item.title;
-            this.count = item.quantity;
+            this.count = item.count;
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);
@@ -241,6 +244,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     index: scene.endSlot.index
                 };
 
+
+
                 //console.log("드랍한 슬롯의 정보", slotInfo);
 
                 // 마우스 포인터가 위치한 슬롯의 아이템이 존재하는지 체크
@@ -254,6 +259,30 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     // 이 경우에는 동일한 객체 참조 여부를 검사해야되는건가?
                     if (scene.endSlot !== scene.startSlot) {
                         //console.log("시작 슬롯과 드랍 슬롯이 동일하지 않아서 아이템 교체");
+
+
+                        // 드랍한 슬롯의 타입에 따라 인덱스 시작 값이 달라져야한다.
+                        // 퀵슬롯이면 그대로 넣으면 되고
+                        let item_index = scene.endSlot.index;
+
+                        // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야된다.
+                        if (scene.endSlot.type === 0) {
+                            item_index += this.quickSize;
+                        }
+
+                        // start -> end 이동 요청
+                        scene.serverMoveItem(scene.startSlot.item.name, item_index);
+
+                        // end -> start 이동 요청
+                        item_index = scene.startSlot.index;
+
+                        // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야된다.
+                        if (scene.startSlot.type === 0) {
+                            item_index += this.quickSize;
+                        }
+
+                        scene.serverMoveItem(scene.endSlot.item.name, item_index);
+
                         this.swapItem(scene.startSlot, scene.endSlot);
 
                     }
@@ -262,8 +291,22 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     }
                 }
                 else {
+
+                    // 드랍한 슬롯의 타입에 따라 인덱스 시작 값이 달라져야한다.
+                    // 퀵슬롯이면 그대로 넣으면 되고
+                    let item_index = scene.endSlot.index;
+
+                    // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야된다.
+                    if (scene.endSlot.type === 0) {
+                        item_index += this.quickSize;
+                    }
+
+                    // 아이템 이동 요청
+                    scene.serverMoveItem(scene.startSlot.item.name, item_index);
+
                     // 빈 슬롯으로 아이템 옮기기
                     this.moveItem(scene.startSlot, scene.endSlot);
+
                 }
 
             }
@@ -318,6 +361,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     }
 
     // 아이템 소비해서 수량 감소시키는 함수
+    // 다 사용하면 슬롯에서 아이템 삭제함.
     // spend : 사용 개수
     useItem(spend) {
 
@@ -328,18 +372,18 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
 
         // 사용할 개수 만큼 수량이 남아 있는지 체크
-        if (item.quantity >= spend) {
+        if (item.count >= spend) {
             // 사용 개수 만큼 수량 감소
-            item.quantity -= spend;
+            item.count -= spend;
 
-            console.log('남은 아이템 수량 : ', item.quantity);
+            console.log('남은 아이템 수량 : ', item.count);
 
             // 수량 텍스트 업데이트
-            this.countTxt.setText(item.quantity);
+            this.countTxt.setText(item.count);
 
             // 아이템의 남은 수량이 없으면 삭제
-            if(item.quantity <= 0)
-            this.removeItem();
+            if (item.count <= 0)
+                this.removeItem();
 
             return true;
         }
@@ -374,10 +418,10 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         // 드랍 슬롯의 아이템을 드래그 시작 슬롯의 아이템으로 교체
         endSlot.item = Object.assign({}, startSlot.item);
-        endSlot.itemImg.setTexture(endSlot.item.imgKey)
+        endSlot.itemImg.setTexture(endSlot.item.name)
             .setDisplaySize(endSlot.width / 2, endSlot.height / 2);
-        endSlot.nameTxt.setText(endSlot.item.title);
-        endSlot.countTxt.setText(endSlot.item.quantity);
+        endSlot.nameTxt.setText(endSlot.item.name);
+        endSlot.countTxt.setText(endSlot.item.count);
 
         console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
 
@@ -391,16 +435,19 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 드랍 슬롯 아이템 객체의 복사본이 필요하다.
         // Js에서 클래스 객체를 대입하면 객체에 대한 참조가 전달된다.
         startSlot.item = hoverItem;
-        startSlot.itemImg.setTexture(startSlot.item.imgKey)
+        startSlot.itemImg.setTexture(startSlot.item.name)
             .setDisplaySize(startSlot.width / 2, startSlot.height / 2);
-        startSlot.nameTxt.setText(startSlot.item.title);
-        startSlot.countTxt.setText(startSlot.item.quantity);
+        startSlot.nameTxt.setText(startSlot.item.name);
+        startSlot.countTxt.setText(startSlot.item.count);
 
         startSlot.setImgHitArea();
     }
 
     // 빈 아이템 슬롯으로 아이템 옮기기
     moveItem(startSlot, endSlot) {
+
+
+
         endSlot.setSlotItem(startSlot.item);
         startSlot.removeItem();
     }
