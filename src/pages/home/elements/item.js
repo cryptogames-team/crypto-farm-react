@@ -32,14 +32,19 @@ export default class Item{
     // 주의 : 디폴트 매개변수는 해당 매개변수에 'undefined'가 전달되었을 때 사용된다.
     // null, 0, ''과 같은 falsy 값들은 디폴트 매개변수를 대체한다.
     // 근데 이 기능은 ES6에서 도입된 거라서 구형 브라우저에서는 지원되지 않을 수 있음.
-    constructor(type, id, name, count = 1, stackLimit = 999){
+    constructor(type, id, name, des, seedTime, useLevel, price, count = 1, stackLimit = 999){
 
-        // name, title, imgKey를 통합
+
         this.type = type;
         this.id = id;
         this.name = name;
-        this.stackLimit = stackLimit;
+        this.des = des;
+        this.seed_Time = seedTime;
+        this.use_level = useLevel;
+        this.price = price;
         this.count = count;
+        this.stackLimit = stackLimit;
+
     }
 
     // 여러 생성자를 만들 수 있나?

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import ItemSlot from "./item_slot";
 import Item from "../elements/item";
+import ToolTip from "./tooltip";
 
 
 // 퀵슬롯 UI
@@ -104,19 +105,14 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             }
         });
 
-
         // 서버에서 받아온 소유 아이템들을 퀵슬롯에 추가하여 퀵슬롯 초기화
         this.initQuick(scene.own_items);
 
-        // 퀵슬롯 아이템 하드코딩으로 추가하기
-        /* this.quickSlots[0].setSlotItem(new Item('Tool', 'shovel', '삽', 'shovel_icon'));
-        this.quickSlots[1].setSlotItem(new Item('Tool', 'harvest', '수확하기', 'harvest_icon'));
-        this.quickSlots[2].setSlotItem(new Item('Tool', 'axe', '도끼', 'axe_icon'));
-        this.quickSlots[3].setSlotItem(new Item('Tool', 'pickaxe', '곡괭이', 'pickaxe_icon'));
-        this.quickSlots[4].setSlotItem(new Item('Seed', 'potato_seed', '감자 씨앗', 'potato_00', 4));
-        this.quickSlots[5].setSlotItem(new Item('Seed', 'carrot_seed', '당근 씨앗', 'carrot_00', 1));
-        this.quickSlots[6].setSlotItem(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00', 2));
-        this.quickSlots[7].setSlotItem(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00',3 )); */
+        // 아이템 툴팁 생성하기3
+        // 컨테이너는 오리진 설정이 불가능
+        this.toolTip = new ToolTip(scene, 0 , -250, 250, 250);
+        this.toolTip.setVisible(false);
+        this.add(this.toolTip);
 
     }
 
@@ -139,9 +135,14 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
                 const type = item.item_type;
                 const id = item.item_id;
                 const name = item.item_name;
+                const des = item.item_des;
+                const seedTime = item.seed_time;
+                const useLevel = item.use_level;
+                const price = item.item_price;
                 const count = item_count;
 
-                this.quickSlots[item_index].setSlotItem(new Item(type, id, name, count));
+                this.quickSlots[item_index].setSlotItem(
+                    new Item(type, id, name, des, seedTime, useLevel, price, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }

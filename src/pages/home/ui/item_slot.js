@@ -3,6 +3,7 @@ import Phaser from "phaser";
 
 const pad = 7;
 
+
 export default class ItemSlot extends Phaser.GameObjects.Container {
 
     // 퀵슬롯으로 사용시 슬롯 번호 텍스트
@@ -155,11 +156,11 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         // 아이템 슬롯 이벤트 추가
         // 마우스 포인터오버
+        // 마우스 오버하면 딱 한번만 호출됨
         this.on('pointerover', (pointer) => {
 
             //console.log("아이템 슬롯 포인터 오버");
             //this.hoverIndex = this.index;
-            //console.log("마우스 올린 슬롯의 인덱스 : ", this.hoverIndex);
 
             scene.hoverSlot = this;
 
@@ -170,17 +171,118 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
             //console.log("마우스 올린 슬롯 정보 : ", slotInfo);
 
+            // 마우스 올린 인벤 슬롯에 아이템이 존재하면 툴팁 띄우기
+            // 드래그 중이 아니면 조건 추가
+            if (scene.hoverSlot.item !== null && scene.isDragging === false) {
+
+                // 인벤 슬롯일 경우
+                if (scene.hoverSlot.type === 0) {
+                    const toolTip = scene.inventory.toolTip;
+                    const toolTipPad = 20;
+                    // 상대 위치 구하기
+                    const toolTipX = pointer.x - scene.inventory.x + toolTipPad;
+                    const toolTipY = pointer.y - scene.inventory.y;
+
+                    toolTip.setToolTip(scene.hoverSlot.item);
+                    toolTip.setVisible(true);
+                    toolTip.setPosition(toolTipX, toolTipY);
+                }
+                // 퀵슬롯일 경우
+                else if (scene.hoverSlot.type === 1) {
+
+
+                    const toolTip = scene.quickSlotUI.toolTip;
+
+                    // 계속 호출해도 문제가 없나보네?
+                    scene.quickSlotUI.remove(toolTip, false);
+                    toolTip.setDepth(2000);
+
+                    const toolTipPad = 20;
+                    // 상대 위치 구하기
+                    /* const toolTipX = pointer.x - scene.quickSlotUI.x + toolTipPad;
+                    const toolTipY = pointer.y - scene.quickSlotUI.y - scene.quickSlotUI.toolTip.height; */
+
+                    // 자식에서 해제되서 절대 위치 사용할 경우
+                    const toolTipX = pointer.x + toolTipPad;
+                    const toolTipY = pointer.y - scene.quickSlotUI.toolTip.height;
+
+                    toolTip.setToolTip(scene.hoverSlot.item);
+                    toolTip.setVisible(true);
+                    toolTip.setPosition(toolTipX, toolTipY);
+                }
+            }
+
             scene.input.setTopOnly(false);
 
         });
 
-        // 마우스 포인터 아웃io
+        // 마우스가 움직일 때 마다 발생한다.
+        // 신기하게 pointermove가 1회 호출되고 그 다음에 pointerover가 호출됨.
+        this.on('pointermove', (pointer) => {
+
+            scene.hoverSlot = this;
+
+            //console.log("아이템 슬롯 안에서 마우스 움직이는 중");
+            // 마우스 오버한 슬롯에 아이템이 있고 그 슬롯이 인벤 슬롯이고
+            // 드래그 중이 아니면
+            if (scene.hoverSlot.item !== null && scene.isDragging === false) {
+
+                // 인벤 슬롯일 경우
+                if (scene.hoverSlot.type === 0) {
+                    const toolTip = scene.inventory.toolTip;
+                    const toolTipPad = 20;
+                    // 상대 위치 구하기
+                    const toolTipX = pointer.x - scene.inventory.x + toolTipPad;
+                    const toolTipY = pointer.y - scene.inventory.y;
+
+                    toolTip.setToolTip(scene.hoverSlot.item);
+                    toolTip.setVisible(true);
+                    toolTip.setPosition(toolTipX, toolTipY);
+                }
+                // 퀵슬롯일 경우
+                else if (scene.hoverSlot.type === 1) {
+
+                    // 자식에서 해제할까
+
+                    const toolTip = scene.quickSlotUI.toolTip;
+
+                    // 계속 호출해도 문제가 없나보네?
+                    scene.quickSlotUI.remove(toolTip, false);
+                    toolTip.setDepth(2000);
+
+                    const toolTipPad = 20;
+                    // 상대 위치 구하기
+                    /* const toolTipX = pointer.x - scene.quickSlotUI.x + toolTipPad;
+                    const toolTipY = pointer.y - scene.quickSlotUI.y - scene.quickSlotUI.toolTip.height; */
+
+                    // 자식에서 해제되서 절대 위치 사용할 경우
+                    const toolTipX = pointer.x + toolTipPad;
+                    const toolTipY = pointer.y - scene.quickSlotUI.toolTip.height;
+
+                    toolTip.setToolTip(scene.hoverSlot.item);
+                    toolTip.setVisible(true);
+                    toolTip.setPosition(toolTipX, toolTipY);
+                }
+            }
+
+
+        });
+
+        // pointermove가 1회 호출되고 pointerout-> pointerover 순으로 호출된다.
+        // 마우스 포인터 아웃
         this.on('pointerout', (pointer) => {
 
             //console.log("아이템 슬롯 포인터 아웃");
             //this.hoverIndex = null;
 
             scene.hoverSlot = null;
+
+            scene.inventory.toolTip.setVisible(false);
+            scene.quickSlotUI.toolTip.setVisible(false);
+
+            scene.quickSlotUI.add(scene.quickSlotUI.toolTip);
+            scene.quickSlotUI.toolTip.x = 0;
+            scene.quickSlotUI.toolTip.y = 0;
 
         });
 
@@ -216,6 +318,15 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             this.itemImg.x = pointer.x;
             this.itemImg.y = pointer.y;
 
+            // 툴팁 끄기
+            const toolTip = scene.inventory.toolTip;
+            toolTip.setVisible(false);
+
+            scene.quickSlotUI.toolTip.setVisible(false);
+            scene.quickSlotUI.add(scene.quickSlotUI.toolTip);
+            scene.quickSlotUI.toolTip.x = 0;
+            scene.quickSlotUI.toolTip.y = 0;
+
             scene.isDragging = true;
         });
 
@@ -225,6 +336,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
             this.itemImg.x = pointer.x;
             this.itemImg.y = pointer.y;
+
+
         });
 
         // 슬롯 이미지 드래그 종료
@@ -260,30 +373,14 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     if (scene.endSlot !== scene.startSlot) {
                         //console.log("시작 슬롯과 드랍 슬롯이 동일하지 않아서 아이템 교체");
 
-
-                        // 드랍한 슬롯의 타입에 따라 인덱스 시작 값이 달라져야한다.
-                        // 퀵슬롯이면 그대로 넣으면 되고
-                        let item_index = scene.endSlot.index;
-
-                        // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야된다.
-                        if (scene.endSlot.type === 0) {
-                            item_index += this.quickSize;
-                        }
-
                         // start -> end 이동 요청
-                        scene.serverMoveItem(scene.startSlot.item.name, item_index);
-
+                        this.sendMoveItem(scene.startSlot, scene.endSlot);
                         // end -> start 이동 요청
-                        item_index = scene.startSlot.index;
-
-                        // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야된다.
-                        if (scene.startSlot.type === 0) {
-                            item_index += this.quickSize;
-                        }
-
-                        scene.serverMoveItem(scene.endSlot.item.name, item_index);
-
+                        this.sendMoveItem(scene.endSlot, scene.startSlot);
+                        // 아이템 교체
                         this.swapItem(scene.startSlot, scene.endSlot);
+
+
 
                     }
                     else {
@@ -292,20 +389,16 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                 }
                 else {
 
-                    // 드랍한 슬롯의 타입에 따라 인덱스 시작 값이 달라져야한다.
-                    // 퀵슬롯이면 그대로 넣으면 되고
-                    let item_index = scene.endSlot.index;
+                    // 씬에게 아이템 이동 요청 서버에 보내달라고 한다.
+                    this.sendMoveItem(scene.startSlot, scene.endSlot);
 
-                    // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야된다.
-                    if (scene.endSlot.type === 0) {
-                        item_index += this.quickSize;
-                    }
-
-                    // 아이템 이동 요청
-                    scene.serverMoveItem(scene.startSlot.item.name, item_index);
-
+                    // 이동 요청 결과 안 기다리고 걍 옮겨
                     // 빈 슬롯으로 아이템 옮기기
                     this.moveItem(scene.startSlot, scene.endSlot);
+
+                    // 툴팁 내용 재설정
+                    scene.inventory.toolTip.setToolTip(scene.hoverSlot.item);
+                    scene.quickSlotUI.toolTip.setToolTip(scene.hoverSlot.item);
 
                 }
 
@@ -326,6 +419,26 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     }
 
 
+    // 씬에게 아이템 이동 요청 서버에게 보내달라고 전달한다. 
+    sendMoveItem(startSlot, endSlot) {
+
+        const item_name = startSlot.item.name;
+
+        // 아이템이 이동할 슬롯의 인덱스
+        // 드랍한 슬롯의 타입에 따라 인덱스 값에 보정이 들가야된다.
+        // 퀵슬롯이면 그대로 넣으면 되지만
+        let move_index = endSlot.index;
+
+        // 인벤이면 퀵슬롯 크기만큼 추가해서 9부터 시작해야 된다
+        if (endSlot.type === 0) {
+            move_index += this.quickSize;
+        }
+
+        // 아이템 이동 요청
+        this.scene.serverMoveItem(item_name, move_index);
+
+    }
+
     // 빈 아이템 슬롯에서 아이템 슬롯으로 변경될 때
     // 아이템 객체를 전달받아 아이템의 이미지, 수량, 제목을 표시한다.
     // 아이템 이미지가 상호작용 가능해진다.
@@ -335,8 +448,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             .setDisplaySize(this.width / 2, this.height / 2);
         this.nameTxt.setText(item.name);
 
-        // 아이템 타입이 3이면 수량 텍스트 표시 안함.
-        if (item.type === 3)
+        // 아이템 타입이 4이면 수량 텍스트 표시 안함.
+        if (item.type === 4)
             this.countTxt.setText(undefined);
         else
             this.countTxt.setText(item.count);

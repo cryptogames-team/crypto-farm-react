@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import Frame from '../ui/frame';
 import ItemSlot from "./item_slot";
 import Item from "../elements/item";
+import Frame_LT from "./frame_lt";
+import ToolTip from "./tooltip";
 
 // 패딩
 const pad = 19;
@@ -50,6 +52,8 @@ export default class Inventory extends Frame {
     graphics;
 
     scene;
+
+    toolTip;
 
     constructor(scene, x, y, width, height) {
 
@@ -168,6 +172,12 @@ export default class Inventory extends Frame {
 
         this.initInventory(scene.own_items);
 
+        // 아이템 툴팁 생성하기
+        this.toolTip = new ToolTip(scene, 0 ,0, 250, 250);
+        this.toolTip.setVisible(false);
+        this.add(this.toolTip);
+
+        
 
         // 하드 코딩으로 아이템 추가하기
         // 아이템 슬롯에 새 아이템이 추가될 때 마다 상호작용 설정한다.
@@ -185,6 +195,7 @@ export default class Inventory extends Frame {
 
             const { item, item_count, item_index } = own_item;
 
+
             // 아이템 인덱스 범위가 9~35인지 확인하기
             if (item_index >= this.startIndex && item_index <= this.endIndex) {
                 //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
@@ -193,12 +204,17 @@ export default class Inventory extends Frame {
                 const type = item.item_type;
                 const id = item.item_id;
                 const name = item.item_name;
+                const des = item.item_des;
+                const seedTime = item.seed_time;
+                const useLevel = item.use_level;
+                const price = item.item_price;
                 const count = item_count;
 
                 // 서버의 item_index는 퀵슬롯 인벤 구별하지 않음.
                 // 0~8는 퀵슬롯에 할당되고 9부터 인벤에 할당되는거라서
                 // 인벤에 아이템 들어갈 때 퀵슬롯 크기만큼 빼줘야 함.
-                this.itemSlots[item_index - this.quickSize].setSlotItem(new Item(type, id, name, count));
+                this.itemSlots[item_index - this.quickSize].setSlotItem(
+                    new Item(type, id, name, des, seedTime, useLevel, price, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }
