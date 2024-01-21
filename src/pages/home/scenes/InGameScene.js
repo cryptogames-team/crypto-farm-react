@@ -76,7 +76,7 @@ export default class InGameScene extends Phaser.Scene {
     isDragging = false;
 
     // JWT 액세스 토큰
-    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NTUyODQ5LCJleHAiOjE3MDU1ODg4NDl9.SHGO0ER6vUR7xXzofEvmOPAoWwtF-X8xyh73fvZ_Hsk";
+    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NjQyMzMwLCJleHAiOjE3MDU2NzgzMzB9.Lvk53S8gtMALFsOKYSFxmXDmCCzeLYG82lwfpae6Skc";
     // 플레이어 소유 아이템 목록
     own_items;
 
