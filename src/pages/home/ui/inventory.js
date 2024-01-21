@@ -8,6 +8,7 @@ const pad = 19;
 
 export default class Inventory extends Frame {
 
+    
     exitIcon;
 
     // 경계선
@@ -27,6 +28,7 @@ export default class Inventory extends Frame {
     // 아이템 슬롯 배열
     itemSlots = [];
 
+    hi=5;
 
     // 현재 마우스가 올려진 인벤토리 슬롯의 인덱스
     hoverIndex = null;
@@ -351,10 +353,17 @@ export default class Inventory extends Frame {
 
         // 하드 코딩으로 아이템 추가하기
         // 아이템 슬롯에 새 아이템이 추가될 때 마다 상호작용 설정한다.
-        this.itemSlots[0].setSlotItem(new Item('Crops', 'potato', '감자', 'potato_05'));
-        this.itemSlots[10].setSlotItem(new Item('Crops', 'carrot', '당근', 'carrot_05'));
-        this.itemSlots[14].setSlotItem(new Item('Crops', 'cabbage', '양배추', 'cabbage_05'));
-
+        this.itemSlots[0].setSlotItem(new Item('Crops', '감자 씨앗', '감자 씨앗', '감자 씨앗',160));
+        this.itemSlots[1].setSlotItem(new Item('Crops', '나무', '나무', '나무',156));
+        this.itemSlots[2].setSlotItem(new Item('Crops', '당근 씨앗', '당근 씨앗', '당근 씨앗',47));
+        this.itemSlots[3].setSlotItem(new Item('Crops', '사탕무', '사탕무', '사탕무',36));
+        this.itemSlots[4].setSlotItem(new Item('Crops', '양배추 씨앗', '양배추 씨앗', '양배추 씨앗',5));
+        this.itemSlots[5].setSlotItem(new Item('Crops', '호박 씨앗', '호박 씨앗', '호박 씨앗',50));
+        this.itemSlots[6].setSlotItem(new Item('Crops', '무 씨앗', '무 씨앗', '무 씨앗',1309));
+        this.itemSlots[7].setSlotItem(new Item('Crops', '감자', '감자', '감자',1640));
+        this.itemSlots[8].setSlotItem(new Item('Crops', '밀 씨앗', '밀 씨앗', '밀 씨앗',300));
+        this.itemSlots[9].setSlotItem(new Item('Crops', '케일 씨앗', '케일 씨앗', '케일 씨앗',600));
+    
     }
 
     // 드래그 할 때 슬롯 자식에서 해제된 이미지를 다시 자식으로 되돌린다.
@@ -449,7 +458,7 @@ export default class Inventory extends Frame {
 
                     console.log("중복 아이템 발견 수량 증가");
                     // 중복 아이템의 수량 증가
-                    itemSlot.item.quantity += 1;
+                    itemSlot.item.quantity += item.quantity;
                     itemSlot.setSlotItem(itemSlot.item);
                     return true;
                 } else {

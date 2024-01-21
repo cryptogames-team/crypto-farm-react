@@ -37,6 +37,9 @@ export default class SearchItem extends Phaser.GameObjects.Container {
             frame_searchResult_width, frame_searchResult_height); 
         this.setDepth(100).setScrollFactor(0);
 
+
+
+        
         this.ItemBG = scene.add.graphics()
         .fillStyle(0xCCCCCCC) // 채우기 색상 설정
         .fillRoundedRect(frame_searchResult_x+16, frame_searchResult_y+10, 50, 50, 8) // round rectangle 그리기
@@ -51,9 +54,9 @@ export default class SearchItem extends Phaser.GameObjects.Container {
 
         
 
-        this.item_image = scene.add.image(imageX, imageY, "Potato")   
-        .setOrigin(0,0)
-        .setDisplaySize(30,30)
+        this.item_image = scene.add.image(imageX+13, imageY+13, "감자")   
+        .setOrigin(0.5,0.5)
+        .setDisplaySize(25,25)
 
         this.item_text = scene.add.text(frame_searchResult_x+255, frame_searchResult_y+22,"",textConfig).setOrigin(1,0);
 

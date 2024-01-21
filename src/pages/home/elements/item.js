@@ -16,7 +16,7 @@ export default class Item{
     // 스택제한수 : 인벤토리 아이템 한 칸에 몇개까지 들어 갈 수 있는지
     // 스택이 불가능하 아이템들은 1개까지만 들어가고
     // 스택이 가능한 아이템들은 999개까지 들어간다.
-    stackLimit;
+    stackLimit=999;
 
     // 가격
     price;
@@ -25,20 +25,14 @@ export default class Item{
     // 주의 : 디폴트 매개변수는 해당 매개변수에 'undefined'가 전달되었을 때 사용된다.
     // null, 0, ''과 같은 falsy 값들은 디폴트 매개변수를 대체한다.
     // 근데 이 기능은 ES6에서 도입된 거라서 구형 브라우저에서는 지원되지 않을 수 있음.
-    constructor(type, name, title, imgKey, stackLimit = 999){
+    constructor(type, name, title, imgKey,quantity=1){
 
         this.type = type;
         this.name = name;
         this.title = title;
         this.imgKey = imgKey;
-        this.stackLimit = stackLimit;
-        this.quantity = 1;
+        this.quantity = quantity;
     }
 
-
-    // 클래스의 메소드에서도 디폴트 매개변수 사용가능
-    greet(msg = "yo Hello!"){
-        console.log(msg);
-    }
 
 }

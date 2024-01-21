@@ -27,6 +27,9 @@ const items = [];
 
 export default class InGameScene extends Phaser.Scene {
 
+    APIurl='http://221.148.25.234:1234'
+    accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1ODA4NzMyLCJleHAiOjE3MDU4NDQ3MzJ9.z1kYqYaDTFS9L6I-D0drGbkr20ORWgfsltQhCu6d4u4"
+    auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
     // 게임 캐릭터의 정보 - 캐릭터 외형, 레벨, 소지금등을 포함한다.
@@ -34,11 +37,12 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
     equipNumber = 0;
 
+    goldText
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
 
     spriteLoader;
-
+    
     // paint tileMap example
     selectedTile;
     marker;
@@ -94,7 +98,13 @@ export default class InGameScene extends Phaser.Scene {
         this.spriteLoader = new SpriteLoader(this);
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
-        //this.characterInfo.name = 'curly';
+        this.characterInfo = {
+            user_id : 2,
+            user_name : 'park',
+            exp: 1000,
+            level: 1,
+            cft: 1500000
+        }
     }
 
     // 애셋 로드
@@ -221,8 +231,29 @@ export default class InGameScene extends Phaser.Scene {
 
         //농작물 이미지
         this.load.path = "assets/Crops/";
-        this.load.image("Potato Seed", 'seeds_generic.png');
-        this.load.image("Potato", 'potato_05.png');
+        this.load.image("감자 씨앗", 'potato_00.png');
+        this.load.image("호박 씨앗", 'pumpkin_00.png');
+        this.load.image("당근 씨앗", 'carrot_00.png');
+        this.load.image("양배추 씨앗", 'cabbage_00.png');
+        this.load.image("사탕무 씨앗", 'beetroot_00.png')
+        this.load.image("무 씨앗", 'radish_00.png');
+        this.load.image("케일 씨앗", 'kale_00.png')
+        this.load.image("밀 씨앗", 'wheat_00.png')
+
+        this.load.image("감자", 'potato_05.png');
+        this.load.image("호박", 'pumpkin_05.png')
+        this.load.image("당근", 'carrot_05.png');
+        this.load.image("양배추", 'cabbage_05.png')
+        this.load.image("사탕무", 'beetroot_05.png')
+        this.load.image("무", 'radish_05.png');
+        this.load.image("케일", 'kale_05.png')
+        this.load.image("밀", 'wheat_05.png')
+
+        this.load.image("나무", 'wood.png');
+        this.load.image("바위", 'rock.png')
+        this.load.image("달걀", 'egg.png');
+        this.load.image("우유", 'milk.png')
+        this.load.image("물고기", 'fish.png');
 
         
         // nine-slice 로드
@@ -482,6 +513,22 @@ export default class InGameScene extends Phaser.Scene {
         quickSlotItems.push(new Item('Seed', 'pumpkin_seed', '호박 씨앗', 'pumpkin_00'));
         quickSlotItems.push(new Item('Seed', 'cabbage_seed', '양배추 씨앗', 'cabbage_00'));
 
+        // 인벤토리 UI 추가
+
+        // 크기
+        const invenWidth = 1000;
+        const invenHeight = 500;
+
+        // UI 위치 화면 중앙에 배치됨.
+        const invenX = this.cameras.main.width / 2 - invenWidth / 2;
+        const invenY = this.cameras.main.height / 2 - invenHeight / 2;
+
+        //console.log("invenX, invenY : ", invenX, invenY);
+
+        this.inventory = new Inventory(this, invenX, invenY,
+            invenWidth, invenHeight);
+
+        this.inventory.disable();
        //옥션 UI 생성
         //크기
         const auctionWidth = 1400;
@@ -508,22 +555,7 @@ export default class InGameScene extends Phaser.Scene {
         this.equipMarker = this.add.graphics();
         this.equipQuickSlot(0);
 
-        // 인벤토리 UI 추가
-
-        // 크기
-        const invenWidth = 1000;
-        const invenHeight = 500;
-
-        // UI 위치 화면 중앙에 배치됨.
-        const invenX = this.cameras.main.width / 2 - invenWidth / 2;
-        const invenY = this.cameras.main.height / 2 - invenHeight / 2;
-
-        //console.log("invenX, invenY : ", invenX, invenY);
-
-        this.inventory = new Inventory(this, invenX, invenY,
-            invenWidth, invenHeight);
-
-        this.inventory.disable();
+        
 
 
 
@@ -983,6 +1015,11 @@ class SpriteLoader {
         this.scene.anims.create(animationData);
     }
 
+
+
+    
+     
+    
 }
 
 // 플레이어가 상호작용할 타일을 표시하거나 선택한 아이템을 표시하는 UI 박스
