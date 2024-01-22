@@ -80,7 +80,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 아이템 객체를 받아서 아이템 슬롯으로 사용 시
         if (item) {
             this.itemTitle = item.title;
-            this.count = item.count;
+            this.itemQuantity = item.quantity;
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);

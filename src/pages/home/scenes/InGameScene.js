@@ -26,6 +26,9 @@ let APIUrl = process.env.REACT_APP_API;
 
 export default class InGameScene extends Phaser.Scene {
 
+    APIurl='http://221.148.25.234:1234'
+    accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1ODA4NzMyLCJleHAiOjE3MDU4NDQ3MzJ9.z1kYqYaDTFS9L6I-D0drGbkr20ORWgfsltQhCu6d4u4"
+    auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
     // 게임 캐릭터의 정보 - 캐릭터 외형, 레벨, 소지금등을 포함한다.
@@ -33,6 +36,7 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
     equipNumber = 0;
 
+goldText
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
 
@@ -75,9 +79,7 @@ export default class InGameScene extends Phaser.Scene {
     // 드래그 상태 추적
     isDragging = false;
 
-    // JWT 액세스 토큰
-    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NjQyMzMwLCJleHAiOjE3MDU2NzgzMzB9.Lvk53S8gtMALFsOKYSFxmXDmCCzeLYG82lwfpae6Skc";
-    // 플레이어 소유 아이템 목록
+        // 플레이어 소유 아이템 목록
     own_items;
 
     // 서버에서 전체 아이템 목록을 요청한 다음 그게 배열로 오는데
@@ -92,9 +94,7 @@ export default class InGameScene extends Phaser.Scene {
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-        this.serverGetUserItem();
-
-        this.serverGetAllItem();
+        
 
         // 테스트 계정의 감자 갯수 증가 시키기
         //this.serverAddItem(9, 1, 3);
@@ -113,7 +113,16 @@ export default class InGameScene extends Phaser.Scene {
         this.spriteLoader = new SpriteLoader(this);
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
-        //this.characterInfo.name = 'curly';
+        this.characterInfo = {
+            user_id : 2,
+            user_name : 'park',
+            exp: 1000,
+            level: 1,
+            cft: 1500000
+        }
+
+        this.serverGetUserItem();
+        this.serverGetAllItem();
     }
 
     // 애셋 로드
@@ -248,6 +257,29 @@ export default class InGameScene extends Phaser.Scene {
 
         //농작물 이미지
         this.load.path = "assets/Crops/";
+        this.load.image("감자 씨앗", 'potato_00.png');
+        this.load.image("호박 씨앗", 'pumpkin_00.png');
+        this.load.image("당근 씨앗", 'carrot_00.png');
+        this.load.image("양배추 씨앗", 'cabbage_00.png');
+        this.load.image("사탕무 씨앗", 'beetroot_00.png')
+        this.load.image("무 씨앗", 'radish_00.png');
+        this.load.image("케일 씨앗", 'kale_00.png')
+        this.load.image("밀 씨앗", 'wheat_00.png')
+
+        this.load.image("감자", 'potato_05.png');
+        this.load.image("호박", 'pumpkin_05.png')
+        this.load.image("당근", 'carrot_05.png');
+        this.load.image("양배추", 'cabbage_05.png')
+        this.load.image("사탕무", 'beetroot_05.png')
+        this.load.image("무", 'radish_05.png');
+        this.load.image("케일", 'kale_05.png')
+        this.load.image("밀", 'wheat_05.png')
+
+        this.load.image("나무", 'wood.png');
+        this.load.image("바위", 'rock.png')
+        this.load.image("달걀", 'egg.png');
+        this.load.image("우유", 'milk.png')
+        this.load.image("물고기", 'fish.png');
         this.load.image("Potato Seed", 'seeds_generic.png');
         this.load.image("Potato", 'potato_05.png');
 
@@ -556,6 +588,7 @@ export default class InGameScene extends Phaser.Scene {
         // 각 오브젝트에 대한 시각적 표현 생성
         plantableLayer.forEach( (object) => {
 
+            
 
             if(object.rectangle){
                 objectGraphics.strokeRect(
@@ -1113,8 +1146,8 @@ export default class InGameScene extends Phaser.Scene {
         // 서버로부터 로그인한 유저의 아이템 목록 받아오기
         async serverGetUserItem() {
 
-            const user_id = '1'
-            const requestURL = APIUrl + 'item/own-item/' + user_id;
+            
+            const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
     
             try {
     
@@ -1236,8 +1269,7 @@ export default class InGameScene extends Phaser.Scene {
                     // 새 아이템 추가
                     else {
                         addItemSlot.setSlotItem(
-                            new Item(item_type, item_id, item_name, item_des,
-                                seed_time, use_level, item_price, item_count));
+                            new Item(addItemInfo, item_count));
                     }
     
                 }

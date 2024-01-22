@@ -32,16 +32,17 @@ export default class Item{
     // 주의 : 디폴트 매개변수는 해당 매개변수에 'undefined'가 전달되었을 때 사용된다.
     // null, 0, ''과 같은 falsy 값들은 디폴트 매개변수를 대체한다.
     // 근데 이 기능은 ES6에서 도입된 거라서 구형 브라우저에서는 지원되지 않을 수 있음.
-    constructor(type, id, name, des, seedTime, useLevel, price, count = 1, stackLimit = 999){
+    constructor(itemInfo, count = 1, stackLimit = 999){
 
 
-        this.type = type;
-        this.id = id;
-        this.name = name;
-        this.des = des;
-        this.seed_Time = seedTime;
-        this.use_level = useLevel;
-        this.price = price;
+        
+        this.type = itemInfo.item_type;
+        this.id = itemInfo.item_id;
+        this.name = itemInfo.item_name;
+        this.des = itemInfo.item_des;
+        this.seed_Time = itemInfo.seed_time;
+        this.use_level = itemInfo.use_level;
+        this.price = itemInfo.item_price;
         this.count = count;
         this.stackLimit = stackLimit;
 
@@ -51,9 +52,7 @@ export default class Item{
     // 불가능
 
 
-    // 클래스의 메소드에서도 디폴트 매개변수 사용가능
-    greet(msg = "yo Hello!"){
-        console.log(msg);
-    }
+
+    
 
 }

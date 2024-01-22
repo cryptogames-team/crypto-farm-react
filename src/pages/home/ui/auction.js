@@ -15,13 +15,19 @@ export default class Auction extends Frame {
     tabItem_sell;
     tabItem_complete;
     
-
+    goldText;
+    tabItems=[];
     selectTabItem(index)
     {
         this.tabItems.forEach((item) => {
             item.disable();
         });
         this.tabItems[index].enable();
+        if(index==1)
+        {
+            this.tabItems[index].setMyItems()
+            this.tabItems[index].setMySellingItems()
+        }
     }
     enable()
     {
@@ -62,7 +68,6 @@ export default class Auction extends Frame {
 
         
 
-        this.tabItems=[];
         this.tabItem_search=new TabItem(scene,x,y,width,height,0,"검색");
         this.tabItems.push(this.tabItem_search);
         this.tabItem_sell=new TabItem(scene,x,y,width,height,1,"판매");
@@ -111,13 +116,13 @@ export default class Auction extends Frame {
         this.goldIcon.setDisplaySize(32, 32);
         
         //골드 텍스트
-        this.goldText = scene.add.text(width-40, 91, "2,000,000",{
+        this.goldText = scene.add.text(width-40, 91, scene.characterInfo.cft.toLocaleString(),{
             fontFamily: 'Arial',
             fontSize: '29px',
             color: 'white',
             fontStyle: 'bold'
         }).setOrigin(1,0)
-
+        scene.goldText=this.goldText
 
         for (let i = 0; i < 3; i++) {
             this.tab_texts[i].setSize(100,50);
