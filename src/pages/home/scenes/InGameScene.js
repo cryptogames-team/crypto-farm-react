@@ -79,8 +79,6 @@ export default class InGameScene extends Phaser.Scene {
     // 드래그 상태 추적
     isDragging = false;
 
-    // JWT 액세스 토큰
-    acessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1NjQyMzMwLCJleHAiOjE3MDU2NzgzMzB9.Lvk53S8gtMALFsOKYSFxmXDmCCzeLYG82lwfpae6Skc";
     // 플레이어 소유 아이템 목록
     own_items;
 
@@ -1132,8 +1130,7 @@ export default class InGameScene extends Phaser.Scene {
                     // 새 아이템 추가
                     else {
                         addItemSlot.setSlotItem(
-                            new Item(item_type, item_id, item_name, item_des,
-                                seed_time, use_level, item_price, item_count));
+                            new Item(addItemInfo, item_count));
                     }
     
                 }
