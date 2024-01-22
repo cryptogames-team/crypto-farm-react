@@ -142,7 +142,7 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
                 const count = item_count;
 
                 this.quickSlots[item_index].setSlotItem(
-                    new Item(type, id, name, des, seedTime, useLevel, price, count));
+                    new Item(item, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }

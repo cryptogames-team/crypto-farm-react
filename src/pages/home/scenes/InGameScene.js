@@ -36,12 +36,12 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
     equipNumber = 0;
 
-    goldText
+goldText
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
 
     spriteLoader;
-    
+
     // paint tileMap example
     selectedTile;
     marker;
@@ -79,7 +79,7 @@ export default class InGameScene extends Phaser.Scene {
     // 드래그 상태 추적
     isDragging = false;
 
-    // 플레이어 소유 아이템 목록
+        // 플레이어 소유 아이템 목록
     own_items;
 
     // 서버에서 전체 아이템 목록을 요청한 다음 그게 배열로 오는데
@@ -94,9 +94,7 @@ export default class InGameScene extends Phaser.Scene {
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-        this.serverGetUserItem();
-
-        this.serverGetAllItem();
+        
 
         // 테스트 계정의 감자 갯수 증가 시키기
         //this.serverAddItem(9, 1, 3);
@@ -122,6 +120,9 @@ export default class InGameScene extends Phaser.Scene {
             level: 1,
             cft: 1500000
         }
+
+        this.serverGetUserItem();
+        this.serverGetAllItem();
     }
 
     // 애셋 로드
@@ -279,6 +280,8 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image("달걀", 'egg.png');
         this.load.image("우유", 'milk.png')
         this.load.image("물고기", 'fish.png');
+        this.load.image("Potato Seed", 'seeds_generic.png');
+        this.load.image("Potato", 'potato_05.png');
 
 
         // nine-slice 로드
@@ -498,7 +501,22 @@ export default class InGameScene extends Phaser.Scene {
         this.equipMarker = this.add.graphics();
         this.equipQuickSlot(0);
 
-        
+        // 인벤토리 UI 추가
+
+        // 크기
+        const invenWidth = 1000;
+        const invenHeight = 500;
+
+        // UI 위치 화면 중앙에 배치됨.
+        const invenX = this.cameras.main.width / 2 - invenWidth / 2;
+        const invenY = this.cameras.main.height / 2 - invenHeight / 2;
+
+        //console.log("invenX, invenY : ", invenX, invenY);
+
+        this.inventory = new Inventory(this, invenX, invenY,
+            invenWidth, invenHeight);
+
+        this.inventory.disable();
 
 
 
@@ -570,7 +588,7 @@ export default class InGameScene extends Phaser.Scene {
         // 각 오브젝트에 대한 시각적 표현 생성
         plantableLayer.forEach( (object) => {
 
-            object.setScale(layerScale);
+            
 
             if(object.rectangle){
                 objectGraphics.strokeRect(
@@ -1128,8 +1146,8 @@ export default class InGameScene extends Phaser.Scene {
         // 서버로부터 로그인한 유저의 아이템 목록 받아오기
         async serverGetUserItem() {
 
-            const user_id = '1'
-            const requestURL = APIUrl + 'item/own-item/' + user_id;
+            
+            const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
     
             try {
     
@@ -1251,8 +1269,7 @@ export default class InGameScene extends Phaser.Scene {
                     // 새 아이템 추가
                     else {
                         addItemSlot.setSlotItem(
-                            new Item(item_type, item_id, item_name, item_des,
-                                seed_time, use_level, item_price, item_count));
+                            new Item(addItemInfo, item_count));
                     }
     
                 }
@@ -1387,11 +1404,6 @@ class SpriteLoader {
         this.scene.anims.create(animationData);
     }
 
-
-
-    
-     
-    
 }
 
 // 플레이어가 상호작용할 타일을 표시하거나 선택한 아이템을 표시하는 UI 박스
