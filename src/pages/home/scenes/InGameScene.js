@@ -556,7 +556,6 @@ export default class InGameScene extends Phaser.Scene {
         // 각 오브젝트에 대한 시각적 표현 생성
         plantableLayer.forEach( (object) => {
 
-            object.setScale(layerScale);
 
             if(object.rectangle){
                 objectGraphics.strokeRect(
