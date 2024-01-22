@@ -18,8 +18,7 @@ export default class Item{
     // 스택제한수 : 인벤토리 아이템 한 칸에 몇개까지 들어 갈 수 있는지
     // 스택이 불가능하 아이템들은 1개까지만 들어가고
     // 스택이 가능한 아이템들은 999개까지 들어간다.
-    stackLimit=999;
-
+    stackLimit = 999;
     // 가격
     price;
     // 아이템 설명
@@ -48,6 +47,10 @@ export default class Item{
         this.stackLimit = stackLimit;
 
     }
+
+    // 여러 생성자를 만들 수 있나?
+    // 불가능
+
 
 
     

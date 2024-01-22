@@ -131,10 +131,18 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             if (item_index >= this.startIndex && item_index <= this.endIndex) {
                 //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
                 //console.log("퀵슬롯에 들어갈 아이템 정보", item);
+
+                const type = item.item_type;
+                const id = item.item_id;
+                const name = item.item_name;
+                const des = item.item_des;
+                const seedTime = item.seed_time;
+                const useLevel = item.use_level;
+                const price = item.item_price;
                 const count = item_count;
 
                 this.quickSlots[item_index].setSlotItem(
-                    new Item(item, count));
+                    new Item(type, id, name, des, seedTime, useLevel, price, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }

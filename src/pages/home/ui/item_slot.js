@@ -23,6 +23,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     // 아이템 수량 텍스트
     countTxt;
     // 아이템 수량
+    count;
     // 아이템 이름 텍스트
     nameTxt;
     // 아이템 슬롯에 있는 아이템 객체
@@ -79,7 +80,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 아이템 객체를 받아서 아이템 슬롯으로 사용 시
         if (item) {
             this.itemTitle = item.title;
-            this.count = item.count;
+            this.itemQuantity = item.quantity;
+
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);
             this.itemImg.setDisplaySize(width / 2, height / 2)
@@ -503,6 +505,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         return false;
 
     }
+
     // 아이템 슬롯에서 빈 아이템 슬롯으로 변경한다.
     // 아이템 이미지 상호작용 해제해야 한다.
     removeItem() {
@@ -587,5 +590,5 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         this.itemImg.y = this.height / 2;
     }
 
-    
+
 }

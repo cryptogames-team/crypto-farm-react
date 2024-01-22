@@ -451,7 +451,6 @@ export default class InGameScene extends Phaser.Scene {
 
         // 플레이어가 상호작용할 타일 안에 있는 농작물을 검색하는 물리 객체
         // 스프라이트 키에 null 넣으면 이미지가 표시되지 않음.
-        // setSize() 이거 좀 귀찮은 메소드네...
         this.searchArea = this.physics.add.sprite(500, 500, null);
         this.searchArea.setDisplaySize(tileSize, tileSize).setOrigin(0, 0);
         this.searchArea.body.debugShowBody = false;
@@ -471,7 +470,7 @@ export default class InGameScene extends Phaser.Scene {
         const quickSlotNumber = 8;
 
 
-       //옥션 UI 생성
+        //옥션 UI 생성
         //크기
         const auctionWidth = 1400;
         const auctionHeight = 800;
@@ -557,6 +556,31 @@ export default class InGameScene extends Phaser.Scene {
             layer.renderDebug(debugGraphics[i], styleconfig);
         }
 
+        // 경작 가능오브젝트 레이어 가져오기
+        const plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
+
+        // 로드 체크
+        console.log(plantableLayer);
+
+        // 오브젝트 레이어 디버그 그래픽 설정
+        const objectGraphics = this.add.graphics({
+            fillStyle: { color: 0x0000ff}, lineStyle : {color: 0x0000ff}
+        }).setDepth(1000);
+
+        // 각 오브젝트에 대한 시각적 표현 생성
+        plantableLayer.forEach( (object) => {
+
+            if(object.rectangle){
+                objectGraphics.strokeRect(
+                    object.x * layerScale,
+                    object.y * layerScale,
+                    object.width * layerScale,
+                    object.height * layerScale);
+            }
+        });
+
+
+
         // 키보드 키 입력 설정
         // 방향키, 쉬프트, 스페이스바 키 객체 생성
         this.cursorsKeys = this.input.keyboard.createCursorKeys();
@@ -618,7 +642,7 @@ export default class InGameScene extends Phaser.Scene {
 
         // I키 누르면 인벤토리 Visible 토글
         this.inventoryKey.on('down', () => {
-            // 삼항 연산자 사용한다.
+            // 삼항 연산자 
             this.inventory.visible ? this.inventory.disable() : this.inventory.enable();
 
         });
@@ -1130,7 +1154,8 @@ export default class InGameScene extends Phaser.Scene {
                     // 새 아이템 추가
                     else {
                         addItemSlot.setSlotItem(
-                            new Item(addItemInfo, item_count));
+                            new Item(item_type, item_id, item_name, item_des,
+                                seed_time, use_level, item_price, item_count));
                     }
     
                 }

@@ -30,7 +30,6 @@ export default class Inventory extends Frame {
     // 아이템 슬롯 배열
     itemSlots = [];
 
-    hi=5;
 
     // 인벤토리 시작 인덱스
     startIndex = 9;
@@ -216,8 +215,7 @@ export default class Inventory extends Frame {
                 // 0~8는 퀵슬롯에 할당되고 9부터 인벤에 할당되는거라서
                 // 인벤에 아이템 들어갈 때 퀵슬롯 크기만큼 빼줘야 함.
                 this.itemSlots[item_index - this.quickSize].setSlotItem(
-                    new Item(item, count));
-                    console.log(item)
+                    new Item(type, id, name, des, seedTime, useLevel, price, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }
