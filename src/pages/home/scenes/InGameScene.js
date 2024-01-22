@@ -570,6 +570,8 @@ export default class InGameScene extends Phaser.Scene {
         // 각 오브젝트에 대한 시각적 표현 생성
         plantableLayer.forEach( (object) => {
 
+            object.setScale(layerScale);
+
             if(object.rectangle){
                 objectGraphics.strokeRect(
                     object.x * layerScale,
@@ -604,7 +606,8 @@ export default class InGameScene extends Phaser.Scene {
         this.inventoryKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
 
         this.harvestKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-
+        // 상호작용할 타일이 오브젝트 레이어 영역에 포함되는지 확인한다.
+        this.tileDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
 
         //]키 경매장 UI오픈
         this.closeBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
@@ -638,6 +641,16 @@ export default class InGameScene extends Phaser.Scene {
 
         });
 
+        // 'B' 키 입력 이벤트 리스너
+        this.tileDebugKey.on('down', () => {
+            let isInRect = this.isTileInObjLayer(this.getInteractTile(), plantableLayer);
+
+
+            // 작동 안함
+            if(isInRect){
+                console.log("상호작용할 타일이 경작가능 구역에 있음");
+            }
+        });
 
 
         // I키 누르면 인벤토리 Visible 토글
@@ -695,7 +708,8 @@ export default class InGameScene extends Phaser.Scene {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
 
-        // 플레이어의 현재 위치 : Vector 2
+        // getInteractiTile() 문제 없으면 삭제할 것
+        /* // 플레이어의 현재 위치 : Vector 2
         const playerX = this.playerObject.x;
         const playerY = this.playerObject.y;
 
@@ -715,9 +729,9 @@ export default class InGameScene extends Phaser.Scene {
         }
 
         // 플레이어 중앙 위치의 바로 앞 타일의 위치를 찍는다.
-        /*         this.frontTilePoint.clear();
+                this.frontTilePoint.clear();
                 this.frontTilePoint.fillCircle(pointX, playerCenterY, 2);
-         */
+        
         // 캐릭터가 상호작용할 타일의 인덱스 구하기
         // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
         const interactTileX = this.ingameMap.worldToTileX(pointX);
@@ -725,7 +739,10 @@ export default class InGameScene extends Phaser.Scene {
         this.interactTileX = interactTileX;
         this.interactTileY = interactTileY;
 
-        const interactTile = this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1);
+        //const interactTile = this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1); */
+
+        const interactTile = this.getInteractTile();
+
         // 구한 타일의 인덱스를 텍스트 표시 
         /*         this.interactTileIndexTxt.setText("InteractTileIndex X : " + interactTileX +
                     "\nInteractTileIndex Y : " + interactTileY); */
@@ -735,11 +752,21 @@ export default class InGameScene extends Phaser.Scene {
                     // 상호작용할 타일의 프로퍼티 표시
                     this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable); */
 
+        
 
         // 캐릭터가 상호작용할 타일의 월드 상의 위치
-        const frontTileX = this.ingameMap.tileToWorldX(interactTileX);
-        const frontTileY = this.ingameMap.tileToWorldY(interactTileY);
+        // getInteractTile() 문제 없으면 삭제
+        /* const frontTileX = this.ingameMap.tileToWorldX(interactTileX);
+        const frontTileY = this.ingameMap.tileToWorldY(interactTileY); */
 
+        // 타일의 월드좌표로 상호작용 타일의 월드 상의 위치 저장
+        // tileToWorldX()랑 Tile.pixelX랑 차이가 있네
+        // ingameMap 원래 크기보다 4배 커져있는데
+        // Tile.pixel 위치는 원래 크기에서 위치 값을 구해주네
+        const frontTileX = interactTile.pixelX * layerScale;
+        const frontTileY = interactTile.pixelY * layerScale;
+
+        
         // 상호작용 할 타일 표시 UI 마커 위치 업데이트
         this.interTileMarker.x = frontTileX;
         this.interTileMarker.y = frontTileY;
@@ -1009,6 +1036,76 @@ export default class InGameScene extends Phaser.Scene {
         if (this.input.manager.activePointer.isDown) {
             //this.ingameMap.putTileAt(this.selectedTile, tileX, TileY);
         }
+    }
+
+    // 플레이어가 상호작용할 타일을 구한다.
+    // 상호작용 할 타일 : 플레이어 캐릭터가 바라보는 방향 바로 앞 타일
+    getInteractTile(){
+
+        // 플레이어 현재 위치 : Vector 2
+        const playerLoc = {
+            x : this.playerObject.x,
+            y : this.playerObject.y
+        }
+        // 플레이어 현재 중앙 위치
+        // // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨
+        const playerCenterLoc = {
+            x : playerLoc.x + (this.playerObject.body.width / 2),
+            y : playerLoc.y + (this.playerObject.body.height / 2)
+        }
+
+        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 앞 1타일 크기만큼 떨어진 x축 위치 구하기
+        let pointX = playerCenterLoc.x;
+        // 캐릭터가 현재 바라보는 방향에 따라 
+        if (this.playerObject.playerDirection === 'left') {
+            pointX = playerCenterLoc.x - tileSize;
+        } else if (this.playerObject.playerDirection === "right") {
+            pointX = playerCenterLoc.x + tileSize;
+        }
+
+        // 플레이어 중앙 위치의 바로 앞 타일의 위치를 찍는다.
+        /*         this.frontTilePoint.clear();
+                this.frontTilePoint.fillCircle(pointX, playerCenterY, 2); */
+
+        // 캐릭터가 상호작용할 타일의 인덱스 구하기
+        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
+        const interactTileX = this.ingameMap.worldToTileX(pointX);
+        const interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
+        this.interactTileX = interactTileX;
+        this.interactTileY = interactTileY;
+
+        return this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1);
+    }
+
+    // 사각형 영역안에 특정 위치의 점이 포함되는지 확인
+    isPointInRect(point, rect){
+        return point.x >= rect.x && point.x <= rect.x + rect.width &&
+        point.y >= rect.y && point.y <= rect.y + rect.height;
+    }
+
+    // 매개변수로 전달한 타일이 오브젝트 레이어 안에 포함되는지 확인한다.
+    isTileInObjLayer(tile, objectLayer){
+        // 타일의 중심 좌표 layerScale 곱하기
+        let tileWorldX = tile.getCenterX();
+        let tileWorldY = tile.getCenterY();
+        let point = { x: tileWorldX, y: tileWorldY};
+
+        console.log("objectLayer : ", objectLayer);
+        console.log("point", point);
+
+        // objectlayer.objects가 null 이라는 듯
+        // 이미 obejctLayer에 objects[]가 들어가 있음.
+
+        // object는 layerScale이 적용되지 않음.
+
+        for (let i = 0; i < objectLayer.length; i++){
+            let obj = objectLayer[i];
+            if ( obj.rectangle && this.isPointInRect(point, obj)){
+                return true; // 타일이 사각형 영역 내에 있음
+            }
+        }
+        return false; // 타일이 사각형 영역 내에 없음.
+
     }
 
     // 이미지 속성 설정하는 함수
