@@ -170,12 +170,25 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
                             scene.goldText.text = scene.characterInfo.cft.toLocaleString()
                             this.remainItemCount=this.itemInfo.item_count-(parseInt(this.buyCountValueText.text,10))
                             
-                            console.log("this.remainItemCount : "+this.remainItemCount);
-                            console.log(" scene.auction.tabItems[0] : "+ scene.auction.tabItems[0]);
+
                             scene.auction.tabItems[0].modifyItemInfo(this.remainItemCount)
 
-                            //인벤토리창에 넣어 줘야함
-                            scene.inventory.addItem(new Item('Crops', this.itemInfo.item.item_name, this.itemInfo.item.item_name, this.itemInfo.item.item_name,parseInt(this.buyCountValueText.text)))
+                            //인벤토리창에 넣어 줘야
+                            const {item_name, item_price} = this.itemInfo.item                                                 
+                            this.itemSlot=scene.findAddItemSlot(item_name)
+                            if(this.itemSlot.item)
+                            {
+                                console.log("before count : "+this.itemSlot.item.count)    
+                                this.setCount=this.itemSlot.item.count+parseInt(this.buyCountValueText.text)                      
+                                this.itemSlot.setSlotItem(new Item(this.itemInfo.item,this.setCount))  
+                            }else
+                            {
+                                console.log("before count : 0")    
+                                this.setCount=parseInt(this.buyCountValueText.text)                      
+                                this.itemSlot.setSlotItem(new Item(this.itemInfo.item,this.setCount))  
+                            }
+                                                     
+                               
                         }else
                         {
                             this.prompt.show("아이템 구매를 실패하였습니다.")

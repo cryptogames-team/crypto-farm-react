@@ -1051,8 +1051,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                             
 
                             
-                            this.sellingCountInput_text.text = ""
-                            this.sellingPriceInput_text.text = ""
+                            
 
                             //아이템목록 갱신
                             this.setMyItems()
@@ -1061,7 +1060,13 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
                             //인벤토리 아이템 갯수 변경
                             //인벤토리창에서 뺴줘야함
-                            //scene.inventory.addItem(new Item('Crops', this.itemInfo.item.item_name, this.itemInfo.item.item_name, this.itemInfo.item.item_name,parseInt(this.buyCountValueText.text)))
+                            this.itemSlot=scene.findAddItemSlot(info.item.item_name)
+                            this.itemSlot.useItem(parseInt(this.sellingCountInput_text.text))
+                            
+
+                            this.sellingCountInput_text.text = ""
+                            this.sellingPriceInput_text.text = ""
+                            
                         })
                         .catch(error => {
                             console.error('There was a problem with the POST request:', error);

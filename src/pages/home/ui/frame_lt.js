@@ -4,6 +4,9 @@ import Phaser from "phaser";
 
 export default class Frame_LT extends Phaser.GameObjects.Container {
 
+    // 테두리 크기
+    edgeSize;
+
     constructor(scene, x, y, width, height) {
 
         super(scene,x, y);
@@ -22,6 +25,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
         
         this.edge=[]
         const edgeSize=10;
+        this.edgeSize = edgeSize;
         //테두리 추가
         // 사각형의 각 꼭짓점에 select box UI 추가
         this.topLeft = scene.add.image(0, 0, 'tab_9slice_tl')
