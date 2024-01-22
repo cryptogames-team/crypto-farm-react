@@ -83,16 +83,10 @@ export default class SellingItem extends Phaser.GameObjects.Container {
             .on('pointerup', () => {
 
                 // 인벤토리에 빈 위치 찾기               
-                scene.inventory.itemSlots.some((itemSlot, index) => {
-
-                    if (itemSlot.item === null) {
-                        this.emptySlotIndex = index;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+                this.itemSlot = scene.findAddItemSlot(this.sellingInfo.item.item_name)
+                this.emptySlotIndex = this.itemSlot.index
                 const url = scene.APIurl + '/auction/' + this.sellingInfo.auction_id + '/' + this.emptySlotIndex
+                
                 console.log("auction_id : " + this.sellingInfo.auction_id)
                 //요청 보내기
                 fetch(url, {
@@ -113,7 +107,7 @@ export default class SellingItem extends Phaser.GameObjects.Container {
 
                             scene.auction.tabItems[1].notice("       아이템을 판매취소 하였습니다.") 
                             
-                            this.itemSlot = scene.findAddItemSlot(this.sellingInfo.item.item_name)
+                            
                             if (this.itemSlot.item!=null) {
                                 console.log("before count : " + this.itemSlot.item.count)
                                 this.setCount = this.itemSlot.item.count + this.sellingInfo.item_count

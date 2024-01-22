@@ -136,7 +136,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
                 }
             });
             this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
-            
+
         } else {
             // 씨앗 심기가 불가능한 타일이면 대기 상태로 전환
             player.stateMachine.transition('idle');
@@ -228,7 +228,7 @@ class IdleState extends State {
         }
 
         // E 키 누르면 행동 상태로 전환되는데 인자 추가 전달
-        if (scene.harvestKey.isDown){
+        if (scene.harvestKey.isDown) {
             player.stateMachine.transition('action', 'harvest');
             return;
         }
@@ -263,7 +263,7 @@ class MoveState extends State {
         }
 
         // E 키 누르면 행동 상태로 전환되는데 인자 추가 전달
-        if (scene.harvestKey.isDown){
+        if (scene.harvestKey.isDown) {
             player.stateMachine.transition('action', 'harvest');
             return;
         }
@@ -343,7 +343,7 @@ class ActionState extends State {
 
 
 
-        if( action === 'harvest'){
+        if (action === 'harvest') {
             //console.log("수확 실행");
 
             let harvestAnim = player.playAnimation('do', player.hairSprite);
@@ -380,20 +380,29 @@ class ActionState extends State {
         // 삽일 경우 땅 파는 애니메이션 실행
         if (equipItem.name === '삽') {
 
-            let digAnim = player.playAnimation('dig', player.hairSprite);
-            // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
-            digAnim.on('animationupdate', (anim, frame) => {
-                if (frame.index === 6) {
-                    //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
-                    scene.paintTiles();
-                }
-            });
+            // 경작 가능 영역에 땅을 팔려고 하는지 확인한다.
+            const digTile = scene.getInteractTile();
+            if (scene.isTileInPlantable(digTile)) {
+                //console.log("경작 가능 영역에 땅 팔려고함.");
+                let digAnim = player.playAnimation('dig', player.hairSprite);
+                // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
+                digAnim.on('animationupdate', (anim, frame) => {
+                    if (frame.index === 6) {
+                        //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
+                        scene.setFieldTile();
+                    }
+                });
 
-            // 애니메이션이 종료되면 대기 상태로 전환
-            // 이벤트 리스너에 콜백 함수 등록하려면, 함수를 바로 호출하는 것이 아닌
-            // 함수 참조를 전달해야 한다.
-            // 클래스의 멤버 함수를 등록하는 방법 - 함수 참조와 'bind'
-            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
+                // 애니메이션이 종료되면 대기 상태로 전환
+                // 이벤트 리스너에 콜백 함수 등록하려면, 함수를 바로 호출하는 것이 아닌
+                // 함수 참조를 전달해야 한다.
+                // 클래스의 멤버 함수를 등록하는 방법 - 함수 참조와 'bind'
+                player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
+            } else {
+                //console.log("경작 불가능 영역에 땅 팔려고함.");
+                player.stateMachine.transition('idle');
+            }
+
 
         }
         // 도끼일 경우

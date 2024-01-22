@@ -26,8 +26,8 @@ let APIUrl = process.env.REACT_APP_API;
 
 export default class InGameScene extends Phaser.Scene {
 
-    APIurl='http://221.148.25.234:1234'
-    accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1ODA4NzMyLCJleHAiOjE3MDU4NDQ3MzJ9.z1kYqYaDTFS9L6I-D0drGbkr20ORWgfsltQhCu6d4u4"
+    APIurl = 'http://221.148.25.234:1234'
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1OTIyODA0LCJleHAiOjE3MDU5NTg4MDR9.fE63VLptujeN4i0063qCbwmY8vAvCALMEt_BB_bn1s0"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -36,7 +36,7 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
     equipNumber = 0;
 
-goldText
+    goldText
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
 
@@ -79,13 +79,16 @@ goldText
     // 드래그 상태 추적
     isDragging = false;
 
-        // 플레이어 소유 아이템 목록
+    // 플레이어 소유 아이템 목록
     own_items;
 
     // 서버에서 전체 아이템 목록을 요청한 다음 그게 배열로 오는데
     // 해쉬 테이블에 저장시킴
     // 모든 아이템 정보 <- 해쉬 테이블
     allItems = new Map();
+
+    // 경작 가능 영역 표시하는 오브젝트 레이어
+    plantableLayer;
 
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
@@ -94,7 +97,7 @@ goldText
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-        
+
 
         // 테스트 계정의 감자 갯수 증가 시키기
         //this.serverAddItem(9, 1, 3);
@@ -114,8 +117,8 @@ goldText
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
         this.characterInfo = {
-            user_id : 2,
-            user_name : 'park',
+            user_id: 1,
+            user_name: 'park',
             exp: 1000,
             level: 1,
             cft: 1500000
@@ -575,28 +578,34 @@ goldText
         }
 
         // 경작 가능오브젝트 레이어 가져오기
-        const plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
+        this.plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
 
         // 로드 체크
-        console.log(plantableLayer);
+        //console.log(this.plantableLayer);
 
         // 오브젝트 레이어 디버그 그래픽 설정
         const objectGraphics = this.add.graphics({
-            fillStyle: { color: 0x0000ff}, lineStyle : {color: 0x0000ff}
+            fillStyle: { color: 0x0000ff }, lineStyle: { color: 0x0000ff }
         }).setDepth(1000);
 
         // 각 오브젝트에 대한 시각적 표현 생성
-        plantableLayer.forEach( (object) => {
+        this.plantableLayer.forEach((object) => {
 
-            
+            // layerScale만큼 object 위치, 크기 곱해주기
+            object.x *= layerScale;
+            object.y *= layerScale;
+            object.width *= layerScale;
+            object.height *= layerScale;
 
-            if(object.rectangle){
+            if (object.rectangle) {
                 objectGraphics.strokeRect(
-                    object.x * layerScale,
-                    object.y * layerScale,
-                    object.width * layerScale,
-                    object.height * layerScale);
+                    object.x,
+                    object.y,
+                    object.width,
+                    object.height);
             }
+
+            //console.log("object layerScale 만큼 크기 늘림", object);
         });
 
 
@@ -661,11 +670,12 @@ goldText
 
         // 'B' 키 입력 이벤트 리스너
         this.tileDebugKey.on('down', () => {
-            let isInRect = this.isTileInObjLayer(this.getInteractTile(), plantableLayer);
+            let isInRect = this.isTileInPlantable(this.getInteractTile(), this.plantableLayer);
 
 
             // 작동 안함
-            if(isInRect){
+            // 오브젝트 영역 위치와 크기값 layerScale만큼 곱해야 됨.
+            if (isInRect) {
                 console.log("상호작용할 타일이 경작가능 구역에 있음");
             }
         });
@@ -770,7 +780,7 @@ goldText
                     // 상호작용할 타일의 프로퍼티 표시
                     this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable); */
 
-        
+
 
         // 캐릭터가 상호작용할 타일의 월드 상의 위치
         // getInteractTile() 문제 없으면 삭제
@@ -784,7 +794,7 @@ goldText
         const frontTileX = interactTile.pixelX * layerScale;
         const frontTileY = interactTile.pixelY * layerScale;
 
-        
+
         // 상호작용 할 타일 표시 UI 마커 위치 업데이트
         this.interTileMarker.x = frontTileX;
         this.interTileMarker.y = frontTileY;
@@ -827,9 +837,10 @@ goldText
 
     }
 
-    // 캐릭터가 땅을 판 타일을 다른 타일로 칠한다.
+    // 캐릭터가 땅을 판 타일의 타일 레이어 1를 밭 타일로 변경한다.
+    // setFieldTile
     // 캐릭터 땅파기 애니메이션에 실행될 콜백 함수
-    paintTiles() {
+    setFieldTile() {
 
         const interactTileX = this.interactTileX;
         const interactTileY = this.interactTileY;
@@ -990,7 +1001,7 @@ goldText
 
     // 아이템 이름으로 아이템 추가 요청할 때 필요한 데이터 모아서 
     // 서버에 아이템 추가 요청함.
-    sendAddItem(itemName, addItemSlot){
+    sendAddItem(itemName, addItemSlot) {
         // 추가될 아이템 정보 객체
         const addItemInfo = this.allItems.get(itemName);
 
@@ -1058,18 +1069,18 @@ goldText
 
     // 플레이어가 상호작용할 타일을 구한다.
     // 상호작용 할 타일 : 플레이어 캐릭터가 바라보는 방향 바로 앞 타일
-    getInteractTile(){
+    getInteractTile() {
 
         // 플레이어 현재 위치 : Vector 2
         const playerLoc = {
-            x : this.playerObject.x,
-            y : this.playerObject.y
+            x: this.playerObject.x,
+            y: this.playerObject.y
         }
         // 플레이어 현재 중앙 위치
         // // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨
         const playerCenterLoc = {
-            x : playerLoc.x + (this.playerObject.body.width / 2),
-            y : playerLoc.y + (this.playerObject.body.height / 2)
+            x: playerLoc.x + (this.playerObject.body.width / 2),
+            y: playerLoc.y + (this.playerObject.body.height / 2)
         }
 
         // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 앞 1타일 크기만큼 떨어진 x축 위치 구하기
@@ -1096,29 +1107,24 @@ goldText
     }
 
     // 사각형 영역안에 특정 위치의 점이 포함되는지 확인
-    isPointInRect(point, rect){
+    isPointInRect(point, rect) {
         return point.x >= rect.x && point.x <= rect.x + rect.width &&
-        point.y >= rect.y && point.y <= rect.y + rect.height;
+            point.y >= rect.y && point.y <= rect.y + rect.height;
     }
 
-    // 매개변수로 전달한 타일이 오브젝트 레이어 안에 포함되는지 확인한다.
-    isTileInObjLayer(tile, objectLayer){
+    // 타일이 경작가능 영역(오브젝트 레이어) 안에 포함되는지 확인한다
+
+    isTileInPlantable(tile) {
         // 타일의 중심 좌표 layerScale 곱하기
         let tileWorldX = tile.getCenterX();
         let tileWorldY = tile.getCenterY();
-        let point = { x: tileWorldX, y: tileWorldY};
+        let point = { x: tileWorldX, y: tileWorldY };
 
-        console.log("objectLayer : ", objectLayer);
-        console.log("point", point);
+        //console.log("point", point);
 
-        // objectlayer.objects가 null 이라는 듯
-        // 이미 obejctLayer에 objects[]가 들어가 있음.
-
-        // object는 layerScale이 적용되지 않음.
-
-        for (let i = 0; i < objectLayer.length; i++){
-            let obj = objectLayer[i];
-            if ( obj.rectangle && this.isPointInRect(point, obj)){
+        for (let i = 0; i < this.plantableLayer.length; i++) {
+            let obj = this.plantableLayer[i];
+            if (obj.rectangle && this.isPointInRect(point, obj)) {
                 return true; // 타일이 사각형 영역 내에 있음
             }
         }
@@ -1143,229 +1149,229 @@ goldText
         return image;
     }
 
-        // 서버로부터 로그인한 유저의 아이템 목록 받아오기
-        async serverGetUserItem() {
+    // 서버로부터 로그인한 유저의 아이템 목록 받아오기
+    async serverGetUserItem() {
 
-            
-            const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
-    
-            try {
-    
-                // GET 메소드에 바디를 포함할 수 없음
-                const response = await fetch(requestURL, {
-    
-                    // 요청 방식
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-    
-                    },
-                });
-    
-                // .json() : 받은 응답을 JSON 형식으로 변환한다.
-                this.own_items = await response.json();
-    
-                // 서버로부터 받은 유저 아이템 정보들
-                //console.log('유저 아이템 목록', this.own_items);
-    
-            } catch (error) {
-                console.error('serverGetUserItem() Error : ', error);
-            }
-    
+
+        const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
+
+        try {
+
+            // GET 메소드에 바디를 포함할 수 없음
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+
+                },
+            });
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            this.own_items = await response.json();
+
+            // 서버로부터 받은 유저 아이템 정보들
+            //console.log('유저 아이템 목록', this.own_items);
+
+        } catch (error) {
+            console.error('serverGetUserItem() Error : ', error);
         }
-    
-        // 모든 아이템 정보 받아오기 아이템 배열로 받음
-        async serverGetAllItem() {
-    
-            const requestURL = APIUrl + 'item/item/all';
-    
-            try {
-    
-                // GET 메소드에 바디를 포함할 수 없음
-                const response = await fetch(requestURL, {
-    
-                    // 요청 방식
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-    
-                    },
-                });
-    
-                // .json() : 받은 응답을 JSON 형식으로 변환한다.
-                const data = await response.json();
-    
-                // 서버로부터 받은 전체 아이템 정보들
-                console.log('전체 아이템 목록', data);
-    
-                // 배열을 해쉬 테이블로 변환한다.
-    
-                data.forEach((item, index) => {
-    
-                    // 구조 분해 할당
-                    const { item_name } = item;
-                    // 값 추가
-                    this.allItems.set(item_name, item);
-                });
-    
-                
-            } catch (error) {
-                console.error('serverGetAllItem() Error : ', error);
-            }
-    
+
+    }
+
+    // 모든 아이템 정보 받아오기 아이템 배열로 받음
+    async serverGetAllItem() {
+
+        const requestURL = APIUrl + 'item/item/all';
+
+        try {
+
+            // GET 메소드에 바디를 포함할 수 없음
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+
+                },
+            });
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            const data = await response.json();
+
+            // 서버로부터 받은 전체 아이템 정보들
+            console.log('전체 아이템 목록', data);
+
+            // 배열을 해쉬 테이블로 변환한다.
+
+            data.forEach((item, index) => {
+
+                // 구조 분해 할당
+                const { item_name } = item;
+                // 값 추가
+                this.allItems.set(item_name, item);
+            });
+
+
+        } catch (error) {
+            console.error('serverGetAllItem() Error : ', error);
         }
-    
-    
-        // 서버에 로그인 한 유저에게 새 아이템 추가, 기존 아이템 수량 증가 요청하는 함수
-        // 액세스 토큰 필요함
-        async serverAddItem(item_count, item_index, addItemInfo, addItemSlot) {
-    
-            const { item_id, item_type, item_name, 
-            item_des, seed_time, use_level, item_price} = addItemInfo;
-    
-            const requestURL = APIUrl + 'item/add/';
-    
-            const requestBody = {
-                'item_id': item_id,
-                'item_count': item_count,
-                'item_index': item_index
-            }
-    
-            console.log("서버 아이템 추가 요청에 사용할 바디 ", requestBody);
-    
-            try {
-    
-                const response = await fetch(requestURL, {
-    
-                    // 요청 방식
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        //액세스 토큰 값 보내기
-                        Authorization: 'Bearer ' + this.acessToken
-                    },
-    
-                    // 바디 필요함.
-                    body: JSON.stringify(requestBody)
-                });
-    
-                // .text() : 받은 응답을 text 형식으로 변환한다.
-                // 성공 시 결과값 'success'로 감
-                const data = await response.text();
-    
-                //console.log("받은 응답 헤더의 콘텐츠 타입", response.headers.get("content-type"));
-    
-                // 요청이 성공하면 새 아이템의 추가나 중복 아이템 수량 증가 시키기
-                if (data === 'success') {
-    
-                    console.log('서버 아이템 추가 성공');
-                    console.log('아이템이 추가 되거나 수량 증가할 슬롯', addItemSlot);
-    
-                    // 중복 아이템 수량 증가
-                    if (addItemSlot.item !== null) {
-                        addItemSlot.item.count += 1;
-                        addItemSlot.setSlotItem(addItemSlot.item);
-                    }
-                    // 새 아이템 추가
-                    else {
-                        addItemSlot.setSlotItem(
-                            new Item(addItemInfo, item_count));
-                    }
-    
+
+    }
+
+
+    // 서버에 로그인 한 유저에게 새 아이템 추가, 기존 아이템 수량 증가 요청하는 함수
+    // 액세스 토큰 필요함
+    async serverAddItem(item_count, item_index, addItemInfo, addItemSlot) {
+
+        const { item_id, item_type, item_name,
+            item_des, seed_time, use_level, item_price } = addItemInfo;
+
+        const requestURL = APIUrl + 'item/add/';
+
+        const requestBody = {
+            'item_id': item_id,
+            'item_count': item_count,
+            'item_index': item_index
+        }
+
+        console.log("서버 아이템 추가 요청에 사용할 바디 ", requestBody);
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //액세스 토큰 값 보내기
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+
+                // 바디 필요함.
+                body: JSON.stringify(requestBody)
+            });
+
+            // .text() : 받은 응답을 text 형식으로 변환한다.
+            // 성공 시 결과값 'success'로 감
+            const data = await response.text();
+
+            //console.log("받은 응답 헤더의 콘텐츠 타입", response.headers.get("content-type"));
+
+            // 요청이 성공하면 새 아이템의 추가나 중복 아이템 수량 증가 시키기
+            if (data === 'success') {
+
+                console.log('서버 아이템 추가 성공');
+                console.log('아이템이 추가 되거나 수량 증가할 슬롯', addItemSlot);
+
+                // 중복 아이템 수량 증가
+                if (addItemSlot.item !== null) {
+                    addItemSlot.item.count += 1;
+                    addItemSlot.setSlotItem(addItemSlot.item);
                 }
+                // 새 아이템 추가
                 else {
-                    console.log('서버 아이템 추가 실패');
+                    addItemSlot.setSlotItem(
+                        new Item(addItemInfo, item_count));
                 }
-    
-            } catch (error) {
-                console.error('serverAddItem() Error : ', error);
+
             }
-    
+            else {
+                console.log('서버 아이템 추가 실패');
+            }
+
+        } catch (error) {
+            console.error('serverAddItem() Error : ', error);
         }
-    
-        // 서버에 로그인 한 유저의 아이템 소비 요청함.
-        async serverUseItem(item_name, item_count, useItemSlot){
-    
-            const requestURL = APIUrl + 'item/use/';
-    
-            const useItemInfo = this.allItems.get(item_name);
-    
-            const requestBody = {
-                'item_id': useItemInfo.item_id,
-                'item_count': item_count,
-            }
-    
-            console.log("서버 아이템 사용 요청에 사용할 바디 ", requestBody);
-    
-            try {
-    
-                const response = await fetch(requestURL, {
-    
-                    // 요청 방식
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        //액세스 토큰 값 보내기
-                        Authorization: 'Bearer ' + this.acessToken
-                    },
-    
-                    // 바디 필요함.
-                    body: JSON.stringify(requestBody)
-                });
-    
-                const data = await response.text();
-    
-                // 요청이 성공하면 클라이언트에서도 아이템 소비와 삭제
-                if (data === 'use success') {
-                    console.log('아이템이 소비되는 슬롯', useItemSlot);
-                    
-                    useItemSlot.useItem(item_count);
-                }
-                else {
-                    console.log('서버 아이템 소비 실패');
-                }
-    
-            } catch (error) {
-                console.error('serverUseItem() Error : ', error);
-            }
+
+    }
+
+    // 서버에 로그인 한 유저의 아이템 소비 요청함.
+    async serverUseItem(item_name, item_count, useItemSlot) {
+
+        const requestURL = APIUrl + 'item/use/';
+
+        const useItemInfo = this.allItems.get(item_name);
+
+        const requestBody = {
+            'item_id': useItemInfo.item_id,
+            'item_count': item_count,
         }
-    
-        // 서버에 아이템 이동 요청
-        async serverMoveItem(item_name, item_index){
-    
-            // URL에 포함시켜야함.
-    
-            const useItemInfo = this.allItems.get(item_name);
-    
-            const requestURL = APIUrl + 'item/move/' + useItemInfo.item_id + '/' + item_index;
-    
-            try {
-                const response = await fetch(requestURL, {
-    
-                    // 요청 방식
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        //액세스 토큰 값 보내기
-                        Authorization: 'Bearer ' + this.acessToken
-                    },
-    
-                });
-    
-                const data = await response.text();
-    
-                // 요청이 성공했는지 확인
-                if (data === 'success') {
-                    console.log('서버 아이템 이동 성공');
-                }
-                else {
-                    console.log('서버 아이템 이동 실패');
-                }
-    
-            } catch (error) {
-                console.error('serverMoveItem() Error : ', error);
+
+        console.log("서버 아이템 사용 요청에 사용할 바디 ", requestBody);
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //액세스 토큰 값 보내기
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+
+                // 바디 필요함.
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.text();
+
+            // 요청이 성공하면 클라이언트에서도 아이템 소비와 삭제
+            if (data === 'use success') {
+                console.log('아이템이 소비되는 슬롯', useItemSlot);
+
+                useItemSlot.useItem(item_count);
             }
+            else {
+                console.log('서버 아이템 소비 실패');
+            }
+
+        } catch (error) {
+            console.error('serverUseItem() Error : ', error);
         }
+    }
+
+    // 서버에 아이템 이동 요청
+    async serverMoveItem(item_name, item_index) {
+
+        // URL에 포함시켜야함.
+
+        const useItemInfo = this.allItems.get(item_name);
+
+        const requestURL = APIUrl + 'item/move/' + useItemInfo.item_id + '/' + item_index;
+
+        try {
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //액세스 토큰 값 보내기
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+
+            });
+
+            const data = await response.text();
+
+            // 요청이 성공했는지 확인
+            if (data === 'success') {
+                console.log('서버 아이템 이동 성공');
+            }
+            else {
+                console.log('서버 아이템 이동 실패');
+            }
+
+        } catch (error) {
+            console.error('serverMoveItem() Error : ', error);
+        }
+    }
 
 
 }
