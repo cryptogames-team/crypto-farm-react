@@ -127,16 +127,8 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
             .on('pointerup', () => {
 
 
-                // 인벤토리에 빈 위치 찾기               
-                scene.inventory.itemSlots.some((itemSlot, index) => {
-
-                    if (itemSlot.item === null) {
-                        this.emptySlotIndex = index;
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+                this.itemSlot = scene.findAddItemSlot(this.itemInfo.item_name)
+                this.emptySlotIndex = this.itemSlot.index
               
                 const url = scene.APIurl+'/auction/buy'
                 const patchData = {
@@ -173,9 +165,7 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
 
                             scene.auction.tabItems[0].modifyItemInfo(this.remainItemCount)
 
-                            //인벤토리창에 넣어 줘야
-                            const {item_name, item_price} = this.itemInfo.item                                                 
-                            this.itemSlot=scene.findAddItemSlot(item_name)
+                            //인벤토리창에 넣어 줘야                                              
                             if(this.itemSlot.item)
                             {
                                 console.log("before count : "+this.itemSlot.item.count)    

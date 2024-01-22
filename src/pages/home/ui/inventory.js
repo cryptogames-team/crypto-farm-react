@@ -202,20 +202,14 @@ export default class Inventory extends Frame {
                 //console.log("아이템 인덱스가 0~8 안임" , item.item_index);
 
                 //console.log("인벤에 들어갈 아이템 정보", item);
-                const type = item.item_type;
-                const id = item.item_id;
-                const name = item.item_name;
-                const des = item.item_des;
-                const seedTime = item.seed_time;
-                const useLevel = item.use_level;
-                const price = item.item_price;
+
                 const count = item_count;
 
                 // 서버의 item_index는 퀵슬롯 인벤 구별하지 않음.
                 // 0~8는 퀵슬롯에 할당되고 9부터 인벤에 할당되는거라서
                 // 인벤에 아이템 들어갈 때 퀵슬롯 크기만큼 빼줘야 함.
                 this.itemSlots[item_index - this.quickSize].setSlotItem(
-                    new Item(type, id, name, des, seedTime, useLevel, price, count));
+                    new Item(item, count));
 
                 //console.log(this.quickSlots[item.item_index].item.type);
             }

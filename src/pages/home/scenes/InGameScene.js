@@ -27,7 +27,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl='http://221.148.25.234:1234'
-    accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1ODA4NzMyLCJleHAiOjE3MDU4NDQ3MzJ9.z1kYqYaDTFS9L6I-D0drGbkr20ORWgfsltQhCu6d4u4"
+    accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1OTA5NTk0LCJleHAiOjE3MDU5NDU1OTR9.QBuZgStMNbif2taZEqX7qaI00125ffm7HijF4TxdUww"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -94,9 +94,7 @@ export default class InGameScene extends Phaser.Scene {
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-        this.serverGetUserItem();
-
-        this.serverGetAllItem();
+        
 
         // 테스트 계정의 감자 갯수 증가 시키기
         //this.serverAddItem(9, 1, 3);
@@ -122,6 +120,8 @@ export default class InGameScene extends Phaser.Scene {
             level: 1,
             cft: 1500000
         }
+        this.serverGetUserItem();
+        this.serverGetAllItem();
     }
 
     // 애셋 로드
@@ -482,6 +482,24 @@ export default class InGameScene extends Phaser.Scene {
             auctionWidth, auctionHeight);
 
         this.auction.setVisible(false);
+
+        // 인벤토리 UI 추가
+
+        // 크기
+        const invenWidth = 1000;
+        const invenHeight = 500;
+
+        // UI 위치 화면 중앙에 배치됨.
+        const invenX = this.cameras.main.width / 2 - invenWidth / 2;
+        const invenY = this.cameras.main.height / 2 - invenHeight / 2;
+
+        //console.log("invenX, invenY : ", invenX, invenY);
+
+        this.inventory = new Inventory(this, invenX, invenY,
+            invenWidth, invenHeight);
+
+        this.inventory.disable();
+
 
         // 퀵슬롯 클래스 객체 생성하고 추가
         this.quickSlotUI = new QuickSlot(this, 0, 0);
@@ -1029,10 +1047,8 @@ export default class InGameScene extends Phaser.Scene {
     }
 
         // 서버로부터 로그인한 유저의 아이템 목록 받아오기
-        async serverGetUserItem() {
-
-            const user_id = '1'
-            const requestURL = APIUrl + 'item/own-item/' + user_id;
+        async serverGetUserItem() {       
+            const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
     
             try {
     
