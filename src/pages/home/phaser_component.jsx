@@ -5,6 +5,7 @@ import { eventSystem } from './event_system';
 // import Phaser Scene
 import LoginScene from './scenes/LoginScene';
 import InGameScene from './scenes/InGameScene';
+import MarketScene from './scenes/MarketScene'
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin'
 // 게임에서 사용할 이미지는 public에 넣을 것
 
@@ -28,7 +29,7 @@ function PhaserGameComponent() {
         // LoginScene 사용
         //scene: [LoginScene, InGameScene],
         // InGameScene 테스트
-        scene: [InGameScene, LoginScene],
+        scene: [InGameScene,MarketScene,LoginScene],
 
         // 게임 설정에서 'scale' 속성 구성
         scale : {
@@ -61,7 +62,7 @@ function PhaserGameComponent() {
     }
     // Phaser 게임 인스턴스 생성
     const game = new Phaser.Game(config);
-
+    
 
     // 언마운트될 때 게임 인스턴스 정리
     // 전역 이벤트 시스템에 등록된 이벤트 전부 정리

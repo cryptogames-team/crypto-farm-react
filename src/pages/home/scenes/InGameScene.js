@@ -115,6 +115,7 @@ export default class InGameScene extends Phaser.Scene {
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
         this.characterInfo = {
             user_id : 2,
+            asset_name : '9763734532',
             user_name : 'park',
             exp: 1000,
             level: 1,
@@ -223,7 +224,7 @@ export default class InGameScene extends Phaser.Scene {
 
         // 타일맵 JSON 파일 로드
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
-
+        this.load.tilemapTiledJSON('시장맵', 'ingame/시장맵.json');
 
         // 상대 경로 재설정
         // selectbox.png를 로드
@@ -769,6 +770,7 @@ export default class InGameScene extends Phaser.Scene {
         //]키 눌렀는지 체크 경매장 UI열어줌.
         if (this.closeBracketKey.isDown) {
             this.auction.enable();
+            this.scene.start('MarketScene',this.characterInfo);
         }
 
     }
@@ -1304,12 +1306,7 @@ class SpriteLoader {
 
     createAnimation(animationData) {
         this.scene.anims.create(animationData);
-    }
-
-
-
-    
-     
+    }  
     
 }
 
@@ -1344,14 +1341,10 @@ class SelectBox extends Phaser.GameObjects.Container {
 
         this.bottomLeft = scene.add.image(0, height, 'selectbox_bl');
         this.bottomLeft.setOrigin(0, 1).setScale(scale);
-
         this.bottomRight = scene.add.image(width, height, 'selectbox_br');
         this.bottomRight.setOrigin(1, 1).setScale(scale);
 
 
-
         this.add([this.topLeft, this.topRight, this.bottomLeft, this.bottomRight]);
-
     }
-
 }
