@@ -27,7 +27,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2MDcxODk1LCJleHAiOjE3MDYxMDc4OTV9.DM0UhFU5rKiHXgXFDKAPoT7fhD4xnkqssSz1frfBaIU"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2MTU3NTA0LCJleHAiOjE3MDYxOTM1MDR9.6gai4KhR8IwDwbyyS_ZaqkIPRVeRD1_j8GvuItksM_Y"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -98,7 +98,7 @@ export default class InGameScene extends Phaser.Scene {
     // 맵 데이터 객체
     mapData = {
         objects: this.objects,
-        crops: this.crops
+        crops: []
     }
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
@@ -137,134 +137,6 @@ export default class InGameScene extends Phaser.Scene {
         this.serverGetUserItem();
         this.serverGetAllItem();
 
-
-    }
-
-    // 서버에 맵 데이터 추가 및 수정 요청
-    async serverAddMap() {
-        const requestURL = APIUrl + 'map/';
-
-        try {
-
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: 'Bearer ' + this.accessToken
-                },
-
-                body: JSON.stringify(this.mapData)
-            });
-
-            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
-
-            // .json() : 받은 응답을 JSON 형식으로 변환한다.
-            const data = await response.json();
-
-            // 서버로부터 받은 유저 아이템 정보들
-            //console.log('응답받은 맵 정보', data);
-
-        } catch (error) {
-            console.error('serverAddMap() Error : ', error);
-        }
-    }
-
-    // 로그인 한 유저의 맵 데이터 불러오기
-    async serverGetMap() {
-
-        const requestURL = APIUrl + 'map/' + this.characterInfo.asset_id;
-
-        try {
-
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-
-            });
-
-            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
-
-            // .json() : 받은 응답을 JSON 형식으로 변환한다.
-            const data = await response.json();
-
-            // 서버로부터 받은 유저 아이템 정보들
-            //console.log('받은 맵 정보', data);
-
-            // data -> mapData에 저장하기
-            data.objects.forEach((object, index) => {
-                this.mapData.objects.push(object);
-            });
-
-            data.crops.forEach((crop, index) => {
-                this.mapData.crops.push(crop);
-            });
-
-            // 서버에 맵 데이터 보낼 때 
-            // objects랑 crops만 포함시켜야됨.
-
-            console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
-
-            // 받은 맵 데이터를 기반으로 밭 타일 생성
-            // 나중에 게임 오브젝트(농작물)도 생성할 예정
-            // initGameMap()
-
-
-            this.mapData.objects.forEach((object, index) => {
-                const tileX = object.tileX;
-                const tileY = object.tileY;
-                const ingameMap = this.ingameMap;
-
-                // 서버에 저장된 타일의 타입에 따라 사용할 타일셋 변경
-                let layer0Tile = ingameMap.putTileAt(68, tileX, tileY, true, 0);
-                let layer1Tile = null;
-                let layer2Tile = ingameMap.putTileAt(-1, tileX, tileY, true, 2);
-
-                // 여기서 object.type에 따라 타일 변경
-                switch(object.type){
-
-                    case 'field':
-                        layer1Tile = ingameMap.putTileAt(819, tileX, tileY, true, 1);
-                        // 경작 가능한 타일
-                        layer1Tile.properties.plantable = true;
-                    break;
-
-                    // 농작물 수확해서 구멍난 밭타일
-                    case 'perforated field':
-                        layer1Tile = ingameMap.putTileAt(1139, tileX, tileY, true, 1);
-                        // 경작 불가능한 타일
-                        layer1Tile.properties.plantable = false;
-                    break;
-
-                }
-
-                // 변경한 레이어의 타일들을 배열에 넣음
-                let tiles = [];
-                tiles.push(layer0Tile, layer1Tile, layer2Tile);
-
-                // 각 레이어의 타일의 회전 제거
-                tiles.forEach((tile) => {
-
-                    if (tile) {
-                        tile.rotation = 0;
-                        // 타일의 X축, Y축 반전 제거
-                        tile.flipX = false;
-                        tile.flipY = false;
-                    }
-                });
-
-
-            });
-
-
-        } catch (error) {
-            console.error('serverGetMap() Error : ', error);
-        }
 
     }
 
@@ -391,6 +263,11 @@ export default class InGameScene extends Phaser.Scene {
         // 인벤토리 아이콘
         this.load.image('inven_icon', 'basket.png');
         this.load.image("auction_exit", 'cancel.png');
+
+        // 성장 진행도 UI 바
+        this.load.image('greenbar00', 'greenbar_00.png');
+        this.load.image('greenbar02', 'greenbar_02.png');
+        this.load.image('greenbar04', 'greenbar_04.png');
 
 
         // 도구 아이콘
@@ -879,6 +756,12 @@ export default class InGameScene extends Phaser.Scene {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
 
+
+        //console.log(this.crops);
+        this.crops.forEach((crops, index) => {
+            crops.update(delta);
+        });
+
         const interactTile = this.getInteractTile();
 
         // 구한 타일의 인덱스를 텍스트 표시 
@@ -1030,6 +913,8 @@ export default class InGameScene extends Phaser.Scene {
         // 컨테이너 객체는 origin이 중앙임
         const crops = new Crops(this, plantX, plantY, newSeedName, plantTime, seedItem.seed_time);
 
+        this.crops.push(crops);
+
         crops.body.debugShowBody = false;
 
         // 캐릭터와 농작물 간의 overlap 이벤트 설정
@@ -1059,7 +944,7 @@ export default class InGameScene extends Phaser.Scene {
                         console.log("수확이 완료된 타일 찾음 상태 변경");
 
                         object.type = 'perforated field';
-                        
+
                         return true;
                     }
                     return false;
@@ -1097,7 +982,7 @@ export default class InGameScene extends Phaser.Scene {
     }
 
     // mapData에 새 밭 타일 추가를 시도함.
-    addMapTile(tileX, tileY){
+    addMapTile(tileX, tileY) {
 
         // 땅 판 타일이 맵 데이터에 이미 존재하는 타일과 같은지 확인한다.
         // X,Y 위치가 같은 타일이 중복 추가되는 것을 방지함.
@@ -1106,13 +991,13 @@ export default class InGameScene extends Phaser.Scene {
             if (object.tileX === tileX && object.tileY === tileY) {
                 console.log("mapData.Objects에 이미 존재하는 타일");
 
-                    // 지금 파는 타일이 구멍난 밭 타일이면
-                    if(object.type === 'perforated field'){
-                        object.type = 'field';
+                // 지금 파는 타일이 구멍난 밭 타일이면
+                if (object.type === 'perforated field') {
+                    object.type = 'field';
 
-                        // 서버에 맵 데이터 변경 저장 요청
-                        this.serverAddMap();
-                    }
+                    // 서버에 맵 데이터 변경 저장 요청
+                    this.serverAddMap();
+                }
                 return true;
             }
             return false;
@@ -1544,6 +1429,135 @@ export default class InGameScene extends Phaser.Scene {
             console.error('serverMoveItem() Error : ', error);
         }
     }
+
+    // 서버에 맵 데이터 추가 및 수정 요청
+    async serverAddMap() {
+        const requestURL = APIUrl + 'map/';
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+
+                body: JSON.stringify(this.mapData)
+            });
+
+            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            const data = await response.json();
+
+            // 서버로부터 받은 유저 아이템 정보들
+            //console.log('응답받은 맵 정보', data);
+
+        } catch (error) {
+            console.error('serverAddMap() Error : ', error);
+        }
+    }
+
+    // 로그인 한 유저의 맵 데이터 불러오기
+    async serverGetMap() {
+
+        const requestURL = APIUrl + 'map/' + this.characterInfo.asset_id;
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+
+            });
+
+            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            const data = await response.json();
+
+            // 서버로부터 받은 유저 아이템 정보들
+            //console.log('받은 맵 정보', data);
+
+            // data -> mapData에 저장하기
+            data.objects.forEach((object, index) => {
+                this.mapData.objects.push(object);
+            });
+
+            data.crops.forEach((crop, index) => {
+                this.mapData.crops.push(crop);
+            });
+
+            // 서버에 맵 데이터 보낼 때 
+            // objects랑 crops만 포함시켜야됨.
+
+            console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
+
+            // 받은 맵 데이터를 기반으로 밭 타일 생성
+            // 나중에 게임 오브젝트(농작물)도 생성할 예정
+            // initGameMap()
+
+
+            this.mapData.objects.forEach((object, index) => {
+                const tileX = object.tileX;
+                const tileY = object.tileY;
+                const ingameMap = this.ingameMap;
+
+                // 서버에 저장된 타일의 타입에 따라 사용할 타일셋 변경
+                let layer0Tile = ingameMap.putTileAt(68, tileX, tileY, true, 0);
+                let layer1Tile = null;
+                let layer2Tile = ingameMap.putTileAt(-1, tileX, tileY, true, 2);
+
+                // 여기서 object.type에 따라 타일 변경
+                switch (object.type) {
+
+                    case 'field':
+                        layer1Tile = ingameMap.putTileAt(819, tileX, tileY, true, 1);
+                        // 경작 가능한 타일
+                        layer1Tile.properties.plantable = true;
+                        break;
+
+                    // 농작물 수확해서 구멍난 밭타일
+                    case 'perforated field':
+                        layer1Tile = ingameMap.putTileAt(1139, tileX, tileY, true, 1);
+                        // 경작 불가능한 타일
+                        layer1Tile.properties.plantable = false;
+                        break;
+
+                }
+
+                // 변경한 레이어의 타일들을 배열에 넣음
+                let tiles = [];
+                tiles.push(layer0Tile, layer1Tile, layer2Tile);
+
+                // 각 레이어의 타일의 회전 제거
+                tiles.forEach((tile) => {
+
+                    if (tile) {
+                        tile.rotation = 0;
+                        // 타일의 X축, Y축 반전 제거
+                        tile.flipX = false;
+                        tile.flipY = false;
+                    }
+                });
+
+
+            });
+
+
+        } catch (error) {
+            console.error('serverGetMap() Error : ', error);
+        }
+
+    }
+
 
 
 }
