@@ -27,7 +27,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA1OTIyODA0LCJleHAiOjE3MDU5NTg4MDR9.fE63VLptujeN4i0063qCbwmY8vAvCALMEt_BB_bn1s0"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2MDcxODk1LCJleHAiOjE3MDYxMDc4OTV9.DM0UhFU5rKiHXgXFDKAPoT7fhD4xnkqssSz1frfBaIU"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -90,13 +90,22 @@ export default class InGameScene extends Phaser.Scene {
     // 경작 가능 영역 표시하는 오브젝트 레이어
     plantableLayer;
 
+    // 타일맵 데이터 저장
+    objects = [];
+    // 농작물 오브젝트 저장
+    crops = [];
+
+    // 맵 데이터 객체
+    mapData = {
+        objects: this.objects,
+        crops: this.crops
+    }
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
         super('InGameScene');
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
-
 
 
         // 테스트 계정의 감자 갯수 증가 시키기
@@ -121,11 +130,142 @@ export default class InGameScene extends Phaser.Scene {
             user_name: 'park',
             exp: 1000,
             level: 1,
-            cft: 1500000
+            cft: 1500000,
+            asset_id: 4563456
         }
 
         this.serverGetUserItem();
         this.serverGetAllItem();
+
+
+    }
+
+    // 서버에 맵 데이터 추가 및 수정 요청
+    async serverAddMap() {
+        const requestURL = APIUrl + 'map/';
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+
+                body: JSON.stringify(this.mapData)
+            });
+
+            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            const data = await response.json();
+
+            // 서버로부터 받은 유저 아이템 정보들
+            //console.log('응답받은 맵 정보', data);
+
+        } catch (error) {
+            console.error('serverAddMap() Error : ', error);
+        }
+    }
+
+    // 로그인 한 유저의 맵 데이터 불러오기
+    async serverGetMap() {
+
+        const requestURL = APIUrl + 'map/' + this.characterInfo.asset_id;
+
+        try {
+
+            const response = await fetch(requestURL, {
+
+                // 요청 방식
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+
+            });
+
+            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
+
+            // .json() : 받은 응답을 JSON 형식으로 변환한다.
+            const data = await response.json();
+
+            // 서버로부터 받은 유저 아이템 정보들
+            //console.log('받은 맵 정보', data);
+
+            // data -> mapData에 저장하기
+            data.objects.forEach((object, index) => {
+                this.mapData.objects.push(object);
+            });
+
+            data.crops.forEach((crop, index) => {
+                this.mapData.crops.push(crop);
+            });
+
+            // 서버에 맵 데이터 보낼 때 
+            // objects랑 crops만 포함시켜야됨.
+
+            console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
+
+            // 받은 맵 데이터를 기반으로 밭 타일 생성
+            // 나중에 게임 오브젝트(농작물)도 생성할 예정
+            // initGameMap()
+
+
+            this.mapData.objects.forEach((object, index) => {
+                const tileX = object.tileX;
+                const tileY = object.tileY;
+                const ingameMap = this.ingameMap;
+
+                // 서버에 저장된 타일의 타입에 따라 사용할 타일셋 변경
+                let layer0Tile = ingameMap.putTileAt(68, tileX, tileY, true, 0);
+                let layer1Tile = null;
+                let layer2Tile = ingameMap.putTileAt(-1, tileX, tileY, true, 2);
+
+                // 여기서 object.type에 따라 타일 변경
+                switch(object.type){
+
+                    case 'field':
+                        layer1Tile = ingameMap.putTileAt(819, tileX, tileY, true, 1);
+                        // 경작 가능한 타일
+                        layer1Tile.properties.plantable = true;
+                    break;
+
+                    // 농작물 수확해서 구멍난 밭타일
+                    case 'perforated field':
+                        layer1Tile = ingameMap.putTileAt(1139, tileX, tileY, true, 1);
+                        // 경작 불가능한 타일
+                        layer1Tile.properties.plantable = false;
+                    break;
+
+                }
+
+                // 변경한 레이어의 타일들을 배열에 넣음
+                let tiles = [];
+                tiles.push(layer0Tile, layer1Tile, layer2Tile);
+
+                // 각 레이어의 타일의 회전 제거
+                tiles.forEach((tile) => {
+
+                    if (tile) {
+                        tile.rotation = 0;
+                        // 타일의 X축, Y축 반전 제거
+                        tile.flipX = false;
+                        tile.flipY = false;
+                    }
+                });
+
+
+            });
+
+
+        } catch (error) {
+            console.error('serverGetMap() Error : ', error);
+        }
+
     }
 
     // 애셋 로드
@@ -577,6 +717,9 @@ export default class InGameScene extends Phaser.Scene {
             layer.renderDebug(debugGraphics[i], styleconfig);
         }
 
+        // 서버에서 맵 데이터 가져와서 적용
+        this.serverGetMap();
+
         // 경작 가능오브젝트 레이어 가져오기
         this.plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
 
@@ -736,39 +879,6 @@ export default class InGameScene extends Phaser.Scene {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
 
-        // getInteractiTile() 문제 없으면 삭제할 것
-        /* // 플레이어의 현재 위치 : Vector 2
-        const playerX = this.playerObject.x;
-        const playerY = this.playerObject.y;
-
-        // 플레이어의 현재 중앙 위치
-        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
-        const playerCenterX = playerX + (this.playerObject.body.width / 2);
-        const playerCenterY = playerY + (this.playerObject.body.height / 2);
-
-
-        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 앞에 1타일 크기만큼 떨어진 곳 위치 구하기
-        let pointX = playerCenterX;
-        // 캐릭터가 현재 바라보는 방향
-        if (this.playerObject.playerDirection === 'left') {
-            pointX = playerCenterX - tileSize;
-        } else if (this.playerObject.playerDirection === "right") {
-            pointX = playerCenterX + tileSize;
-        }
-
-        // 플레이어 중앙 위치의 바로 앞 타일의 위치를 찍는다.
-                this.frontTilePoint.clear();
-                this.frontTilePoint.fillCircle(pointX, playerCenterY, 2);
-        
-        // 캐릭터가 상호작용할 타일의 인덱스 구하기
-        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
-        const interactTileX = this.ingameMap.worldToTileX(pointX);
-        const interactTileY = this.ingameMap.worldToTileY(playerCenterY);
-        this.interactTileX = interactTileX;
-        this.interactTileY = interactTileY;
-
-        //const interactTile = this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1); */
-
         const interactTile = this.getInteractTile();
 
         // 구한 타일의 인덱스를 텍스트 표시 
@@ -780,12 +890,6 @@ export default class InGameScene extends Phaser.Scene {
                     // 상호작용할 타일의 프로퍼티 표시
                     this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable); */
 
-
-
-        // 캐릭터가 상호작용할 타일의 월드 상의 위치
-        // getInteractTile() 문제 없으면 삭제
-        /* const frontTileX = this.ingameMap.tileToWorldX(interactTileX);
-        const frontTileY = this.ingameMap.tileToWorldY(interactTileY); */
 
         // 타일의 월드좌표로 상호작용 타일의 월드 상의 위치 저장
         // tileToWorldX()랑 Tile.pixelX랑 차이가 있네
@@ -838,13 +942,18 @@ export default class InGameScene extends Phaser.Scene {
     }
 
     // 캐릭터가 땅을 판 타일의 타일 레이어 1를 밭 타일로 변경한다.
-    // setFieldTile
     // 캐릭터 땅파기 애니메이션에 실행될 콜백 함수
     setFieldTile() {
 
         const interactTileX = this.interactTileX;
         const interactTileY = this.interactTileY;
         const ingameMap = this.ingameMap;
+
+        //console.log("interactTileX, interactTileY : ", interactTileX, interactTileY);
+
+        // mapData에 새 밭 타일 추가 시도
+        this.addMapTile(interactTileX, interactTileY);
+
 
         // 타일 인덱스를 전달, 페이저 타일 인덱스는 1부터 시작한다.
         // 전체 레이어의 타일 변경
@@ -860,6 +969,7 @@ export default class InGameScene extends Phaser.Scene {
         tiles.push(ingameMap.getTileAt(interactTileX, interactTileY, true, 1));
         tiles.push(ingameMap.getTileAt(interactTileX, interactTileY, true, 2));
 
+        //console.log("interactTile : ", ingameMap.getTileAt(interactTileX, interactTileY, true, 1));
 
         // 변경한 타일의 Ground 2 Layer의 프로퍼티를 수정하여 재배 가능한 타일이라고 나타내기
         tiles[1].properties.plantable = true;
@@ -910,13 +1020,15 @@ export default class InGameScene extends Phaser.Scene {
         // seedName '감자 씨앗'으로 오니까 ' 씨앗' 부분 빼야됨.
         let newSeedName = seedName.replace(' 씨앗', '');
 
-        const seedImgKey = newSeedName + '_01';
-        //console.log("seedImgKey : " + seedImgKey);
+        // 심은 시간 = 현재 시간
+        const plantTime = new Date();
 
+        // 아이템 정보 가져와야 함. seed_time
+        const seedItem = this.allItems.get(seedName);
 
         // 농작물 게임 오브젝트 추가
         // 컨테이너 객체는 origin이 중앙임
-        const crops = new Crops(this, plantTileX + tileSize / 2, plantTileY + tileSize / 2, seedImgKey, newSeedName);
+        const crops = new Crops(this, plantX, plantY, newSeedName, plantTime, seedItem.seed_time);
 
         crops.body.debugShowBody = false;
 
@@ -938,6 +1050,25 @@ export default class InGameScene extends Phaser.Scene {
                 this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
 
 
+                // 맵 데이터에서 수확이 완료된 밭 타일의 상태를 변경해야 된다.
+                // type : 'field' -> 'perforated field'
+                const tileExist = this.mapData.objects.some((object, index) => {
+
+                    if (object.tileX === fieldTileX &&
+                        object.tileY === fieldTileY) {
+                        console.log("수확이 완료된 타일 찾음 상태 변경");
+
+                        object.type = 'perforated field';
+                        
+                        return true;
+                    }
+                    return false;
+                });
+
+                console.log("상태가 변경된 밭 타일이 적용되었는지 확인", this.mapData.objects);
+
+                // 밭 타일 상태 변경 사항 저장
+                this.serverAddMap();
 
                 // 새 아이템이 추가되거나 중복 아이템 수량이 증가할 아이템 슬롯 찾기
                 let addItemSlot = null;
@@ -952,11 +1083,52 @@ export default class InGameScene extends Phaser.Scene {
 
                 // 씬에서 농작물 객체 제거
                 crops.harvest();
+
+                // 밭 타일에 농작물이 없어졌다고 알림
+                plantTile.properties.crops = false;
             }
         });
 
         // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
         plantTile.properties.plantable = false
+        // 타일에 농작물이 있다고 알림
+        plantTile.properties.crops = true;
+
+    }
+
+    // mapData에 새 밭 타일 추가를 시도함.
+    addMapTile(tileX, tileY){
+
+        // 땅 판 타일이 맵 데이터에 이미 존재하는 타일과 같은지 확인한다.
+        // X,Y 위치가 같은 타일이 중복 추가되는 것을 방지함.
+        const tileExist = this.mapData.objects.some((object, index) => {
+
+            if (object.tileX === tileX && object.tileY === tileY) {
+                console.log("mapData.Objects에 이미 존재하는 타일");
+
+                    // 지금 파는 타일이 구멍난 밭 타일이면
+                    if(object.type === 'perforated field'){
+                        object.type = 'field';
+
+                        // 서버에 맵 데이터 변경 저장 요청
+                        this.serverAddMap();
+                    }
+                return true;
+            }
+            return false;
+        });
+
+        // 중복되는 밭 타일이 없으면 맵 데이터에 밭 타일 새로 추가
+        if (!tileExist) {
+
+            //console.log("중복되는 밭 타일 없음");
+            this.mapData.objects.push({
+                tileX: tileX, tileY: tileY,
+                type: 'field', tileIndex: 819
+            });
+            // 서버에 맵 데이터 변경 저장 요청
+            this.serverAddMap();
+        }
 
     }
 
@@ -1096,14 +1268,14 @@ export default class InGameScene extends Phaser.Scene {
         /*         this.frontTilePoint.clear();
                 this.frontTilePoint.fillCircle(pointX, playerCenterY, 2); */
 
-        // 캐릭터가 상호작용할 타일의 인덱스 구하기
-        // 캐릭터 중앙 위치에서 캐릭터가 바라보는 방향 바로 앞 타일의 인덱스 구하기
-        const interactTileX = this.ingameMap.worldToTileX(pointX);
-        const interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
-        this.interactTileX = interactTileX;
-        this.interactTileY = interactTileY;
+        // 월드 상의 특정 위치(픽셀 단위)를 기반으로 해당 위치에 해당하는 타일맵의 타일 좌표를 계산한다.
+        // 캐릭터가 상호작용할 타일의 위치 구하기
+        //const interactTileX = this.ingameMap.worldToTileX(pointX);
+        //const interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
+        this.interactTileX = this.ingameMap.worldToTileX(pointX);
+        this.interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
 
-        return this.ingameMap.getTileAt(interactTileX, interactTileY, true, 1);
+        return this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
     }
 
     // 사각형 영역안에 특정 위치의 점이 포함되는지 확인
@@ -1301,7 +1473,7 @@ export default class InGameScene extends Phaser.Scene {
             'item_count': item_count,
         }
 
-        console.log("서버 아이템 사용 요청에 사용할 바디 ", requestBody);
+        //console.log("서버 아이템 사용 요청에 사용할 바디 ", requestBody);
 
         try {
 
@@ -1323,7 +1495,7 @@ export default class InGameScene extends Phaser.Scene {
 
             // 요청이 성공하면 클라이언트에서도 아이템 소비와 삭제
             if (data === 'use success') {
-                console.log('아이템이 소비되는 슬롯', useItemSlot);
+                //console.log('아이템이 소비되는 슬롯', useItemSlot);
 
                 useItemSlot.useItem(item_count);
             }

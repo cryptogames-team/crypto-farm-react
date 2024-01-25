@@ -489,7 +489,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             // 사용 개수 만큼 수량 감소
             item.count -= spend;
 
-            console.log('남은 아이템 수량 : ', item.count);
+            //console.log('남은 아이템 수량 : ', item.count);
 
             // 수량 텍스트 업데이트
             this.countTxt.setText(item.count);

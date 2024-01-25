@@ -23,6 +23,8 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
     // 수확중인지 여부
     isHarvesting = false;
 
+    // remote 캐릭터인가?
+
     constructor(scene, x, y) {
         // 상속받은 부모 클래스의 생성자
         super(scene, x, y);
@@ -233,7 +235,7 @@ class IdleState extends State {
             return;
         }
 
-        // 방향키를 누르면 걷는 상태로 전환
+        // 방향키를 누르면 이동 상태로 전환
         if (left.isDown || right.isDown || up.isDown || down.isDown ||
             W.isDown || A.isDown || S.isDown || D.isDown) {
             player.stateMachine.transition('move');
@@ -382,7 +384,12 @@ class ActionState extends State {
 
             // 경작 가능 영역에 땅을 팔려고 하는지 확인한다.
             const digTile = scene.getInteractTile();
-            if (scene.isTileInPlantable(digTile)) {
+
+            // 경작 가능한 밭타일이 존재하지 않으면 땅 팔수 있게 변경
+            // 농작물이 있는 밭 타일에 삽질 못함.
+            if (scene.isTileInPlantable(digTile) &&
+                digTile.properties.plantable !== true &&
+                digTile.properties.crops !== true) {
                 //console.log("경작 가능 영역에 땅 팔려고함.");
                 let digAnim = player.playAnimation('dig', player.hairSprite);
                 // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
