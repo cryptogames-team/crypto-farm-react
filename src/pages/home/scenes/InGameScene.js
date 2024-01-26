@@ -6,6 +6,7 @@ import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction';
+import CropsToolTip from '../ui/crops_tooltip';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -27,7 +28,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2MTU3NTA0LCJleHAiOjE3MDYxOTM1MDR9.6gai4KhR8IwDwbyyS_ZaqkIPRVeRD1_j8GvuItksM_Y"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2MjQ2MjY3LCJleHAiOjE3MDYyODIyNjd9.kgxyubsrQj4LAFbUkCuGlYOlAvkiwP-kAok_sevZuzM"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -100,6 +101,9 @@ export default class InGameScene extends Phaser.Scene {
         objects: this.objects,
         crops: []
     }
+
+    // 농작물 정보 툴팁
+    cropsToolTip;
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
@@ -539,6 +543,9 @@ export default class InGameScene extends Phaser.Scene {
         this.inventory.disable();
 
 
+        // 농작물 정보 툴팁
+        this.cropsToolTip = new CropsToolTip(this, 500, 500, 200, 100);
+        
 
 
         const debugGraphics = [];
@@ -597,6 +604,10 @@ export default class InGameScene extends Phaser.Scene {
         // 서버에서 맵 데이터 가져와서 적용
         this.serverGetMap();
 
+        // 맵 초기화 하고 싶으면 호출
+        //this.serverAddMap();
+
+
         // 경작 가능오브젝트 레이어 가져오기
         this.plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
 
@@ -606,7 +617,7 @@ export default class InGameScene extends Phaser.Scene {
         // 오브젝트 레이어 디버그 그래픽 설정
         const objectGraphics = this.add.graphics({
             fillStyle: { color: 0x0000ff }, lineStyle: { color: 0x0000ff }
-        }).setDepth(1000);
+        }).setDepth(40);
 
         // 각 오브젝트에 대한 시각적 표현 생성
         this.plantableLayer.forEach((object) => {
@@ -617,13 +628,13 @@ export default class InGameScene extends Phaser.Scene {
             object.width *= layerScale;
             object.height *= layerScale;
 
-            if (object.rectangle) {
+            /* if (object.rectangle) {
                 objectGraphics.strokeRect(
                     object.x,
                     object.y,
                     object.width,
                     object.height);
-            }
+            } */
 
             //console.log("object layerScale 만큼 크기 늘림", object);
         });
@@ -1548,9 +1559,7 @@ export default class InGameScene extends Phaser.Scene {
                     }
                 });
 
-
             });
-
 
         } catch (error) {
             console.error('serverGetMap() Error : ', error);

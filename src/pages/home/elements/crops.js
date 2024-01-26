@@ -151,11 +151,31 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.cropSprite.setScale(scale).setOrigin(0.5, 1);
         this.setSpritePosition();
 
-        // 농작물 컨테이너를 클릭 가능하게 변경한다.
-        /*         this.setInteractive();
-                this.on('pointerdown', () => {
-                    console.log(this.name + " 클릭함.");
-                }); */
+        // 농작물 옵젝을 상호작용 가능하게 변경함.
+        this.setInteractive();
+
+        // 상호작용 영역 확인하고 싶음
+        scene.input.enableDebug(this);
+
+        this.on('pointerover', () => {
+        console.log(this.name + "에 마우스 오버함.");
+
+        scene.cropsToolTip.setVisible(true);
+
+        // 이거 위치 기준이 뭐지?
+        // 아마 컨테이너 실제 영역이랑, 상호작용 영역이 다른듯
+
+        scene.cropsToolTip.x = this.x - scene.cropsToolTip.width / 2;
+        scene.cropsToolTip.y = this.y - scene.cropsToolTip.height - (this.height / 2) - scene.cropsToolTip.space ;
+
+
+        });
+
+        this.on('pointerout', (pointer) => {
+            console.log(this.name + "에 마우스 아웃");
+
+            scene.cropsToolTip.setVisible(false);
+        });
 
 
 
@@ -251,7 +271,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         // 현재 시간이랑 성장 완료 시간 비교
         if (now.getTime() >= this.growCompleteTime.getTime()) {
             // 열매 수확기로 설정
-            console.log("농작물 초기 성장 상태 : 열매(수확기)");
+            //console.log("농작물 초기 성장 상태 : 열매(수확기)");
 
             this.imgKey = this.name + '_04';
             this.state = 'harvest';
@@ -261,7 +281,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
             // 새싹
             if (now.getTime() < this.grow1Time) {
-                console.log("농작물 초기 성장 상태 : 새싹");
+                //console.log("농작물 초기 성장 상태 : 새싹");
 
                 this.state = 'sprout';
 
@@ -270,7 +290,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
                 // 다음 성장 단계(성장 1단계)까지 남은 시간 계산(밀리초)
                 this.nextGrowRemain = (this.grow1Time - now);
-                console.log("다음 성장 단계까지 남은 초", this.nextGrowRemain / 1000);
+                //console.log("다음 성장 단계까지 남은 초", this.nextGrowRemain / 1000);
 
                 // 성장 타이머 이벤트 추가
                 this.scene.time.addEvent({
@@ -282,7 +302,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
             }
             else if (now.getTime() < this.grow2Time) { // 성장 1
-                console.log("농작물 초기 성장 상태 : 성장1");
+                //console.log("농작물 초기 성장 상태 : 성장1");
 
                 this.imgKey = this.name + '_02';
                 this.state = 'grow1';
@@ -290,7 +310,7 @@ export default class Crops extends Phaser.GameObjects.Container {
                 // 다음 성장 단계(성장 2단계)에 도달하는 데 남은 시간 계산(밀리초)
                 this.nextGrowRemain = (this.grow2Time - now);
 
-                console.log('다음 성장 단계까지 남은 초', this.nextGrowRemain / 1000);
+                //console.log('다음 성장 단계까지 남은 초', this.nextGrowRemain / 1000);
 
                 // 다음 성장 단계로 가는 타이머 이벤트 설정
                 this.scene.time.addEvent({
@@ -302,7 +322,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
             }
             else { // 성장 2
-                console.log("농작물 초기 성장 상태 : 성장2");
+                //console.log("농작물 초기 성장 상태 : 성장2");
 
                 this.imgKey = this.name + '_03';
                 this.state = 'grow2';
@@ -310,7 +330,7 @@ export default class Crops extends Phaser.GameObjects.Container {
                 // 다음 성장 단계(수확기)에 도달하는 데 남은 시간 계산(밀리초)
                 this.nextGrowRemain = (this.harvestTime - now);
 
-                console.log('다음 성장 단계까지 남은 초', this.nextGrowRemain / 1000);
+                //console.log('다음 성장 단계까지 남은 초', this.nextGrowRemain / 1000);
 
                 // 다음 성장 단계로 가는 타이머 이벤트 설정
                 this.scene.time.addEvent({
@@ -329,8 +349,8 @@ export default class Crops extends Phaser.GameObjects.Container {
     // 성장기 1
     grow1() {
 
-        console.log("농작물 성장 1단계 도달");
-        console.log("다음 성장까지 남은 초", this.nextGrowingTime / 1000);
+        //console.log("농작물 성장 1단계 도달");
+        //console.log("다음 성장까지 남은 초", this.nextGrowingTime / 1000);
 
         // 성장기 1에 사용되는 이미지 키는 name + '_02'이다.
         // 예) this.name = 감자면 '감자_02'
@@ -354,8 +374,8 @@ export default class Crops extends Phaser.GameObjects.Container {
     // 성장기 2 설정 함수
     grow2() {
 
-        console.log("농작물 성장 2단계 도달");
-        console.log("다음 성장까지 남은 초", this.nextGrowingTime / 1000);
+        //console.log("농작물 성장 2단계 도달");
+        //console.log("다음 성장까지 남은 초", this.nextGrowingTime / 1000);
 
         // 성장기 1에 사용되는 이미지 키는 name + '_03'이다.        
         this.imgKey = this.name + '_03';
@@ -378,8 +398,8 @@ export default class Crops extends Phaser.GameObjects.Container {
     // 수확기
     growComplete() {
 
-        console.log("농작물 수확기 도달");
-        console.log('성장 완료');
+        //console.log("농작물 수확기 도달");
+        //console.log('성장 완료');
 
         // 성장기 1에 사용되는 이미지 키는 name + '_04'이다.        
         this.imgKey = this.name + '_04';
