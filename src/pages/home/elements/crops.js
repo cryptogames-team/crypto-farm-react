@@ -158,7 +158,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         scene.input.enableDebug(this);
 
         this.on('pointerover', () => {
-        console.log(this.name + "에 마우스 오버함.");
+        //console.log(this.name + "에 마우스 오버함.");
 
         scene.cropsToolTip.setVisible(true);
 
@@ -168,11 +168,12 @@ export default class Crops extends Phaser.GameObjects.Container {
         scene.cropsToolTip.x = this.x - scene.cropsToolTip.width / 2;
         scene.cropsToolTip.y = this.y - scene.cropsToolTip.height - (this.height / 2) - scene.cropsToolTip.space ;
 
+        scene.cropsToolTip.setCrops(this);
 
         });
 
         this.on('pointerout', (pointer) => {
-            console.log(this.name + "에 마우스 아웃");
+            //console.log(this.name + "에 마우스 아웃");
 
             scene.cropsToolTip.setVisible(false);
         });
@@ -207,7 +208,6 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         // 남은 성장 시간 표시하는 타이머 텍스트
         // 남은 성장 시간 초기화
-
 
         // 남은 시간이 60초 초과면 1m
 

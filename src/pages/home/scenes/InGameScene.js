@@ -28,7 +28,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2MjQ2MjY3LCJleHAiOjE3MDYyODIyNjd9.kgxyubsrQj4LAFbUkCuGlYOlAvkiwP-kAok_sevZuzM"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NDIyNDcyLCJleHAiOjE3MDY0NTg0NzJ9._okz8bYX6a8pPV8wSi1QvgKhD4kwvxBmNxbfLX3_TxE"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -99,7 +99,7 @@ export default class InGameScene extends Phaser.Scene {
     // 맵 데이터 객체
     mapData = {
         objects: this.objects,
-        crops: []
+        crops: this.crops
     }
 
     // 농작물 정보 툴팁
@@ -544,8 +544,8 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // 농작물 정보 툴팁
-        this.cropsToolTip = new CropsToolTip(this, 500, 500, 200, 100);
-        
+        this.cropsToolTip = new CropsToolTip(this, 0, 0, 200, 100);
+        this.cropsToolTip.setVisible(false);
 
 
         const debugGraphics = [];
@@ -1491,8 +1491,14 @@ export default class InGameScene extends Phaser.Scene {
 
             //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
 
+
+
             // .json() : 받은 응답을 JSON 형식으로 변환한다.
             const data = await response.json();
+
+            console.log("serverGetMap() response 확인". response);
+
+
 
             // 서버로부터 받은 유저 아이템 정보들
             //console.log('받은 맵 정보', data);

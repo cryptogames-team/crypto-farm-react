@@ -99,6 +99,30 @@ export default class Frame extends Phaser.GameObjects.Container {
         this.setDepth(1000);
     }
 
+        // 9분할 박스 UI 크기 변경
+        setUISize(width, height){
+            console.log('setUISize 호출됨.');
+    
+            const edgeSize = this.edgeSize;
+    
+            // top 부분은 height 필요 없음
+            // topCenter, topRight
+            this.topCenter.setDisplaySize(width - (edgeSize * 2), edgeSize);
+            this.topRight.setPosition(width, 0);
+    
+            // center 부분 width, height 
+            // centerLeft, center, centerRight
+            this.centerLeft.setDisplaySize(edgeSize, height - (edgeSize * 2));
+            this.center.setDisplaySize(width - (edgeSize * 2), height - (edgeSize * 2));
+            this.centerRight.setPosition(width - edgeSize, edgeSize);
+            this.centerRight.setDisplaySize(edgeSize, height - (edgeSize * 2));
+    
+            // bottom 부분 width, height
+            this.bottomLeft.setPosition(0, height);
+            this.bottomCenter.setPosition(edgeSize, height)
+            .setDisplaySize(width - (edgeSize * 2), edgeSize);
+            this.bottomRight.setPosition(width, height);
+        }
     
 
 
