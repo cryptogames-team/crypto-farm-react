@@ -95,7 +95,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         // 유저가 들어온 시간
         if (this.isload === true) {
             // 성장 완료까지 남은 시간 계산
-            this.remainTime = this.getRemainTime(new Date());    
+            this.remainTime = this.getRemainTime(new Date());
 
         } else {
             // 성장 완료까지 남은 시간 계산
@@ -123,7 +123,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         // 생성된 시간에서 일정시간만큼 더해보기
         // 유저가 농작물을 심고 일정 시간 후에 재접속했다는 것을 가정함.
-        //const nowPlus = new Date(now.getTime() + 7 * 1000);
+        //const nowPlus = new Date(now.getTime() + 11 * 1000);
 
 
         // 다음 성장 단계까지 필요한 총 성장 시간
@@ -155,30 +155,35 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.setInteractive();
 
         // 상호작용 영역 확인하고 싶음
-        scene.input.enableDebug(this);
+        //scene.input.enableDebug(this);
 
         this.on('pointerover', () => {
-        //console.log(this.name + "에 마우스 오버함.");
+            //console.log(this.name + "에 마우스 오버함.");
 
-        scene.cropsToolTip.setVisible(true);
 
-        // 이거 위치 기준이 뭐지?
-        // 아마 컨테이너 실제 영역이랑, 상호작용 영역이 다른듯
+            // 성장 완료되지 않은 농작물만 툴팁뜨게 만들기
+            if (this.state !== 'harvest') {
 
-        scene.cropsToolTip.x = this.x - scene.cropsToolTip.width / 2;
-        scene.cropsToolTip.y = this.y - scene.cropsToolTip.height - (this.height / 2) - scene.cropsToolTip.space ;
+                scene.cropsToolTip.setVisible(true);
 
-        scene.cropsToolTip.setCrops(this);
+                // 이거 위치 기준이 뭐지?
+                // 아마 컨테이너 실제 영역이랑, 상호작용 영역이 다른듯
+
+                scene.cropsToolTip.x = this.x - scene.cropsToolTip.width / 2;
+                scene.cropsToolTip.y = this.y - scene.cropsToolTip.height - (this.height / 2) - scene.cropsToolTip.space;
+
+                scene.cropsToolTip.setCrops(this);
+
+            }
 
         });
 
         this.on('pointerout', (pointer) => {
             //console.log(this.name + "에 마우스 아웃");
 
-            scene.cropsToolTip.setVisible(false);
+            scene.cropsToolTip.setCrops(null);
+            scene.cropsToolTip.setVisible(false).setPosition(0, 0);
         });
-
-
 
         // 성장 진행도 UI 표시
         this.progressBar = scene.add.image(0, 0, 'greenbar00');
@@ -203,35 +208,23 @@ export default class Crops extends Phaser.GameObjects.Container {
             fontStyle: 'bold',
             align: 'center',
             stroke: 'black', // 외곽선
-            strokeThickness: 4 // 외곽선 두께  
+            strokeThickness: 5 // 외곽선 두께  
         };
 
+
+        // 남은 성장 시간 텍스트 내용초기화
+        this.setProgressContent();
+
         // 남은 성장 시간 표시하는 타이머 텍스트
-        // 남은 성장 시간 초기화
-
-        // 남은 시간이 60초 초과면 1m
-
-        // 남은 시간이 60초 이하가 되면 60s
-
-        // 70초 짜리로 테스트
-        this.progressContent = '';
-
-        const mins = Math.floor((this.remainTime % 3600) / 60);
-        const secs = Math.floor(this.remainTime % 60);
-
-        // 시간 표시를 제일 큰 단위, 작은 단위 표시로 할까 <- 일단 이걸로 한다
-        // 아니면 제일 큰 단위만 나오게 할까?
-
-        if( mins > 0){
-            this.progressContent += mins + 'm';
-        }
-
-        if( secs > 0){
-            this.progressContent += secs + 's';
-        }
-
         this.progressText = scene.add.text(0, -this.offsetY, this.progressContent, txtStyle);
         this.progressText.setOrigin(0.5, 0.5);
+
+        // uiVisible 확인
+        if( scene.uiVisibleBtn.uiVisible === false){
+            this.progressBar.setVisible(false);
+            this.progressText.setVisible(false);
+        }
+
 
         // 컨테이너에 자식 오브젝트 추가
         this.add([this.cropSprite, this.progressBar, this.progressText]);
@@ -241,26 +234,13 @@ export default class Crops extends Phaser.GameObjects.Container {
     update(delta) {
         //console.log('농작물 성장중...');
 
-        if( this.remainTime >= 0){
-        this.remainTime -= delta / 1000;
+        if (this.remainTime >= 0) {
+            // delta가 밀리초 단위니까 초단위랑 계산하려면 변환해줘야됨.
+            this.remainTime -= delta / 1000;
 
-        this.progressContent = '';
-
-        // Math.floor : 소숫점 없애버리고 정수값만 리턴
-        const mins = Math.floor((this.remainTime % 3600) / 60);
-        const secs = Math.floor(this.remainTime % 60);
-
-        // 성장완료랑 타이머 0초되는데 대략 1초정도 오차남
-        if( mins > 0){
-            this.progressContent += mins + 'm';
-        }
-
-        // 초단위는 올림처리해서 보여줘야 함.
-        if( secs >= 0){
-            this.progressContent += (secs + 1) + 's';
-        }
-
-        this.progressText.setText(this.progressContent);
+            //남은 성장 시간 텍스트 내용초기화
+            this.setProgressContent();
+            this.progressText.setText(this.progressContent);
         }
     }
 
@@ -339,7 +319,6 @@ export default class Crops extends Phaser.GameObjects.Container {
                     callbackScope: this,
                     loop: false
                 });
-
 
             }
         }
@@ -442,6 +421,30 @@ export default class Crops extends Phaser.GameObjects.Container {
 
     }
 
+    // 남은 성장 시간 '몇분', '몇초' 형식으로 텍스트 설정하는 함수
+    setProgressContent() {
+
+        this.progressContent = '';
+
+        // Math.floor : 소숫점 없애버리고 정수값만 리턴
+        const mins = Math.floor((this.remainTime % 3600) / 60);
+        const secs = Math.floor(this.remainTime % 60);
+
+        if (mins > 0) {
+            this.progressContent += mins + 'm';
+        }
+
+        // 초단위는 올림처리해서 보여줘야 함.
+        if (secs >= 0) {
+
+            // 남은 시간이 60초 미만이라서 
+            // 몇분 부분에 없을 경우 초를 표시한다.
+            if (this.progressContent === '')
+                this.progressContent += (secs + 1) + 's';
+        }
+
+    }
+
     //농작물 이름과 상태에 따라 농작물 스프라이트 위치를 밭 타일에 딱 맞게 설정한다.
     setSpritePosition() {
 
@@ -454,8 +457,9 @@ export default class Crops extends Phaser.GameObjects.Container {
         if (this.state === 'sprout') {
 
             switch (this.name) {
-                case '':
-
+                // 반픽셀 오른쪽
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
                     break;
             }
 
@@ -471,6 +475,11 @@ export default class Crops extends Phaser.GameObjects.Container {
                     this.cropSprite.y = this.cropSprite.y + this.offsetY;
 
                     break;
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+
             }
 
         }
@@ -491,7 +500,13 @@ export default class Crops extends Phaser.GameObjects.Container {
                 case '양배추':
                     this.cropSprite.y = this.cropSprite.y + this.offsetY;
                     break;
-
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+                case '케일':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
             }
         }
         // 수확기
@@ -511,7 +526,19 @@ export default class Crops extends Phaser.GameObjects.Container {
                 case '양배추':
                     this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
                     break;
-
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                case '케일':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+                case '무':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                case '사탕무':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
             }
         } else {
             console.log("정의되지 않은 성장 상태");

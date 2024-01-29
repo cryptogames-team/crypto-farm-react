@@ -7,6 +7,8 @@ import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction';
 import CropsToolTip from '../ui/crops_tooltip';
+import ItemDisc from '../ui/itemdisc/itemdisc';
+import UIVisibleBtn from '../ui/button/UIVisibleBtn';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -28,7 +30,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NDIyNDcyLCJleHAiOjE3MDY0NTg0NzJ9._okz8bYX6a8pPV8wSi1QvgKhD4kwvxBmNxbfLX3_TxE"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NTI4MDY4LCJleHAiOjE3MDY1NjQwNjh9.IG1znHXciI02e8yEqw6noNY8pxK2OhFojeS4SefYEg0"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -99,11 +101,14 @@ export default class InGameScene extends Phaser.Scene {
     // 맵 데이터 객체
     mapData = {
         objects: this.objects,
-        crops: this.crops
+        crops: []
     }
 
     // 농작물 정보 툴팁
     cropsToolTip;
+
+    // UI visible 토글 버튼튼
+    uiVisibleBtn;
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
@@ -270,9 +275,33 @@ export default class InGameScene extends Phaser.Scene {
 
         // 성장 진행도 UI 바
         this.load.image('greenbar00', 'greenbar_00.png');
+        this.load.image('greenbar01', 'greenbar_01.png');
         this.load.image('greenbar02', 'greenbar_02.png');
+        this.load.image('greenbar03', 'greenbar_03.png');
         this.load.image('greenbar04', 'greenbar_04.png');
+        this.load.image('greenbar05', 'greenbar_05.png');
+        this.load.image('greenbar06', 'greenbar_06.png');
 
+        // 빨강색 Ui 바
+        this.load.image('redbar00', 'redbar_00.png');
+        this.load.image('redbar01', 'redbar_01.png');
+        this.load.image('redbar02', 'redbar_02.png');
+        this.load.image('redbar03', 'redbar_03.png');
+        this.load.image('redbar04', 'redbar_04.png');
+        this.load.image('redbar05', 'redbar_05.png');
+        this.load.image('redbar06', 'redbar_06.png');
+
+        // 푸른색 ui 바
+        this.load.image('bluebar00', 'bluebar_00.png');
+        this.load.image('bluebar01', 'bluebar_01.png');
+        this.load.image('bluebar02', 'bluebar_02.png');
+        this.load.image('bluebar03', 'bluebar_03.png');
+        this.load.image('bluebar04', 'bluebar_04.png');
+        this.load.image('bluebar05', 'bluebar_05.png');
+        //this.load.image('bluebar06', 'bluebar_06.png');
+
+        // 아이템 디스크
+        this.load.image('itemdisc01', 'itemdisc_01.png');
 
         // 도구 아이콘
         this.load.image("삽", 'shovel.png');
@@ -395,6 +424,31 @@ export default class InGameScene extends Phaser.Scene {
         this.load.image('양배추_02', "cabbage_02.png");
         this.load.image('양배추_03', "cabbage_03.png");
         this.load.image('양배추_04', "cabbage_04.png");
+
+        // 사탕무 beetroot
+        this.load.image('사탕무_01', "beetroot_01.png");
+        this.load.image('사탕무_02', "beetroot_02.png");
+        this.load.image('사탕무_03', "beetroot_03.png");
+        this.load.image('사탕무_04', "beetroot_04.png");
+
+        // 무 radish
+        this.load.image('무_01', "radish_01.png");
+        this.load.image('무_02', "radish_02.png");
+        this.load.image('무_03', "radish_03.png");
+        this.load.image('무_04', "radish_04.png");
+
+        // 케일 kale
+        this.load.image('케일_01', "kale_01.png");
+        this.load.image('케일_02', "kale_02.png");
+        this.load.image('케일_03', "kale_03.png");
+        this.load.image('케일_04', "kale_04.png");
+
+        // 밀 wheat
+        this.load.image('밀_01', "wheat_01.png");
+        this.load.image('밀_02', "wheat_02.png");
+        this.load.image('밀_03', "wheat_03.png");
+        this.load.image('밀_04', "wheat_04.png");
+
 
         // 농작물 열매 이미지
         this.load.image("감자", 'potato_05.png');
@@ -544,8 +598,17 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // 농작물 정보 툴팁
-        this.cropsToolTip = new CropsToolTip(this, 0, 0, 200, 100);
+        this.cropsToolTip = new CropsToolTip(this, 0, 0, 150, 100);
         this.cropsToolTip.setVisible(false);
+
+        const btnWidth = 60;
+        const btnHeight = 60;
+        const btnPad = 10;
+        const btnX = this.cameras.main.width - btnWidth - btnPad;
+        const btnY = this.cameras.main.height - btnHeight - btnPad;
+
+        // 특정 UI 보이기 토글 버튼 추가
+        this.uiVisibleBtn = new UIVisibleBtn(this, btnX, btnY, btnWidth, btnHeight);
 
 
         const debugGraphics = [];
@@ -772,6 +835,8 @@ export default class InGameScene extends Phaser.Scene {
         this.crops.forEach((crops, index) => {
             crops.update(delta);
         });
+
+        this.cropsToolTip.update(delta);
 
         const interactTile = this.getInteractTile();
 

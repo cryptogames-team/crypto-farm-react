@@ -410,7 +410,6 @@ class ActionState extends State {
                 player.stateMachine.transition('idle');
             }
 
-
         }
         // 도끼일 경우
         else if (equipItem.name === '도끼') {
@@ -424,32 +423,33 @@ class ActionState extends State {
             let mineAnim = player.playAnimation('mine', player.hairSprite);
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(mineAnim));
         }
-        // 감자 씨앗인 경우
         // 나중에 씨앗 아이템을 장착한 경우로 변경하기
         else if (equipItem.name === '감자 씨앗') {
-
             // 씨앗 심기
             // 성공할 경우 씬에 농작물 오브젝트가 추가되고
             // 실패하면 농작물 오브젝트가 추가되지 않고 캐릭터 상태가 대기로 전환됨.
             player.plantSeed(scene, player, '감자 씨앗', equipSlot);
-
         }
-        // 당근 씨앗
         else if (equipItem.name === '당근 씨앗') {
-
             player.plantSeed(scene, player, '당근 씨앗', equipSlot);
         }
-        // 호박 씨앗
         else if (equipItem.name === '호박 씨앗') {
-
             player.plantSeed(scene, player, '호박 씨앗', equipSlot);
-
         }
-        // 양배추 씨앗
         else if (equipItem.name === '양배추 씨앗') {
-
             player.plantSeed(scene, player, '양배추 씨앗', equipSlot);
-
+        }
+        else if (equipItem.name === '사탕무 씨앗') {
+            player.plantSeed(scene, player, '사탕무 씨앗', equipSlot);
+        }
+        else if (equipItem.name === '무 씨앗') {
+            player.plantSeed(scene, player, '무 씨앗', equipSlot);
+        }
+        else if (equipItem.name === '밀 씨앗') {
+            player.plantSeed(scene, player, '밀 씨앗', equipSlot);
+        }
+        else if (equipItem.name === '케일 씨앗') {
+            player.plantSeed(scene, player, '케일 씨앗', equipSlot);
         }
         else {
             player.stateMachine.transition('idle');

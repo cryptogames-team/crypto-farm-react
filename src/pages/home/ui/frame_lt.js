@@ -9,13 +9,10 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
 
     constructor(scene, x, y, width, height) {
 
-        super(scene,x, y);
+        super(scene, x, y);
 
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
-        // UI 객체라서 물리 효과가 필요 없지만 테두리 확인할려고 추가
-        //scene.physics.add.existing(this);
-
 
         this.setDepth(100).setScrollFactor(0);
 
