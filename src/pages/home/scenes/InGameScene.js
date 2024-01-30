@@ -30,7 +30,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NTI4MDY4LCJleHAiOjE3MDY1NjQwNjh9.IG1znHXciI02e8yEqw6noNY8pxK2OhFojeS4SefYEg0"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NTkwMTU2LCJleHAiOjE3MDY2MjYxNTZ9.CF4lR18vULygj69yceHDYcs0mXksKC81Iv_uzRV1PEM"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -98,16 +98,21 @@ export default class InGameScene extends Phaser.Scene {
     // 농작물 오브젝트 저장
     crops = [];
 
-    // 맵 데이터 객체
+    // 서버에 저장할 농작물 오브젝트 배열
+    // 농작물 옵젝을 그냥 저장하면 불필요한 데이터들이 너무 많음
+    // x, y, name, plantTime, growSec <- 저장
+    serverCrops = [];
+
+    // 서버에 저장할 맵 데이터 객체
     mapData = {
         objects: this.objects,
-        crops: []
+        crops: this.serverCrops
     }
 
     // 농작물 정보 툴팁
     cropsToolTip;
 
-    // UI visible 토글 버튼튼
+    // UI visible 토글 버튼
     uiVisibleBtn;
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
@@ -145,7 +150,6 @@ export default class InGameScene extends Phaser.Scene {
 
         this.serverGetUserItem();
         this.serverGetAllItem();
-
 
     }
 
@@ -670,7 +674,6 @@ export default class InGameScene extends Phaser.Scene {
         // 맵 초기화 하고 싶으면 호출
         //this.serverAddMap();
 
-
         // 경작 가능오브젝트 레이어 가져오기
         this.plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
 
@@ -729,7 +732,8 @@ export default class InGameScene extends Phaser.Scene {
         this.harvestKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
         // 상호작용할 타일이 오브젝트 레이어 영역에 포함되는지 확인한다.
         this.tileDebugKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
-
+        // 현재 맵 데이터 로그로 확인
+        this.mapDataKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
         //]키 경매장 UI오픈
         this.closeBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
 
@@ -780,6 +784,10 @@ export default class InGameScene extends Phaser.Scene {
             // 삼항 연산자 
             this.inventory.visible ? this.inventory.disable() : this.inventory.enable();
 
+        });
+        // M키 눌러 현재 게임 맵 데이터 로그로 확인하기
+        this.mapDataKey.on('down', () => {
+            console.log("현재 게임 맵 데이터 ", this.mapData);
         });
 
         // 게임 시작시 디버그 그래픽 숨기기
@@ -945,6 +953,102 @@ export default class InGameScene extends Phaser.Scene {
         });
     }
 
+    // 농작물 검색 영역과 농작물 간의 overlap 이벤트 설정해서 
+    // 농작물 수확이 가능하게 만든다.
+    setCropsOverlap(crops, plantTile) {
+
+        this.physics.add.overlap(this.searchArea, crops, () => {
+            /*             if(crops.state === 'harvest'){
+                            console.log("검색 영역 안에 수확 가능한 농작물이 있음", crops.name);
+                        } */
+            //console.log(this.playerObject.isHarvesting);
+
+            if (this.playerObject.isHarvesting === true && crops.state === 'harvest') {
+                console.log("캐릭터 수확 성공", crops.name);
+
+                // 수확한 밭 타일을 구멍난 밭 타일로 변경한다.
+                const fieldTileX = this.interactTileX;
+                const fieldTileY = this.interactTileY;
+
+                // 구멍난 밭 타일 인덱스 1139
+                this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
+
+
+                // 맵 데이터에서 수확이 완료된 밭 타일의 상태를 변경해야 된다.
+                // type : 'field' -> 'perforated field'
+                const tileExist = this.mapData.objects.some((object, index) => {
+
+                    if (object.tileX === fieldTileX &&
+                        object.tileY === fieldTileY) {
+                        console.log("수확이 완료된 타일 찾음 상태 변경");
+
+                        object.type = 'perforated field';
+
+                        return true;
+                    }
+                    return false;
+                });
+
+                //console.log("상태가 변경된 밭 타일이 적용되었는지 확인", this.mapData.objects);
+
+                // 밭 타일 상태 변경 사항 저장
+                this.serverAddMap();
+
+                // 새 아이템이 추가되거나 중복 아이템 수량이 증가할 아이템 슬롯 찾기
+                let addItemSlot = null;
+                addItemSlot = this.findAddItemSlot(crops.name);
+
+                // 추가할 아이템 슬롯이 있으면
+                // 아이템 추가 요청할 때 필요한 데이터 모아서 서버에 아이템 추가 요청함.
+                if (addItemSlot !== null) {
+
+                    this.sendAddItem(crops.name, addItemSlot);
+                }
+
+                //console.log("농작물 제거하기 전 this.crops 내용", this.crops);
+
+                // 씬에서 농작물 객체 제거
+                // 주의 : 씬에서 게임 오브젝트를 제거해도 다른 곳(예 : 배열)의 참조는
+                // 자동으로 제거되지 않기 때문에, 수동으로 제거 해줘야 한다.
+                crops.harvest();
+
+                // 배열에서 참조 제거 filter() 사용
+                // 씬에서 제거된 농작물 옵젝을 배열에서도 완전히 제거
+                this.crops = this.crops.filter(crop => crop !== crops);
+                //console.log("배열에서도 참조 제거한 후 this.crops 내용", this.crops);
+
+                // x,y 값이 둘 다 똑같은 객체는 배열에 존재 하지 않음.
+                const compareServerCrops = {
+                    x: crops.x,
+                    y: crops.y
+                }
+
+                console.log("compareServerCrops", compareServerCrops);
+
+                console.log("filter 전 this.serverCrops", this.serverCrops);
+                // this.serverCrops에서도 참조 제거
+                // x, y 값이 일치하는 요소만 뺀 배열을 반환
+                this.serverCrops = this.serverCrops.filter(serverCrop =>
+                    !(compareServerCrops.x === serverCrop.x &&
+                        compareServerCrops.y === serverCrop.y));
+
+                console.log("filter 후 this.serverCrops", this.serverCrops);
+
+
+                // mapData 객체 내부의 배열 참조를 바꿀려면
+                // 직접 객체의 배열 속성을 수정해야 한다.
+                this.mapData.crops = this.serverCrops;
+                console.log("current Map Data", this.mapData);
+
+                // 농작물을 수확하여 옵젝이 제거되었으니 변경 사항 저장 요청
+                this.serverAddMap();
+
+                // 밭 타일에 농작물이 없어졌다고 알림
+                plantTile.properties.crops = false;
+            }
+        });
+    }
+
     // 씨앗을 심을 타일 구하기
     getPlantTile() {
         const interactTileX = this.interactTileX;
@@ -988,67 +1092,26 @@ export default class InGameScene extends Phaser.Scene {
         // 농작물 게임 오브젝트 추가
         // 컨테이너 객체는 origin이 중앙임
         const crops = new Crops(this, plantX, plantY, newSeedName, plantTime, seedItem.seed_time);
-
         this.crops.push(crops);
 
+        // 서버에 저장할 농작물 오브젝트 데이터
+        const serverCrops = {
+            x: crops.x,
+            y: crops.y,
+            name: crops.name,
+            plantTime: crops.plantTime,
+            growTime: crops.growSec
+        };
+        this.serverCrops.push(serverCrops);
+
+
+        // 농작물 옵젝 변경 사항 서버에 저장
+        this.serverAddMap();
         crops.body.debugShowBody = false;
 
-        // 캐릭터와 농작물 간의 overlap 이벤트 설정
-        this.physics.add.overlap(this.searchArea, crops, () => {
-            /*             if(crops.state === 'harvest'){
-                            console.log("검색 영역 안에 수확 가능한 농작물이 있음", crops.name);
-                        } */
-            //console.log(this.playerObject.isHarvesting);
-
-            if (this.playerObject.isHarvesting === true && crops.state === 'harvest') {
-                console.log("캐릭터 수확 성공", crops.name);
-
-                // 수확한 밭 타일을 구멍난 밭 타일로 변경한다.
-                const fieldTileX = this.interactTileX;
-                const fieldTileY = this.interactTileY;
-
-                // 구멍난 밭 타일 인덱스 1139
-                this.ingameMap.putTileAt(1139, fieldTileX, fieldTileY, true, 1);
-
-
-                // 맵 데이터에서 수확이 완료된 밭 타일의 상태를 변경해야 된다.
-                // type : 'field' -> 'perforated field'
-                const tileExist = this.mapData.objects.some((object, index) => {
-
-                    if (object.tileX === fieldTileX &&
-                        object.tileY === fieldTileY) {
-                        console.log("수확이 완료된 타일 찾음 상태 변경");
-
-                        object.type = 'perforated field';
-
-                        return true;
-                    }
-                    return false;
-                });
-
-                console.log("상태가 변경된 밭 타일이 적용되었는지 확인", this.mapData.objects);
-
-                // 밭 타일 상태 변경 사항 저장
-                this.serverAddMap();
-
-                // 새 아이템이 추가되거나 중복 아이템 수량이 증가할 아이템 슬롯 찾기
-                let addItemSlot = null;
-                addItemSlot = this.findAddItemSlot(crops.name);
-
-                // 추가할 아이템 슬롯이 있으면
-                // 아이템 추가 요청할 때 필요한 데이터 모아서 서버에 아이템 추가 요청함.
-                if (addItemSlot !== null) {
-
-                    this.sendAddItem(crops.name, addItemSlot);
-                }
-
-                // 씬에서 농작물 객체 제거
-                crops.harvest();
-
-                // 밭 타일에 농작물이 없어졌다고 알림
-                plantTile.properties.crops = false;
-            }
-        });
+        // 농작물 검색 영역과 농작물 간의 overlap 이벤트 설정
+        // 농작물 수확이 가능하게 만듦.
+        this.setCropsOverlap(crops, plantTile)
 
         // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
         plantTile.properties.plantable = false
@@ -1510,6 +1573,8 @@ export default class InGameScene extends Phaser.Scene {
     async serverAddMap() {
         const requestURL = APIUrl + 'map/';
 
+        console.log("서버에 맵 데이터 추가 및 수정 요청");
+
         try {
 
             const response = await fetch(requestURL, {
@@ -1523,6 +1588,8 @@ export default class InGameScene extends Phaser.Scene {
 
                 body: JSON.stringify(this.mapData)
             });
+
+
 
             //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
 
@@ -1561,7 +1628,7 @@ export default class InGameScene extends Phaser.Scene {
             // .json() : 받은 응답을 JSON 형식으로 변환한다.
             const data = await response.json();
 
-            console.log("serverGetMap() response 확인". response);
+            console.log("serverGetMap() response 확인".response);
 
 
 
@@ -1631,6 +1698,44 @@ export default class InGameScene extends Phaser.Scene {
                 });
 
             });
+
+            // 서버에서 로드한 농작물 정보 기반으로 농작물 오브젝트 생성
+            this.mapData.crops.forEach((crop, index) => {
+                const cropX = crop.x;
+                const cropY = crop.y;
+                const cropName = crop.name;
+
+                // plantTime string -> date로 변경
+                crop.plantTime = new Date(crop.plantTime);
+
+                const plantTime = crop.plantTime;
+                const growTime = crop.growTime;
+
+                // 인게임에서 농작물 옵젝 생성
+                const crops = new Crops(this, cropX, cropY, cropName, plantTime, growTime, true);
+                this.crops.push(crops);
+
+
+                // getTileAt()에 픽셀 위치가 아니라 타일 위치를 넣어야 함.
+                // 타일 유닛 위치 구하기
+                const plantTileX = this.ingameMap.worldToTileX(crops.x);
+                const plantTileY = this.ingameMap.worldToTileY(crops.y);
+
+                // plantTile 구하기
+                const plantTile = this.ingameMap.getTileAt(plantTileX, plantTileY, true, 1);
+                // 농작물의 x,y 위치 아니까 농작물이 속한 타일 위치도 알 수 있다.
+                this.setCropsOverlap(crops, plantTile);
+
+                //console.log('plantTile', plantTile);
+
+                // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
+                plantTile.properties.plantable = false
+                // 타일에 농작물이 있다고 알림
+                plantTile.properties.crops = true;
+            });
+
+            //console.log("string -> Date mapDate 확인", this.mapData.crops);
+            //console.log("string -> Date serverCrops 확인", this.serverCrops);
 
         } catch (error) {
             console.error('serverGetMap() Error : ', error);

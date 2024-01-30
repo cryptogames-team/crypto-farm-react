@@ -83,7 +83,6 @@ export default class ToolTip extends Frame_LT {
 
         //console.log("desTxt 높이", this.desTxt.height);
 
-
         // 성장 시간 텍스트 <- 중앙배치
         const seedTimeX = (this.width - this.edgeSize * 2 ) / 2;
         const seedTimeY = desY + this.desTxt.height + this.space;

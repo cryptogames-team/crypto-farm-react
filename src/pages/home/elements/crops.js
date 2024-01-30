@@ -69,41 +69,10 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         this.name = seedName;
         this.scene = scene;
-
         this.imgKey = seedName + '_01';
-
         this.plantTime = plantTime;
         this.growSec = growSec;
-
-        // 심은 시간 = 현재 시간
-
-        //console.log("심은 농작물 이름 :", this.name);
-        console.log("이 농작물의 심은 시간", plantTime);
-        console.log("이 농작물의 전체 성장에 필요한 초", growSec);
-
-        // 성장 완료 시간 계산하기
-        this.growCompleteTime = new Date(plantTime.getTime() + growSec * 1000);
-        //console.log("이 농작물의 전체 성장 완료 시간", this.growCompleteTime);
-
-
-
-        // 인게임에서 농작물 심었다 plantTime
-
-        // 중간에 접속했다 new Date()
-
-
-        // 유저가 들어온 시간
-        if (this.isload === true) {
-            // 성장 완료까지 남은 시간 계산
-            this.remainTime = this.getRemainTime(new Date());
-
-        } else {
-            // 성장 완료까지 남은 시간 계산
-            this.remainTime = this.getRemainTime(plantTime);
-        }
-
-        console.log("농작물 성장 완료까지 남은 시간(초) ", this.remainTime);
-
+        this.isload = isload;
 
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
@@ -113,18 +82,14 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.setSize(tileSize, tileSize);
         this.setDepth(depth);
 
-        // 심은 시간으로부터 일정 시간 뒤 구하기
-        // 유저가 성장 중간에 들어온 경우를 가정해서 테스트 가능하다.
-        // const nowDate = new Date();
-        // nowDate.getTime() + 15 * 1000
 
-        // 농작물이 생성된 시간
-        const now = new Date();
+        //console.log("심은 농작물 이름 :", this.name);
+        console.log("이 농작물의 심은 시간", plantTime);
+        console.log("이 농작물의 전체 성장에 필요한 초", growSec);
 
-        // 생성된 시간에서 일정시간만큼 더해보기
-        // 유저가 농작물을 심고 일정 시간 후에 재접속했다는 것을 가정함.
-        //const nowPlus = new Date(now.getTime() + 11 * 1000);
-
+        // 성장 완료 시간 계산하기
+        this.growCompleteTime = new Date(plantTime.getTime() + growSec * 1000);
+        //console.log("이 농작물의 전체 성장 완료 시간", this.growCompleteTime);
 
         // 다음 성장 단계까지 필요한 총 성장 시간
         this.nextGrowingTime = growSec / 3 * 1000;
@@ -134,15 +99,46 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.grow1Time = new Date(plantTime.getTime() + nextGrowingTime);
         this.grow2Time = new Date(this.grow1Time.getTime() + nextGrowingTime);
         this.harvestTime = new Date(this.grow2Time.getTime() + nextGrowingTime);
-
         //console.log("성장 1단계 도달시간", this.grow1Time);
         //console.log("성장 2단계 도달시간", this.grow2Time);
         //console.log("수확기 도달시간", this.harvestTime);
 
+
+        // 유저가 게임에 접속하여 농작물 옵젝 정보를 받아와 생성한 시간을
+        // 성장 완료 시간과 비교한다.
+        if (this.isload === true) {
+            // 성장 완료까지 남은 시간 계산
+            console.log("서버에서 불러옴.");
+            this.remainTime = this.getRemainTime(new Date());
+
+        } else {
+            // 성장 완료까지 남은 시간 계산
+            console.log("인게임에서 농작물 심음.");
+            this.remainTime = this.getRemainTime(plantTime);
+        }
+
+        console.log("농작물 성장 완료까지 남은 시간(초) ", this.remainTime);
+
+
+        // 심은 시간으로부터 일정 시간 뒤 구하기
+        // 유저가 성장 중간에 들어온 경우를 가정해서 테스트 가능하다.
+        // const nowDate = new Date();
+        // nowDate.getTime() + 15 * 1000
+
+        // 농작물이 생성된 시간
+        // 인 게임에서 농작물을 심었을 때 1ms밖에 차이가 안나서 그냥 냅둠.
+        const now = new Date();
+
+        console.log('plantTime.getTime()', plantTime.getTime());
+        console.log('now.getTime()', now.getTime());
+
+        // 생성된 시간에서 일정시간만큼 더해보기
+        // 유저가 농작물을 심고 일정 시간 후에 재접속했다는 것을 가정함.
+        //const nowPlus = new Date(now.getTime() + 11 * 1000);
+
         // 농작물 초기 성장 단계 설정
         // 현재 시간이랑 성장 완료 시간 비교
         this.setInitialStage(now);
-
 
         // 농작물 스프라이트 생성
         // 스프라이트 초기 상대 위치는 컨테이너 중앙 위치(0, 0)에서 
@@ -150,16 +146,13 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.cropSprite = scene.add.sprite(0, this.offsetY, this.imgKey);
         this.cropSprite.setScale(scale).setOrigin(0.5, 1);
         this.setSpritePosition();
-
         // 농작물 옵젝을 상호작용 가능하게 변경함.
         this.setInteractive();
-
-        // 상호작용 영역 확인하고 싶음
+        // 상호작용 영역 확인
         //scene.input.enableDebug(this);
 
         this.on('pointerover', () => {
             //console.log(this.name + "에 마우스 오버함.");
-
 
             // 성장 완료되지 않은 농작물만 툴팁뜨게 만들기
             if (this.state !== 'harvest') {
@@ -168,19 +161,16 @@ export default class Crops extends Phaser.GameObjects.Container {
 
                 // 이거 위치 기준이 뭐지?
                 // 아마 컨테이너 실제 영역이랑, 상호작용 영역이 다른듯
-
                 scene.cropsToolTip.x = this.x - scene.cropsToolTip.width / 2;
                 scene.cropsToolTip.y = this.y - scene.cropsToolTip.height - (this.height / 2) - scene.cropsToolTip.space;
 
                 scene.cropsToolTip.setCrops(this);
-
             }
 
         });
 
         this.on('pointerout', (pointer) => {
             //console.log(this.name + "에 마우스 아웃");
-
             scene.cropsToolTip.setCrops(null);
             scene.cropsToolTip.setVisible(false).setPosition(0, 0);
         });
@@ -220,7 +210,7 @@ export default class Crops extends Phaser.GameObjects.Container {
         this.progressText.setOrigin(0.5, 0.5);
 
         // uiVisible 확인
-        if( scene.uiVisibleBtn.uiVisible === false){
+        if (scene.uiVisibleBtn.uiVisible === false) {
             this.progressBar.setVisible(false);
             this.progressText.setVisible(false);
         }
@@ -323,6 +313,8 @@ export default class Crops extends Phaser.GameObjects.Container {
             }
         }
 
+        console.log("농작물 초기 성장 단계 설정 ", this.state);
+
     }
 
     // 성장기 1
@@ -397,6 +389,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
     // 농작물 수확
     harvest() {
+
         this.destroy();
     }
 
@@ -406,7 +399,7 @@ export default class Crops extends Phaser.GameObjects.Container {
 
         const completeTime = new Date(this.growCompleteTime);
         // 남은 시간 초로 변환
-        const remainTimeInSec = (completeTime - now) / 1000;
+        let remainTimeInSec = (completeTime - now) / 1000;
 
         if (remainTimeInSec <= 0) {
             remainTimeInSec = 0;
@@ -418,7 +411,6 @@ export default class Crops extends Phaser.GameObjects.Container {
         const secs = Math.floor((remainTimeInSec % 60));
 
         return remainTimeInSec;
-
     }
 
     // 남은 성장 시간 '몇분', '몇초' 형식으로 텍스트 설정하는 함수

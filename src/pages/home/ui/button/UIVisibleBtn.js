@@ -40,7 +40,6 @@ export default class UIVisibleBtn extends ItemDisc {
             document.body.style.cursor = 'default';
         });
 
-
         // 클릭 이벤트 설정하기
         this.on('pointerdown', () => this.toggleUIVisible());
 
