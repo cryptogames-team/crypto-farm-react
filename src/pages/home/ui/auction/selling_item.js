@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import Frame_LT from './frame_lt';
-import Item from "../elements/item";
+import Frame_LT from "../frame/frame_lt";
+import Item from "../../elements/item";
 
 export default class SellingItem extends Phaser.GameObjects.Container {
 

@@ -1,19 +1,11 @@
 import Phaser from "phaser";
-import Frame_LT from './frame_lt';
+import Frame_LT from "../frame/frame_lt";
 
-export default class SearchItem extends Phaser.GameObjects.Container {
+export default class SearchResult extends Phaser.GameObjects.Container {
 
 
     index
-    setInfo(item)
-    {   
-        this.item_image.setTexture(item.item.item_name);
-        this.item_text.text=item.item.item_name
-        this.itemCount_text.text=item.item_count
-        this.itemPrice_text.text=item.item_price
-        this.itemTotalPrice_text.text=(item.item_price)*(item.item_count)
-    }
-    constructor(scene, width,x_position,index) {
+    constructor(scene, width,x_position,item,index) {
 
         super(scene);
         scene.add.existing(this);
@@ -37,9 +29,6 @@ export default class SearchItem extends Phaser.GameObjects.Container {
             frame_searchResult_width, frame_searchResult_height); 
         this.setDepth(100).setScrollFactor(0);
 
-
-
-        
         this.ItemBG = scene.add.graphics()
         .fillStyle(0xCCCCCCC) // 채우기 색상 설정
         .fillRoundedRect(frame_searchResult_x+16, frame_searchResult_y+10, 50, 50, 8) // round rectangle 그리기
@@ -53,16 +42,15 @@ export default class SearchItem extends Phaser.GameObjects.Container {
         const imageY=frame_searchResult_y+20
 
         
+        this.item_image = scene.add.image(imageX, imageY, item.item.item_name)   
+        .setOrigin(0,0)
+        .setDisplaySize(30,30)
 
-        this.item_image = scene.add.image(imageX+13, imageY+13, "감자")   
-        .setOrigin(0.5,0.5)
-        .setDisplaySize(25,25)
+        this.item_text = scene.add.text(frame_searchResult_x+255, frame_searchResult_y+22, item.item.item_name,textConfig).setOrigin(1,0);
 
-        this.item_text = scene.add.text(frame_searchResult_x+255, frame_searchResult_y+22,"",textConfig).setOrigin(1,0);
-
-        this.itemCount_text=scene.add.text(frame_searchResult_x+390, frame_searchResult_y+22, "",textConfig).setOrigin(1,0);
-        this.itemPrice_text=scene.add.text(frame_searchResult_x+590, frame_searchResult_y+22, "",textConfig).setOrigin(1,0);
-        this.itemTotalPrice_text=scene.add.text(frame_searchResult_x+805, frame_searchResult_y+22, "",textConfig).setOrigin(1,0);
+        this.itemCount_text=scene.add.text(frame_searchResult_x+390, frame_searchResult_y+22, item.item_count,textConfig).setOrigin(1,0);
+            this.itemPrice_text=scene.add.text(frame_searchResult_x+590, frame_searchResult_y+22, item.item_price,textConfig).setOrigin(1,0);
+            this.itemTotalPrice_text=scene.add.text(frame_searchResult_x+805, frame_searchResult_y+22, item.item_count*item.item_price,textConfig).setOrigin(1,0);
         this.add([
             this.frame_searchResult,this.ItemBG,
             this.item_image,this.item_text,this.itemCount_text,this.itemPrice_text,this.itemTotalPrice_text

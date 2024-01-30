@@ -1,12 +1,12 @@
 import Phaser from "phaser";
-import Frame from '../ui/frame';
-import SearchItem from '../ui/searchItem';
-import BuyConfirm from "../ui/buyConfirm";
-import AuctionItem from "../ui/auction_item"
-import SellingItem from "../ui/selling_item"
+import Frame from '../frame/frame';
+import SearchItem from './searchItem';
+import BuyConfirm from "./buyConfirm";
+import AuctionItem from "./auction_item"
+import SellingItem from "./selling_item"
 import CompleteItem from "./complete_item";
-import Item from "../elements/item";
-import Prompt from '../ui/prompt';
+import Item from "../../elements/item";
+import Prompt from './prompt';
 
 export default class TabItem extends Phaser.GameObjects.Container {
 

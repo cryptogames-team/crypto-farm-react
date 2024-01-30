@@ -82,6 +82,19 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
             move: new MoveState(),
             action: new ActionState(),
         }, [scene, this]);
+
+
+
+        //캐릭터 이름표 추가
+        this.nameTag = scene.add.text(33,60, scene.characterInfo.user_name, {
+            fontFamily: 'Arial',
+            fontSize: '18px',
+            color: 'white',
+            fontStyle: 'bold',
+            stroke: '#000000', 
+            strokeThickness: 4
+        }).setOrigin(0.5, 0)
+        this.add(this.nameTag)
     }
 
 

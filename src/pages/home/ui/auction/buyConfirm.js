@@ -1,7 +1,7 @@
 import Phaser, { RIGHT } from "phaser";
-import Frame from '../ui/frame';
-import Prompt from '../ui/prompt';
-import Item from '../elements/item'
+import Frame from '../frame/frame';
+import Prompt from './prompt';
+import Item from '../../elements/item'
 
 export default class BuyConfirm extends Phaser.GameObjects.Container {
 

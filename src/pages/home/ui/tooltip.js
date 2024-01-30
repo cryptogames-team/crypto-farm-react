@@ -1,4 +1,4 @@
-import Frame_LT from "./frame_lt";
+import Frame_LT from "./frame/frame_lt";
 
 // 아이템 툴팁 클래스
 export default class ToolTip extends Frame_LT {

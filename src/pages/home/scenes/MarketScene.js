@@ -1,12 +1,14 @@
 import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
+import RemotePlayer from '../characters/remote_player_object';
 import ItemSlot from '../ui/item_slot';
 import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
-import Auction from '../ui/auction';
+import Auction from '../ui/auction/auction';
 import { io } from 'socket.io-client';
+import Chat from '../ui/chat/chat';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -27,8 +29,8 @@ let APIUrl = process.env.REACT_APP_API;
 
 export default class MarketScene extends Phaser.Scene {
 
-    APIurl='http://221.148.25.234:1234'
-    accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1OTA5NTk0LCJleHAiOjE3MDU5NDU1OTR9.QBuZgStMNbif2taZEqX7qaI00125ffm7HijF4TxdUww"
+    APIurl = 'http://221.148.25.234:1234'
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1OTA5NTk0LCJleHAiOjE3MDU5NDU1OTR9.QBuZgStMNbif2taZEqX7qaI00125ffm7HijF4TxdUww"
     auction;
     socket;
     // 플레이어가 상호작용할 타일의 인덱스
@@ -37,13 +39,13 @@ export default class MarketScene extends Phaser.Scene {
     characterInfo;
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
     equipNumber = 0;
-
+    playerObject
     goldText
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
 
     spriteLoader;
-    
+
     // paint tileMap example
     selectedTile;
     marker;
@@ -54,10 +56,8 @@ export default class MarketScene extends Phaser.Scene {
     interactTileX;
     interactTileY;
 
-    beforePosition={
-        x : 0,
-        y : 0
-    }
+
+
     // getMousePointerTile()에서 사용할 멤버 변수
     tileIndexText;
     mouseLocationText;
@@ -98,12 +98,6 @@ export default class MarketScene extends Phaser.Scene {
     constructor() {
         super('MarketScene');
 
-        //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
-
-        
-
-        // 테스트 계정의 감자 갯수 증가 시키기
-        //this.serverAddItem(9, 1, 3);
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -115,8 +109,46 @@ export default class MarketScene extends Phaser.Scene {
         console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo)
         this.characterInfo = characterInfo;
 
-        // 스프라이트 로더 인스턴스 생성
+        // 스프라이트 로더 인스턴스 생성       
         this.spriteLoader = new SpriteLoader(this);
+
+
+        this.characterInfo = {
+            user_id: 2,
+            asset_name: '9763734532',
+            user_name: 'park',
+            exp: 1000,
+            level: 1,
+            cft: 1500000
+        }
+        const rand_1_6 = Math.floor(Math.random() * 6) + 1;
+        switch (rand_1_6) {
+            case 1:
+                this.characterInfo.user_name = 'park'
+                this.characterInfo.asset_name = '9763734532'
+                break;
+            case 2:
+                this.characterInfo.user_name = 'test2'
+                this.characterInfo.asset_name = '665556'
+                break;
+            case 3:
+                this.characterInfo.user_name = 'test3'
+                this.characterInfo.asset_name = '56666'
+                break;
+            case 4:
+                this.characterInfo.user_name = 'test4'
+                this.characterInfo.asset_name = '57777'
+                break;
+            case 5:
+                this.characterInfo.user_name = 'test5'
+                this.characterInfo.asset_name = '7777'
+                break;
+            case 6:
+                this.characterInfo.user_name = 'test'
+                this.characterInfo.asset_name = '4563456'
+                break;
+        }
+
     }
 
     // 애셋 로드
@@ -216,7 +248,7 @@ export default class MarketScene extends Phaser.Scene {
         this.load.image('sunnysideworld_tiles', 'spr_tileset_sunnysideworld_16px.png');
         this.load.image('cow_tiles', 'spr_deco_cow_strip4.png');
 
-       
+
 
 
 
@@ -224,18 +256,93 @@ export default class MarketScene extends Phaser.Scene {
     }
 
     create() {
-
+        this.beforePositionX = 0
+        this.beforePositionY = 0
+        this.playerObject = new PlayerObject(this, 1250, 1750);
         this.socket = io('http://221.148.25.234:1234/metaverse');
-        const user_info={
+        var user_info = {
             user_name: this.characterInfo.user_name,
             asset_name: this.characterInfo.asset_name,
             x: 0,
             y: 0
-        }       
-        this.socket.on('join', user_info);
-
+        }
+        // 해시 맵처럼 동작하는 객체 생성
+        this.remotePlayers = [];
+        // 키-값 쌍 추가
+        
         //캐릭터의 위치가 바뀐다면 0.2초 주기로 서버로 위치값 보냄
-        const intervalId = setInterval(this.sendPosition, 200);
+        const intervalId = setInterval(() => {
+            if ((this.beforePositionX != this.playerObject.x) || (this.beforePositionY != this.playerObject.y)) {
+                //console.log("이동함")
+                this.beforePositionX = this.playerObject.x
+                this.beforePositionY = this.playerObject.y
+                user_info.x = this.playerObject.x
+                user_info.y = this.playerObject.y
+                this.socket.emit('move', user_info);
+            } else {
+                //console.log("이동안함")
+            }
+        }, 200);
+
+        this.socket.on('connect', () => {
+            this.socket.emit('join', user_info);;
+        });
+        this.socket.on('disconnect', () => {
+            this.socket.emit('exit', user_info);;
+        });
+        this.socket.on('move', (data) => {             
+            if (data.user_name != this.characterInfo.user_name) {
+                for(let i=0;i<this.remotePlayers.length;i++)
+                {
+                    if(this.remotePlayers[i].name==data.user_name)
+                    {
+                        console.log(this.remotePlayers[i].name+" moved to x: "+data.x+"y : "+data.y)
+                        this.remotePlayers[i].move(data.x,data.y)
+                        break;
+                    }
+                } 
+            }
+        })
+        //유저가 들어왔을때
+        this.socket.on('joinRoom', (data) => {
+            if (data.user_name != this.characterInfo.user_name) {
+                let remotePlayer = new RemotePlayer(this, 1400, 700,data.user_name)
+                this.remotePlayers.push(remotePlayer);
+            }
+        })
+        //방처음 들어왔을때 user리스트 받음 
+        this.socket.on('getUsers', (data) => {
+            for(let i=0;i<data.length;i++)
+            {           
+                let remotePlayer = new RemotePlayer(this, data[i].x, data[i].y,data[i].user_name)
+                this.remotePlayers.push(remotePlayer);
+            }
+        })
+
+        //유저나갔을때 캐릭터 지워줌
+        this.socket.on('exitRoom', (data) => {
+            console.log('exitRoom')
+            console.log(data)
+            if (data != this.characterInfo.user_name) {
+                for(let i=0;i<this.remotePlayers.length;i++)
+                {
+                    if(this.remotePlayers[i].name==data)
+                    {
+                        this.removeCharacter=this.remotePlayers[i]                        
+                        this.remotePlayers.splice(i, 1);
+                        this.removeCharacter.destroy()
+                        break;
+                    }
+                } 
+            }
+        })
+        this.socket.on('chat', (data) => {
+            var resultArray = data.split(':')
+            var name=resultArray[0].trim()
+            var content=resultArray[1].trim()
+            console.log("name : "+name)
+            console.log("content : "+content)
+        })
 
 
         // 게임 화면의 가로, 세로 중앙 좌표
@@ -286,11 +393,11 @@ export default class MarketScene extends Phaser.Scene {
 
 
 
-    
+
         // 플레이어 캐릭터 오브젝트 씬에 생성
         // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
         // 컨테이너 클래스의 오리진은 변경이 불가능하다.
-        this.playerObject = new PlayerObject(this, 500, 600);
+
 
         // 플레이어 캐릭터 디버그 표시 해제
         this.playerObject.body.debugShowBody = false;
@@ -310,7 +417,7 @@ export default class MarketScene extends Phaser.Scene {
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
         const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
-  
+
 
 
         //옥션 UI 생성
@@ -336,12 +443,16 @@ export default class MarketScene extends Phaser.Scene {
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
-        this.ingameMap = this.make.tilemap({ key: 'ingame_tilemap' });
+        this.ingameMap = this.make.tilemap({ key: 'Market' });
         // 현재 사용중인 타일셋 이미지를 추가
         // 타일셋 오브젝트를 리턴한다.
-        const sunnysideworld_tileset = this.ingameMap.addTilesetImage('sunnysideworld_16px', 'sunnysideworld_tiles');
+        console.log("this.ingameMap : " + this.ingameMap)
+        const sunnysideworld_tileset = this.ingameMap.addTilesetImage('spr_tileset_sunnysideworld_16px', 'sunnysideworld_tiles');
+
+        console.log("sunnysideworld_tileset : " + sunnysideworld_tileset)
         // 소 타일셋 이미지
         //const cow_tileset = this.ingameMap.addTilesetImage('spr_deco_cow_strip4', 'cow_tiles');
+
 
         // 제일 밑에 있는 레이어를 가장 먼저 생성한다.
         for (let i = 0; i < this.ingameMap.layers.length; i++) {
@@ -356,57 +467,20 @@ export default class MarketScene extends Phaser.Scene {
             // 현재 맵 크기 설정
             currentMapWidth = layer.displayWidth;
             currentMapHeight = layer.displayHeight;
-            //console.log(layer.displayWidth, layer.displayHeight);
 
-            // 각 레이어에 충돌 적용하기
-            layer.setCollisionByProperty({ collides: true });
-            // 플레이어 캐릭터와 레이어 충돌 적용
+
             this.physics.add.collider(this.playerObject, layer);
 
-            // 디버그 그래픽 객체 배열 초기화
-            if (i === 0) {
-                // 타일맵 레이어 갯수만큼
-                for (let j = 0; j < this.ingameMap.layers.length; j++) {
-                    debugGraphics.push(this.add.graphics().setAlpha(0.6));
-                    debugGraphics[j].setDepth(3);
-                }
-            }
-
-            // 디버그 그래픽 스타일 객체
-            let styleconfig = {
-                // 미충돌 타일 색상 없음
-                tileColor: null,
-                // 충돌 타일 색상
-                collidingTileColor: new Phaser.Display.Color(243, 134, 48, 200),
-                // 충돌 영역의 경계선 색상
-                faceColor: new Phaser.Display.Color(40, 39, 37, 255)
-            }
-            // 각 타일맵 레이어에 디버그 렌더링 설정
-            layer.renderDebug(debugGraphics[i], styleconfig);
         }
 
-        // 경작 가능오브젝트 레이어 가져오기
-        const plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
 
-        // 로드 체크
-        console.log(plantableLayer);
 
         // 오브젝트 레이어 디버그 그래픽 설정
         const objectGraphics = this.add.graphics({
-            fillStyle: { color: 0x0000ff}, lineStyle : {color: 0x0000ff}
+            fillStyle: { color: 0x0000ff }, lineStyle: { color: 0x0000ff }
         }).setDepth(1000);
 
-        // 각 오브젝트에 대한 시각적 표현 생성
-        plantableLayer.forEach( (object) => {
 
-            if(object.rectangle){
-                objectGraphics.strokeRect(
-                    object.x * layerScale,
-                    object.y * layerScale,
-                    object.width * layerScale,
-                    object.height * layerScale);
-            }
-        });
 
 
 
@@ -467,19 +541,12 @@ export default class MarketScene extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, currentMapWidth, currentMapHeight);
 
 
-        // 현재 플레이어가 위치한 타일의 인덱스 표시하고 화면 왼쪽 아래에 배치     
-        /* this.interactTileIndexTxt = this.add.text(0, bottomY, 'interact tile index', txtStyle);
-        this.interactTileIndexTxt.setScrollFactor(0).setOrigin(0, 1).setDepth(100);
+
+        this.chatUI=new Chat(this)
+        this.chatUI.setPosition(this.cameras.main.width/2+50,this.cameras.main.height-50)
+
+         
         
-        this.interactPropsTxt = this.add.text(centerX, 0, 'interact tile Properties', txtStyle);
-        this.interactPropsTxt.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100); */
-
-        // 박스의 스케일과 뎁스
-        const selectBoxScale = 2;
-        const selectBoxDepth = 3;
-
-        // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
-        this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize, selectBoxScale, selectBoxDepth);
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -492,7 +559,6 @@ export default class MarketScene extends Phaser.Scene {
         // 플레이어의 현재 위치 : Vector 2
         const playerX = this.playerObject.x;
         const playerY = this.playerObject.y;
-
         // 플레이어의 현재 중앙 위치
         // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
         const playerCenterX = playerX + (this.playerObject.body.width / 2);
@@ -508,55 +574,28 @@ export default class MarketScene extends Phaser.Scene {
             pointX = playerCenterX + tileSize;
         }
 
-
-        const interactTileX = this.ingameMap.worldToTileX(pointX);
-        const interactTileY = this.ingameMap.worldToTileY(playerCenterY);
-        this.interactTileX = interactTileX;
-        this.interactTileY = interactTileY;
-
-
-
-
-        // 캐릭터가 상호작용할 타일의 월드 상의 위치
-        const frontTileX = this.ingameMap.tileToWorldX(interactTileX);
-        const frontTileY = this.ingameMap.tileToWorldY(interactTileY);
-
-        // 상호작용 할 타일 표시 UI 마커 위치 업데이트
-        this.interTileMarker.x = frontTileX;
-        this.interTileMarker.y = frontTileY;
-
-        // 검색 영역 위치도 업데이트
-        this.searchArea.x = frontTileX;
-        this.searchArea.y = frontTileY;
-
         //]키 눌렀는지 체크 경매장 UI열어줌.
         if (this.closeBracketKey.isDown) {
             this.auction.enable();
         }
 
-    }
-
-    handleMessage(message) {
-        console.log('Received message from server:', message);
-    }
-
-    sendMessage() {
-        console.log("hi")
-        const message = 'Hello, Server!';
-        this.socket.emit('message', message);
-    }
-
-    sendPosition() {
-        //위치가 바뀌었다면
-        if((this.beforePosition.x!=this.playerObject.x) || (this.beforePosition.y!=this.playerObject.y))
+        
+        //원래맵이동
+        if(this.playerObject.x> 1150 && this.playerObject.x <1320 &&this.playerObject.y>1830)
         {
-            console.log("이동함")
-        }else
-        {
-            console.log("이동안함")
+            this.scene.switch('InGameScene', this.characterInfo);
+            this.playerObject.y=1820
         }
+
+        
     }
-    
+
+
+
+
+
+
+
 }
 
 // 스프라이트 시트 로더 클래스 - 로드 부분을 따로 클래스로 분리
@@ -589,8 +628,8 @@ class SpriteLoader {
         });
     }
 
-    
-    
+
+
 }
 
 // 플레이어가 상호작용할 타일을 표시하거나 선택한 아이템을 표시하는 UI 박스
@@ -631,5 +670,5 @@ class SelectBox extends Phaser.GameObjects.Container {
         this.add([this.topLeft, this.topRight, this.bottomLeft, this.bottomRight]);
     }
 
-    
+
 }
