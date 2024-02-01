@@ -411,10 +411,58 @@ class ActionState extends State {
             }
 
         }
-        // 도끼일 경우
+        // 도끼일 경우 10 프레임
         else if (equipItem.name === '도끼') {
 
             let axeAnim = player.playAnimation('axe', player.hairSprite);
+            // 나무 패기
+            axeAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 6) {
+                    //console.log("도끼질 애니메이션 프레임 6에 도달함.");
+
+                    const rangeX = scene.searchArea.x;
+                    const rangeY = scene.searchArea.y;
+                    const rangeWidth = scene.searchArea.displayWidth;
+                    const rangeHeight = scene.searchArea.displayHeight;
+
+                    // Zone 생성 SerachArea 기반
+                    let axeRange = scene.add.zone(rangeX, rangeY,
+                        rangeWidth, rangeHeight);
+
+                    // zone에 물리 바디 추가해줘야 함.
+                    scene.physics.world.enable(axeRange);
+                    axeRange.body.setAllowGravity(false);
+                    axeRange.body.moves = false;
+
+                    // 오리진도 설정
+                    axeRange.setOrigin(0, 0);
+
+
+                    //console.log("axeRange x,y,width,height", axeRange.x, axeRange.y, axeRange.width, axeRange.height);
+
+                    // 1프레임 후 센서 영역 제거
+                    scene.time.delayedCall(16, () => {
+                        axeRange.destroy();
+                    });
+
+                    // 오버랩 시 콜백 함수가 딱 한번만 실행되게 하기
+                    // once() 사용이 불가능하다. 이벤트 리스너 제거하는 방법 사용
+                    // axeRange를 파괴하는 방법도 있다
+
+                    // 주의 : 컨테이너가 아니라 컨테이너의 스프라이트에 물리 바디를 적용해놓음.
+                    scene.physics.add.overlap(axeRange, scene.tree.treeSprite, () => {
+                        console.log("도끼질 범위 영역과 나무가 겹침");
+
+                        // 도끼질 당할 떄
+                        scene.tree.chopTree();
+
+                        axeRange.destroy();
+                    });
+
+                    
+                }
+            });
+
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(axeAnim));
         }
         // 곡괭이일 경우

@@ -9,6 +9,7 @@ import Auction from '../ui/auction';
 import CropsToolTip from '../ui/crops_tooltip';
 import ItemDisc from '../ui/itemdisc/itemdisc';
 import UIVisibleBtn from '../ui/button/UIVisibleBtn';
+import Tree from '../elements/tree';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -30,7 +31,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NTkwMTU2LCJleHAiOjE3MDY2MjYxNTZ9.CF4lR18vULygj69yceHDYcs0mXksKC81Iv_uzRV1PEM"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NzY1MTA3LCJleHAiOjE3MDY4MDExMDd9.0w0Y5QXub1bPe1nBHnYLZ_RZ0x36W0RHvQiAqiUlw6M"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -242,6 +243,15 @@ export default class InGameScene extends Phaser.Scene {
         this.load.path = 'assets/Character/';
         // 플레이어 캐릭터에 사용할 스프라이트 시트 로드
         characterSprites.forEach(sprite => this.spriteLoader.loadSprite(sprite));
+
+
+        // 나무 스프라이트 시트 로드하기
+        this.load.path = 'assets/Elements/Plants/';
+        this.load.spritesheet('tree1', 'spr_deco_tree_01_strip4.png', {
+            frameWidth : 32,
+            frameHeight : 34
+        });
+
 
 
         // sunnysideworld 타일셋 PNG 파일 로드
@@ -521,8 +531,6 @@ export default class InGameScene extends Phaser.Scene {
         ];
 
 
-
-
         // 스프라이트 로더 클래스에 애니메이션 정보 전달해서 씬에서 애니메이션 생성하기
         animations.forEach(animation => this.spriteLoader.createAnimation(animation));
         // 플레이어 캐릭터 오브젝트 씬에 생성
@@ -539,6 +547,10 @@ export default class InGameScene extends Phaser.Scene {
         this.searchArea = this.physics.add.sprite(500, 500, null);
         this.searchArea.setDisplaySize(tileSize, tileSize).setOrigin(0, 0);
         this.searchArea.body.debugShowBody = false;
+
+
+        /* this.examSprite = this.physics.add.sprite(640, 640 , null);
+        this.examSprite.setDisplaySize(tileSize, tileSize).setOrigin(0, 0); */
 
         // setSize() 하니까 갑자기 물리 바디 오리진이 0,0에서 0.5, 0.5가 됨.
 
@@ -706,6 +718,10 @@ export default class InGameScene extends Phaser.Scene {
         });
 
 
+        // 나무 오브젝트 추가
+        this.tree = new Tree(this, 64 * 10, 64 * 10);
+
+        // 5 유닛에 위치
 
         // 키보드 키 입력 설정
         // 방향키, 쉬프트, 스페이스바 키 객체 생성

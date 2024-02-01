@@ -84,8 +84,8 @@ export default class Crops extends Phaser.GameObjects.Container {
 
 
         //console.log("심은 농작물 이름 :", this.name);
-        console.log("이 농작물의 심은 시간", plantTime);
-        console.log("이 농작물의 전체 성장에 필요한 초", growSec);
+        //console.log("이 농작물의 심은 시간", plantTime);
+        //console.log("이 농작물의 전체 성장에 필요한 초", growSec);
 
         // 성장 완료 시간 계산하기
         this.growCompleteTime = new Date(plantTime.getTime() + growSec * 1000);
@@ -108,16 +108,16 @@ export default class Crops extends Phaser.GameObjects.Container {
         // 성장 완료 시간과 비교한다.
         if (this.isload === true) {
             // 성장 완료까지 남은 시간 계산
-            console.log("서버에서 불러옴.");
+            //console.log("서버에서 불러옴.");
             this.remainTime = this.getRemainTime(new Date());
 
         } else {
             // 성장 완료까지 남은 시간 계산
-            console.log("인게임에서 농작물 심음.");
+            //console.log("인게임에서 농작물 심음.");
             this.remainTime = this.getRemainTime(plantTime);
         }
 
-        console.log("농작물 성장 완료까지 남은 시간(초) ", this.remainTime);
+        //console.log("농작물 성장 완료까지 남은 시간(초) ", this.remainTime);
 
 
         // 심은 시간으로부터 일정 시간 뒤 구하기
@@ -129,8 +129,8 @@ export default class Crops extends Phaser.GameObjects.Container {
         // 인 게임에서 농작물을 심었을 때 1ms밖에 차이가 안나서 그냥 냅둠.
         const now = new Date();
 
-        console.log('plantTime.getTime()', plantTime.getTime());
-        console.log('now.getTime()', now.getTime());
+        //console.log('plantTime.getTime()', plantTime.getTime());
+        //console.log('now.getTime()', now.getTime());
 
         // 생성된 시간에서 일정시간만큼 더해보기
         // 유저가 농작물을 심고 일정 시간 후에 재접속했다는 것을 가정함.
@@ -313,7 +313,7 @@ export default class Crops extends Phaser.GameObjects.Container {
             }
         }
 
-        console.log("농작물 초기 성장 단계 설정 ", this.state);
+        //console.log("농작물 초기 성장 단계 설정 ", this.state);
 
     }
 
