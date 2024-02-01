@@ -152,8 +152,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             this.width, this.height),
             Phaser.Geom.Rectangle.Contains);
 
-
-
         // 아이템 슬롯 이벤트 추가
         // 마우스 포인터오버
         // 마우스 오버하면 딱 한번만 호출됨

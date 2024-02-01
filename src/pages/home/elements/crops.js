@@ -18,7 +18,8 @@ export default class Crops extends Phaser.GameObjects.Container {
     name = null;
     // 농작물이 존재할 씬 객체
     scene;
-
+    // 이 오브젝트의 타입
+    type = 'crops';
     // 밭 타일 중앙 위치에서 몇 픽셀 만큼 떨어져야 되는지
     // 이걸로 이미지를 밭 타일에 딱 맞춘다.
     offsetX = 1 * scale;
@@ -41,8 +42,7 @@ export default class Crops extends Phaser.GameObjects.Container {
     growSec;
     // 전체 성장 완료 시간
     growCompleteTime;
-    // 성장 완료 시간(초로 변환)
-    // 성장 완료까지 남은 시간
+    // 성장 완료까지 남은 시간(초)
     remainTime;
 
     // 각 성장 단계에 도달하는 시간
@@ -157,22 +157,22 @@ export default class Crops extends Phaser.GameObjects.Container {
             // 성장 완료되지 않은 농작물만 툴팁뜨게 만들기
             if (this.state !== 'harvest') {
 
-                scene.cropsToolTip.setVisible(true);
+                scene.objectToolTip.setVisible(true);
 
                 // 이거 위치 기준이 뭐지?
                 // 아마 컨테이너 실제 영역이랑, 상호작용 영역이 다른듯
-                scene.cropsToolTip.x = this.x - scene.cropsToolTip.width / 2;
-                scene.cropsToolTip.y = this.y - scene.cropsToolTip.height - (this.height / 2) - scene.cropsToolTip.space;
+                scene.objectToolTip.x = this.x - scene.objectToolTip.width / 2;
+                scene.objectToolTip.y = this.y - scene.objectToolTip.height - (this.height / 2) - scene.objectToolTip.space;
 
-                scene.cropsToolTip.setCrops(this);
+                scene.objectToolTip.setObject(this);
             }
 
         });
 
         this.on('pointerout', (pointer) => {
             //console.log(this.name + "에 마우스 아웃");
-            scene.cropsToolTip.setCrops(null);
-            scene.cropsToolTip.setVisible(false).setPosition(0, 0);
+            scene.objectToolTip.setObject(null);
+            scene.objectToolTip.setVisible(false).setPosition(0, 0);
         });
 
         // 성장 진행도 UI 표시

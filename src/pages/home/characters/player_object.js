@@ -450,11 +450,10 @@ class ActionState extends State {
                     // axeRange를 파괴하는 방법도 있다
 
                     // 주의 : 컨테이너가 아니라 컨테이너의 스프라이트에 물리 바디를 적용해놓음.
-                    scene.physics.add.overlap(axeRange, scene.tree.treeSprite, () => {
-                        console.log("도끼질 범위 영역과 나무가 겹침");
+                    scene.physics.add.overlap(axeRange, scene.trees, (axeRange, tree) => {
 
                         // 도끼질 당할 떄
-                        scene.tree.chopTree();
+                        tree.chopTree();
 
                         axeRange.destroy();
                     });

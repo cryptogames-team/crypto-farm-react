@@ -6,7 +6,7 @@ import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction';
-import CropsToolTip from '../ui/crops_tooltip';
+import ObjectToolTip from '../ui/object_tooltip';
 import ItemDisc from '../ui/itemdisc/itemdisc';
 import UIVisibleBtn from '../ui/button/UIVisibleBtn';
 import Tree from '../elements/tree';
@@ -98,20 +98,29 @@ export default class InGameScene extends Phaser.Scene {
     objects = [];
     // 농작물 오브젝트 저장
     crops = [];
+    // 나무 오브젝트들 저장
+    trees = [];
 
     // 서버에 저장할 농작물 오브젝트 배열
     // 농작물 옵젝을 그냥 저장하면 불필요한 데이터들이 너무 많음
     // x, y, name, plantTime, growSec <- 저장
     serverCrops = [];
 
+    // 서버에 저장할 나무 오브젝트 배열
+    // x, y, logginTime <- 저장
+    serverTrees = [];
+
     // 서버에 저장할 맵 데이터 객체
     mapData = {
         objects: this.objects,
-        crops: this.serverCrops
+        crops: this.serverCrops,
+        trees: this.serverTrees,
+        rocks: [],
+        buildings: []
     }
 
-    // 농작물 정보 툴팁
-    cropsToolTip;
+    // 오브젝트 정보 툴팁
+    objectToolTip;
 
     // UI visible 토글 버튼
     uiVisibleBtn;
@@ -246,12 +255,16 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // 나무 스프라이트 시트 로드하기
-        this.load.path = 'assets/Elements/Plants/';
-        this.load.spritesheet('tree1', 'spr_deco_tree_01_strip4.png', {
-            frameWidth : 32,
-            frameHeight : 34
+        this.load.path = 'assets/Elements/Trees/';
+        this.load.spritesheet('chopped', 'chopped_sheet.png', {
+            frameWidth : 80,
+            frameHeight : 48
         });
-
+        this.load.spritesheet('tree', 'shake_sheet.png', {
+            frameWidth : 64,
+            frameHeight : 48
+        });
+        this.load.image('stump', 'stump.png');
 
 
         // sunnysideworld 타일셋 PNG 파일 로드
@@ -528,6 +541,9 @@ export default class InGameScene extends Phaser.Scene {
             { key: 'do_hair', frames: this.anims.generateFrameNumbers('player_do_hair', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
             { key: 'do_body', frames: this.anims.generateFrameNumbers('player_do_body', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
             { key: 'do_hand', frames: this.anims.generateFrameNumbers('player_do_hand', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+
+            // 나무 흔들리는 애니메이션 7 프레임 frameRate <- 초당 프레임 재생 속도
+            { key: 'tree_shake', frames: this.anims.generateFrameNumbers('tree', { start: 0, end: 6 }), frameRate: 12, repeat: 0 },
         ];
 
 
@@ -614,8 +630,8 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // 농작물 정보 툴팁
-        this.cropsToolTip = new CropsToolTip(this, 0, 0, 150, 100);
-        this.cropsToolTip.setVisible(false);
+        this.objectToolTip = new ObjectToolTip(this, 0, 0, 150, 100);
+        this.objectToolTip.setVisible(false);
 
         const btnWidth = 60;
         const btnHeight = 60;
@@ -718,10 +734,14 @@ export default class InGameScene extends Phaser.Scene {
         });
 
 
-        // 나무 오브젝트 추가
-        this.tree = new Tree(this, 64 * 10, 64 * 10);
+        this.trees.push(new Tree(this, tileSize * 15, tileSize * 5, new Date('2024-02-01T12:05:41.652Z')));
+                // 2024-02-01T10:47:41.652Z
+        // 벌목 시간이 기록된 나무 오브젝트 추가
+        this.trees.push(new Tree(this, tileSize * 18, tileSize * 5, new Date('2024-02-01T10:47:41.652Z')));
+        this.trees.push(new Tree(this, tileSize * 21, tileSize * 5, new Date('2024-02-01T10:47:41.652Z')));
 
-        // 5 유닛에 위치
+        // 컨테이너끼리 충돌 효과는 안된다고 한다.
+        this.physics.add.collider(this.playerObject, this.trees);
 
         // 키보드 키 입력 설정
         // 방향키, 쉬프트, 스페이스바 키 객체 생성
@@ -860,7 +880,11 @@ export default class InGameScene extends Phaser.Scene {
             crops.update(delta);
         });
 
-        this.cropsToolTip.update(delta);
+        this.trees.forEach((tree, index) => {
+            tree.update(delta);
+        });
+
+        this.objectToolTip.update(delta);
 
         const interactTile = this.getInteractTile();
 
@@ -1433,7 +1457,6 @@ export default class InGameScene extends Phaser.Scene {
 
     }
 
-
     // 서버에 로그인 한 유저에게 새 아이템 추가, 기존 아이템 수량 증가 요청하는 함수
     // 액세스 토큰 필요함
     async serverAddItem(item_count, item_index, addItemInfo, addItemSlot) {
@@ -1605,8 +1628,6 @@ export default class InGameScene extends Phaser.Scene {
                 body: JSON.stringify(this.mapData)
             });
 
-
-
             //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
 
             // .json() : 받은 응답을 JSON 형식으로 변환한다.
@@ -1639,17 +1660,13 @@ export default class InGameScene extends Phaser.Scene {
 
             //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
 
-
-
             // .json() : 받은 응답을 JSON 형식으로 변환한다.
             const data = await response.json();
 
-            console.log("serverGetMap() response 확인".response);
-
-
+            //console.log("serverGetMap() response 확인", response);
 
             // 서버로부터 받은 유저 아이템 정보들
-            //console.log('받은 맵 정보', data);
+            console.log('받은 맵 정보', data);
 
             // data -> mapData에 저장하기
             data.objects.forEach((object, index) => {
@@ -1660,16 +1677,27 @@ export default class InGameScene extends Phaser.Scene {
                 this.mapData.crops.push(crop);
             });
 
-            // 서버에 맵 데이터 보낼 때 
-            // objects랑 crops만 포함시켜야됨.
+            // trees 확인
+            data.trees.forEach((tree, index) => {
+                this.mapData.trees.push(tree);
+            });
 
+            
+            console.log('맵 데이터의 트리 배열 길이', this.mapData.trees.length);
+
+            if( this.mapData.trees.length === 0){
+            // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
+            this.serverTrees.push({x: tileSize * 15, y: tileSize * 5, loggingTime: null});
+            this.serverTrees.push({x: tileSize * 18, y: tileSize * 5, loggingTime: null});
+            this.serverTrees.push({x: tileSize * 21, y: tileSize * 5, loggingTime: null});
+            }
             console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
+
+
 
             // 받은 맵 데이터를 기반으로 밭 타일 생성
             // 나중에 게임 오브젝트(농작물)도 생성할 예정
             // initGameMap()
-
-
             this.mapData.objects.forEach((object, index) => {
                 const tileX = object.tileX;
                 const tileY = object.tileY;
