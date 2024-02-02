@@ -42,7 +42,7 @@ function PhaserGameComponent() {
           default: 'arcade',
           arcade: {
             // 디버그 모드
-            debug: true
+            debug: false
           }
         },
         dom: {

@@ -31,7 +31,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2NzY1MTA3LCJleHAiOjE3MDY4MDExMDd9.0w0Y5QXub1bPe1nBHnYLZ_RZ0x36W0RHvQiAqiUlw6M"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2ODQ3NTY4LCJleHAiOjE3MDY4ODM1Njh9.HDxLgFyPblCff0rm8qCF8BwSM-6XFiEBCvAc1ef1mAU"
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -544,6 +544,8 @@ export default class InGameScene extends Phaser.Scene {
 
             // 나무 흔들리는 애니메이션 7 프레임 frameRate <- 초당 프레임 재생 속도
             { key: 'tree_shake', frames: this.anims.generateFrameNumbers('tree', { start: 0, end: 6 }), frameRate: 12, repeat: 0 },
+            // 나무 벌목당했을 때 애니메이션 13프레임 1.5배 배속
+            { key: 'tree_chop', frames: this.anims.generateFrameNumbers('chopped', { start: 0, end: 12 }), frameRate : 16, repeat: 0 }
         ];
 
 
@@ -734,14 +736,13 @@ export default class InGameScene extends Phaser.Scene {
         });
 
 
-        this.trees.push(new Tree(this, tileSize * 15, tileSize * 5, new Date('2024-02-01T12:05:41.652Z')));
-                // 2024-02-01T10:47:41.652Z
+        /* this.trees.push(new Tree(this, tileSize * 15, tileSize * 5, new Date('2024-02-01T12:05:41.652Z')));
+        // 2024-02-01T10:47:41.652Z
         // 벌목 시간이 기록된 나무 오브젝트 추가
         this.trees.push(new Tree(this, tileSize * 18, tileSize * 5, new Date('2024-02-01T10:47:41.652Z')));
         this.trees.push(new Tree(this, tileSize * 21, tileSize * 5, new Date('2024-02-01T10:47:41.652Z')));
-
         // 컨테이너끼리 충돌 효과는 안된다고 한다.
-        this.physics.add.collider(this.playerObject, this.trees);
+        this.physics.add.collider(this.playerObject, this.trees); */
 
         // 키보드 키 입력 설정
         // 방향키, 쉬프트, 스페이스바 키 객체 생성
@@ -1683,9 +1684,8 @@ export default class InGameScene extends Phaser.Scene {
             });
 
             
-            console.log('맵 데이터의 트리 배열 길이', this.mapData.trees.length);
-
             if( this.mapData.trees.length === 0){
+            console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
             // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
             this.serverTrees.push({x: tileSize * 15, y: tileSize * 5, loggingTime: null});
             this.serverTrees.push({x: tileSize * 18, y: tileSize * 5, loggingTime: null});
@@ -1776,6 +1776,21 @@ export default class InGameScene extends Phaser.Scene {
                 plantTile.properties.plantable = false
                 // 타일에 농작물이 있다고 알림
                 plantTile.properties.crops = true;
+            });
+
+
+            // 받은 나무 오브젝트 데이터를 기반으로 나무 생성
+            this.mapData.trees.forEach((tree, index) => {
+
+                const treeX = tree.x;
+                const treeY = tree.y;
+                let loggingTime = tree.loggingTime;
+                // loggingTime이 존재하면 string -> Date로 변환환다
+                if (loggingTime !== null){
+                    loggingTime = new Date(tree.loggingTime);
+                }
+
+                this.trees.push(new Tree(this, treeX, treeY, loggingTime, true));
             });
 
             //console.log("string -> Date mapDate 확인", this.mapData.crops);
