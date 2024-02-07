@@ -1,15 +1,16 @@
 import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
-import ItemSlot from '../ui/item_slot';
 import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction';
 import ObjectToolTip from '../ui/object_tooltip';
-import ItemDisc from '../ui/itemdisc/itemdisc';
 import UIVisibleBtn from '../ui/button/UIVisibleBtn';
 import Tree from '../elements/tree';
+import AssetManager from './asset_manager';
+import SelectBox from '../ui/select_box';
+import NetworkManager from './network_manager';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -23,8 +24,6 @@ const layerScale = 4;
 // 실제 타일 크기에 맞게 설정해야 한다.
 const tileSize = 16 * layerScale;
 
-
-
 let APIUrl = process.env.REACT_APP_API;
 
 
@@ -33,6 +32,7 @@ export default class InGameScene extends Phaser.Scene {
     APIurl = 'http://221.148.25.234:1234'
     accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2ODQ3NTY4LCJleHAiOjE3MDY4ODM1Njh9.HDxLgFyPblCff0rm8qCF8BwSM-6XFiEBCvAc1ef1mAU"
     auction;
+
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
     // 게임 캐릭터의 정보 - 캐릭터 외형, 레벨, 소지금등을 포함한다.
@@ -40,11 +40,10 @@ export default class InGameScene extends Phaser.Scene {
     // 현재 장착중인 도구 슬롯 번호 - 기본값 0
     equipNumber = 0;
 
-    goldText
+    goldText;
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
 
-    spriteLoader;
 
     // paint tileMap example
     selectedTile;
@@ -125,15 +124,14 @@ export default class InGameScene extends Phaser.Scene {
     // UI visible 토글 버튼
     uiVisibleBtn;
 
+    assetManager;
+    networkManager;
+
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
         super('InGameScene');
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
-
-
-        // 테스트 계정의 감자 갯수 증가 시키기
-        //this.serverAddItem(9, 1, 3);
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -144,9 +142,8 @@ export default class InGameScene extends Phaser.Scene {
         // 로그인 씬으로부터 파라미터를 전달 받는다.
         console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo)
         this.characterInfo = characterInfo;
-
-        // 스프라이트 로더 인스턴스 생성
-        this.spriteLoader = new SpriteLoader(this);
+        this.assetManager = new AssetManager(this);
+        this.networkManager = new NetworkManager(this);
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
         this.characterInfo = {
@@ -158,340 +155,43 @@ export default class InGameScene extends Phaser.Scene {
             asset_id: 4563456
         }
 
-        this.serverGetUserItem();
-        this.serverGetAllItem();
+        //this.serverGetUserItem();
 
+        // 서버에 로그인 한 유저의 아이템 목록 요청
+        // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
+        // Promise 객체에서 원하는 값을 빼올려면 then() 이나 다른 async 함수내에서 await 사용 해야 한다.
+        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then( data => {
+            this.own_items = data;
+        });
+
+        // 모든 아이템 정보 목록 요청
+        this.networkManager.serverGetAllItem().then(data => {
+            // 받은 아이템 배열을 해쉬 테이블로 변환
+            data.forEach((item, index) => {
+                // 구조 분해 할당
+                const { item_name } = item;
+                // 값 추가
+                this.allItems.set(item_name, item);
+            });
+        });
+
+        // assetManager로 스프라이트 시트로드가 잘 되는지 테스트
+        //this.characterInfo.name = 'curly';
     }
 
     // 애셋 로드
     preload() {
+        const assetManager = this.assetManager;
 
-
-        // 헤어 애셋 경로 객체
-        const hairPath = {
-            idle: "",
-            walk: "",
-            run: "",
-            dig: "",
-            axe: "",
-            water: "",
-            mine: ""
-        };
-
-        // base는 빡빡이라서 헤어 스프라이트가 필요 없음
-        if (this.characterInfo.name === 'long hair') {
-            hairPath.idle = 'IDLE/longhair_idle_strip9.png';
-            hairPath.walk = 'WALKING/longhair_walk_strip8.png';
-            hairPath.run = 'RUN/longhair_run_strip8.png';
-            hairPath.dig = 'DIG/longhair_dig_strip13.png';
-            hairPath.axe = 'AXE/longhair_axe_strip10.png';
-            hairPath.water = 'WATERING/longhair_watering_strip5.png';
-            hairPath.mine = 'MINING/longhair_mining_strip10.png';
-            hairPath.do = 'DOING/longhair_doing_strip8.png';
-        } else if (this.characterInfo.name === 'curly') {
-            hairPath.idle = 'IDLE/curlyhair_idle_strip9.png';
-            hairPath.walk = 'WALKING/curlyhair_walk_strip8.png';
-            hairPath.run = 'RUN/curlyhair_run_strip8.png';
-            hairPath.dig = 'DIG/curlyhair_dig_strip13.png';
-            hairPath.axe = 'AXE/curlyhair_axe_strip10.png';
-            hairPath.water = 'WATERING/curlyhair_watering_strip5.png';
-            hairPath.mine = 'MINING/curlyhair_mining_strip10.png';
-            hairPath.do = 'DOING/curlyhair_doing_strip8.png';
-        }
-        // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
-        else if (this.characterInfo.name === 'bow' || this.characterInfo.name === undefined) {
-            hairPath.idle = 'IDLE/bowlhair_idle_strip9.png';
-            hairPath.walk = 'WALKING/bowlhair_walk_strip8.png';
-            hairPath.run = 'RUN/bowlhair_run_strip8.png';
-            hairPath.dig = 'DIG/bowlhair_dig_strip13.png';
-            hairPath.axe = 'AXE/bowlhair_axe_strip10.png';
-            hairPath.water = 'WATERING/bowlhair_watering_strip5.png';
-            hairPath.mine = 'MINING/bowlhair_mining_strip10.png';
-            hairPath.do = 'DOING/bowlhair_doing_strip8.png';
-        }
-
-
-        // 스프라이트 시트의 frameWidth 96, frameHeigth 64
-        const characterSprites = [
-            // 대기 스프라이트 시트
-            { name: 'player_idle_hair', path: hairPath.idle },
-            { name: 'player_idle_body', path: 'IDLE/base_idle_strip9.png' },
-            { name: 'player_idle_hand', path: 'IDLE/tools_idle_strip9.png' },
-            // 걷는 스프라이트 시트
-            { name: 'player_walk_hair', path: hairPath.walk },
-            { name: 'player_walk_body', path: 'WALKING/base_walk_strip8.png' },
-            { name: 'player_walk_hand', path: 'WALKING/tools_walk_strip8.png' },
-            // 달리는 스프라이트 시트
-            { name: 'player_run_hair', path: hairPath.run },
-            { name: 'player_run_body', path: 'RUN/base_run_strip8.png' },
-            { name: 'player_run_hand', path: 'RUN/tools_run_strip8.png' },
-            // 땅파는 스프라이트 시트
-            { name: 'player_dig_hair', path: hairPath.dig },
-            { name: 'player_dig_body', path: 'DIG/base_dig_strip13.png' },
-            { name: 'player_dig_hand', path: 'DIG/tools_dig_strip13.png' },
-            // 도끼질 스프라이트 시트
-            { name: 'player_axe_hair', path: hairPath.axe },
-            { name: 'player_axe_body', path: 'AXE/base_axe_strip10.png' },
-            { name: 'player_axe_hand', path: 'AXE/tools_axe_strip10.png' },
-            // 물주는 스프라이트 시트
-            { name: 'player_water_hair', path: hairPath.water },
-            { name: 'player_water_body', path: 'WATERING/base_watering_strip5.png' },
-            { name: 'player_water_hand', path: 'WATERING/tools_watering_strip5.png' },
-            // 채굴 스프라이트 시트
-            { name: 'player_mine_hair', path: hairPath.mine },
-            { name: 'player_mine_body', path: 'MINING/base_mining_strip10.png' },
-            { name: 'player_mine_hand', path: 'MINING/tools_mining_strip10.png' },
-            // 행동 스프라이트 시트
-            { name: 'player_do_hair', path: hairPath.do },
-            { name: 'player_do_body', path: 'DOING/base_doing_strip8.png' },
-            { name: 'player_do_hand', path: 'DOING/tools_doing_strip8.png' },
-
-        ];
-
-        // 상대 경로 설정
-        this.load.path = 'assets/Character/';
-        // 플레이어 캐릭터에 사용할 스프라이트 시트 로드
-        characterSprites.forEach(sprite => this.spriteLoader.loadSprite(sprite));
-
-
-        // 나무 스프라이트 시트 로드하기
-        this.load.path = 'assets/Elements/Trees/';
-        this.load.spritesheet('chopped', 'chopped_sheet.png', {
-            frameWidth : 80,
-            frameHeight : 48
-        });
-        this.load.spritesheet('tree', 'shake_sheet.png', {
-            frameWidth : 64,
-            frameHeight : 48
-        });
-        this.load.image('stump', 'stump.png');
-
-
-        // sunnysideworld 타일셋 PNG 파일 로드
-        // 상대 경로 설정
-        this.load.path = "assets/maps/";
-        this.load.image('sunnysideworld_tiles', 'spr_tileset_sunnysideworld_16px.png');
-        this.load.image('cow_tiles', 'spr_deco_cow_strip4.png');
+        // 게임에 필요한 스프라이트 전부 로드
+        assetManager.loadAllSprites();
 
         // 타일맵 JSON 파일 로드
+        this.load.path = 'assets/maps/'
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
 
-
-        // 상대 경로 재설정
-        // selectbox.png를 로드
-        this.load.path = "assets/UI/";
-        this.load.image("selectbox_bl", 'selectbox_bl.png');
-        this.load.image("selectbox_br", 'selectbox_br.png');
-        this.load.image("selectbox_tl", 'selectbox_tl.png');
-        this.load.image("selectbox_tr", 'selectbox_tr.png');
-        //골드 아이콘
-        this.load.image("goldIcon", 'goldIcon.svg');
-        this.load.image("searchBox", 'searchBox.png');
-
-        this.load.image("indicator", 'indicator.png');
-        this.load.image("next", 'arrow_right.png');
-        this.load.image("before", 'arrow_left.png');
-
-        this.load.image("timer", "stopwatch.png");
-
-        // 나가기 아이콘 exit_icon
-        this.load.image("exit_icon", 'cancel.png');
-        // 인벤토리 아이콘
-        this.load.image('inven_icon', 'basket.png');
-        this.load.image("auction_exit", 'cancel.png');
-
-        // 성장 진행도 UI 바
-        this.load.image('greenbar00', 'greenbar_00.png');
-        this.load.image('greenbar01', 'greenbar_01.png');
-        this.load.image('greenbar02', 'greenbar_02.png');
-        this.load.image('greenbar03', 'greenbar_03.png');
-        this.load.image('greenbar04', 'greenbar_04.png');
-        this.load.image('greenbar05', 'greenbar_05.png');
-        this.load.image('greenbar06', 'greenbar_06.png');
-
-        // 빨강색 Ui 바
-        this.load.image('redbar00', 'redbar_00.png');
-        this.load.image('redbar01', 'redbar_01.png');
-        this.load.image('redbar02', 'redbar_02.png');
-        this.load.image('redbar03', 'redbar_03.png');
-        this.load.image('redbar04', 'redbar_04.png');
-        this.load.image('redbar05', 'redbar_05.png');
-        this.load.image('redbar06', 'redbar_06.png');
-
-        // 푸른색 ui 바
-        this.load.image('bluebar00', 'bluebar_00.png');
-        this.load.image('bluebar01', 'bluebar_01.png');
-        this.load.image('bluebar02', 'bluebar_02.png');
-        this.load.image('bluebar03', 'bluebar_03.png');
-        this.load.image('bluebar04', 'bluebar_04.png');
-        this.load.image('bluebar05', 'bluebar_05.png');
-        //this.load.image('bluebar06', 'bluebar_06.png');
-
-        // 아이템 디스크
-        this.load.image('itemdisc01', 'itemdisc_01.png');
-
-        // 도구 아이콘
-        this.load.image("삽", 'shovel.png');
-        this.load.image("곡괭이", 'pickaxe.png');
-        this.load.image("도끼", 'axe.png');
-
-        //농작물 이미지
-        this.load.path = "assets/Crops/";
-        this.load.image("감자 씨앗", 'potato_00.png');
-        this.load.image("호박 씨앗", 'pumpkin_00.png');
-        this.load.image("당근 씨앗", 'carrot_00.png');
-        this.load.image("양배추 씨앗", 'cabbage_00.png');
-        this.load.image("사탕무 씨앗", 'beetroot_00.png')
-        this.load.image("무 씨앗", 'radish_00.png');
-        this.load.image("케일 씨앗", 'kale_00.png')
-        this.load.image("밀 씨앗", 'wheat_00.png')
-
-        this.load.image("감자", 'potato_05.png');
-        this.load.image("호박", 'pumpkin_05.png')
-        this.load.image("당근", 'carrot_05.png');
-        this.load.image("양배추", 'cabbage_05.png')
-        this.load.image("사탕무", 'beetroot_05.png')
-        this.load.image("무", 'radish_05.png');
-        this.load.image("케일", 'kale_05.png')
-        this.load.image("밀", 'wheat_05.png')
-
-        this.load.image("나무", 'wood.png');
-        this.load.image("바위", 'rock.png')
-        this.load.image("달걀", 'egg.png');
-        this.load.image("우유", 'milk.png')
-        this.load.image("물고기", 'fish.png');
-        this.load.image("Potato Seed", 'seeds_generic.png');
-        this.load.image("Potato", 'potato_05.png');
-
-
-        // nine-slice 로드
-        // 외부 박스
-        this.load.path = "assets/UI/9slice_box_white/"
-        this.load.image("9slice_tl", 'dt_box_9slice_tl.png');
-        this.load.image("9slice_tc", 'dt_box_9slice_tc.png');
-        this.load.image("9slice_tr", 'dt_box_9slice_tr.png');
-        this.load.image("9slice_lc", 'dt_box_9slice_lc.png');
-        this.load.image("9slice_rc", 'dt_box_9slice_rc.png');
-        this.load.image("9slice_c", 'dt_box_9slice_c.png');
-        this.load.image("9slice_bl", 'dt_box_9slice_bl.png');
-        this.load.image("9slice_bc", 'dt_box_9slice_bc.png');
-        this.load.image("9slice_br", 'dt_box_9slice_br.png');
-
-        //lt 탭메뉴 용
-        this.load.image("tab_9slice_bc", 'lt_box_9slice_bc.png');
-        this.load.image("tab_9slice_bl", 'lt_box_9slice_bl.png');
-        this.load.image("tab_9slice_br", 'lt_box_9slice_br.png');
-        this.load.image("tab_9slice_c", 'lt_box_9slice_c.png');
-        this.load.image("tab_9slice_lc", 'lt_box_9slice_lc.png');
-        this.load.image("tab_9slice_rc", 'lt_box_9slice_rc.png');
-        this.load.image("tab_9slice_tc", 'lt_box_9slice_tc.png');
-        this.load.image("tab_9slice_tl", 'lt_box_9slice_tl.png');
-        this.load.image("tab_9slice_tr", 'lt_box_9slice_tr.png');
-
-        // { key: "water_icon", url: "assets/UI/water.png" }
-        this.load.path = "";
-        // 로드할 아이콘 이미지 정보를 담은 객체 배열
-        // 여기에 아이콘 제목을 넣어서 퀵슬롯에서 아이템 이름이 표시되게 해봄.
-
-        //dt frame 용
-        this.load.path = "assets/UI/9slice_box_white/";
-        this.load.image("9slice_bc", 'dt_box_9slice_bc.png');
-        this.load.image("9slice_bl", 'dt_box_9slice_bl.png');
-        this.load.image("9slice_br", 'dt_box_9slice_br.png');
-        this.load.image("9slice_c", 'dt_box_9slice_c.png');
-        this.load.image("9slice_lc", 'dt_box_9slice_lc.png');
-        this.load.image("9slice_rc", 'dt_box_9slice_rc.png');
-        this.load.image("9slice_tc", 'dt_box_9slice_tc.png');
-        this.load.image("9slice_tl", 'dt_box_9slice_tl.png');
-        this.load.image("9slice_tr", 'dt_box_9slice_tr.png');
-
-        //lt 탭메뉴 용
-        this.load.image("tab_9slice_bc", 'lt_box_9slice_bc.png');
-        this.load.image("tab_9slice_bl", 'lt_box_9slice_bl.png');
-        this.load.image("tab_9slice_br", 'lt_box_9slice_br.png');
-        this.load.image("tab_9slice_c", 'lt_box_9slice_c.png');
-        this.load.image("tab_9slice_lc", 'lt_box_9slice_lc.png');
-        this.load.image("tab_9slice_rc", 'lt_box_9slice_rc.png');
-        this.load.image("tab_9slice_tc", 'lt_box_9slice_tc.png');
-        this.load.image("tab_9slice_tl", 'lt_box_9slice_tl.png');
-        this.load.image("tab_9slice_tr", 'lt_box_9slice_tr.png');
-
-
-        this.load.path = "assets/Elements/Crops/"
-        this.load.image("감자 씨앗", 'potato_00.png');
-        this.load.image("호박 씨앗", 'pumpkin_00.png');
-        this.load.image("당근 씨앗", 'carrot_00.png');
-        this.load.image("양배추 씨앗", 'cabbage_00.png');
-        this.load.image("사탕무 씨앗", 'beetroot_00.png')
-        this.load.image("무 씨앗", 'radish_00.png');
-        this.load.image("케일 씨앗", 'kale_00.png');
-        this.load.image("밀 씨앗", 'wheat_00.png');
-
-        // 농작물 밭에 심었을 때 이미지 로드
-        // 감자 
-        this.load.image('감자_01', "potato_01.png");
-        this.load.image('감자_02', "potato_02.png");
-        this.load.image('감자_03', "potato_03.png");
-        this.load.image('감자_04', "potato_04.png");
-
-        // 당근
-        this.load.image('당근_01', "carrot_01.png");
-        this.load.image('당근_02', "carrot_02.png");
-        this.load.image('당근_03', "carrot_03.png");
-        this.load.image('당근_04', "carrot_04.png");
-
-        // 호박
-        this.load.image('호박_01', "pumpkin_01.png");
-        this.load.image('호박_02', "pumpkin_02.png");
-        this.load.image('호박_03', "pumpkin_03.png");
-        this.load.image('호박_04', "pumpkin_04.png");
-
-        // 양배추
-        this.load.image('양배추_01', "cabbage_01.png");
-        this.load.image('양배추_02', "cabbage_02.png");
-        this.load.image('양배추_03', "cabbage_03.png");
-        this.load.image('양배추_04', "cabbage_04.png");
-
-        // 사탕무 beetroot
-        this.load.image('사탕무_01', "beetroot_01.png");
-        this.load.image('사탕무_02', "beetroot_02.png");
-        this.load.image('사탕무_03', "beetroot_03.png");
-        this.load.image('사탕무_04', "beetroot_04.png");
-
-        // 무 radish
-        this.load.image('무_01', "radish_01.png");
-        this.load.image('무_02', "radish_02.png");
-        this.load.image('무_03', "radish_03.png");
-        this.load.image('무_04', "radish_04.png");
-
-        // 케일 kale
-        this.load.image('케일_01', "kale_01.png");
-        this.load.image('케일_02', "kale_02.png");
-        this.load.image('케일_03', "kale_03.png");
-        this.load.image('케일_04', "kale_04.png");
-
-        // 밀 wheat
-        this.load.image('밀_01', "wheat_01.png");
-        this.load.image('밀_02', "wheat_02.png");
-        this.load.image('밀_03', "wheat_03.png");
-        this.load.image('밀_04', "wheat_04.png");
-
-
-        // 농작물 열매 이미지
-        this.load.image("감자", 'potato_05.png');
-        this.load.image("호박", 'pumpkin_05.png')
-        this.load.image("당근", 'carrot_05.png');
-        this.load.image("양배추", 'cabbage_05.png')
-        this.load.image("사탕무", 'beetroot_05.png')
-        this.load.image("무", 'radish_05.png');
-        this.load.image("케일", 'kale_05.png')
-
-        this.load.image("나무", 'wood.png');
-        this.load.image("바위", 'rock.png')
-        this.load.image("달걀", 'egg.png');
-        this.load.image("우유", 'milk.png')
-        this.load.image("물고기", 'fish.png');
-
+        // 게임에 필요한 이미지 전부 로드
+        assetManager.loadAllImage();
 
     }
 
@@ -506,53 +206,14 @@ export default class InGameScene extends Phaser.Scene {
         const rightX = this.cameras.main.width;
         const bottomY = this.cameras.main.height;
 
+        const assetManager = this.assetManager;
 
-        // 캐릭터 애니메이션 생성에 필요한 정보를 담은 객체 배열 
-        const animations = [
-            // 대기 애니메이션 9 프레임
-            { key: 'idle_hair', frames: this.anims.generateFrameNumbers('player_idle_hair', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
-            { key: 'idle_body', frames: this.anims.generateFrameNumbers('player_idle_body', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
-            { key: 'idle_hand', frames: this.anims.generateFrameNumbers('player_idle_hand', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
-            // 걷는 애니메이션 8 프레임
-            { key: 'walk_hair', frames: this.anims.generateFrameNumbers('player_walk_hair', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'walk_body', frames: this.anims.generateFrameNumbers('player_walk_body', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'walk_hand', frames: this.anims.generateFrameNumbers('player_walk_hand', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            // 달리는 애니메이션 8 프레임
-            { key: 'run_hair', frames: this.anims.generateFrameNumbers('player_run_hair', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'run_body', frames: this.anims.generateFrameNumbers('player_run_body', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'run_hand', frames: this.anims.generateFrameNumbers('player_run_hand', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            // 땅파는 애니메이션 13 프레임
-            { key: 'dig_hair', frames: this.anims.generateFrameNumbers('player_dig_hair', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
-            { key: 'dig_body', frames: this.anims.generateFrameNumbers('player_dig_body', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
-            { key: 'dig_hand', frames: this.anims.generateFrameNumbers('player_dig_hand', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
-            // 도끼질 애니메이션 10 프레임
-            { key: 'axe_hair', frames: this.anims.generateFrameNumbers('player_axe_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'axe_body', frames: this.anims.generateFrameNumbers('player_axe_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'axe_hand', frames: this.anims.generateFrameNumbers('player_axe_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            // 물주는 애니메이션 5 프레임
-            { key: 'water_hair', frames: this.anims.generateFrameNumbers('player_water_hair', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
-            { key: 'water_body', frames: this.anims.generateFrameNumbers('player_water_body', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
-            { key: 'water_hand', frames: this.anims.generateFrameNumbers('player_water_hand', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
-            // 채굴 애니메이션 10 프레임
-            { key: 'mine_hair', frames: this.anims.generateFrameNumbers('player_mine_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'mine_body', frames: this.anims.generateFrameNumbers('player_mine_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'mine_hand', frames: this.anims.generateFrameNumbers('player_mine_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            // 행동 애니메이션 8 프레임
-            { key: 'do_hair', frames: this.anims.generateFrameNumbers('player_do_hair', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
-            { key: 'do_body', frames: this.anims.generateFrameNumbers('player_do_body', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
-            { key: 'do_hand', frames: this.anims.generateFrameNumbers('player_do_hand', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+        // 캐릭터 애니메이션 정보 객체 생성
+        assetManager.createAnimData();
+        // 씬에서 사용할 캐릭터 애니메이션 생성
+        assetManager.characterAnims.forEach(animData => assetManager.createAnimation(animData));
 
-            // 나무 흔들리는 애니메이션 7 프레임 frameRate <- 초당 프레임 재생 속도
-            { key: 'tree_shake', frames: this.anims.generateFrameNumbers('tree', { start: 0, end: 6 }), frameRate: 12, repeat: 0 },
-            // 나무 벌목당했을 때 애니메이션 13프레임 1.5배 배속
-            { key: 'tree_chop', frames: this.anims.generateFrameNumbers('chopped', { start: 0, end: 12 }), frameRate : 16, repeat: 0 }
-        ];
-
-
-        // 스프라이트 로더 클래스에 애니메이션 정보 전달해서 씬에서 애니메이션 생성하기
-        animations.forEach(animation => this.spriteLoader.createAnimation(animation));
         // 플레이어 캐릭터 오브젝트 씬에 생성
-        // 플레이어는 현재 컨테이너 클래스로 이뤄져 있음.
         // 컨테이너 클래스의 오리진은 변경이 불가능하다.
         this.playerObject = new PlayerObject(this, 500, 600);
 
@@ -566,13 +227,6 @@ export default class InGameScene extends Phaser.Scene {
         this.searchArea.setDisplaySize(tileSize, tileSize).setOrigin(0, 0);
         this.searchArea.body.debugShowBody = false;
 
-
-        /* this.examSprite = this.physics.add.sprite(640, 640 , null);
-        this.examSprite.setDisplaySize(tileSize, tileSize).setOrigin(0, 0); */
-
-        // setSize() 하니까 갑자기 물리 바디 오리진이 0,0에서 0.5, 0.5가 됨.
-
-
         // 플레이어 캐릭터의 중앙값 구하기
         // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
@@ -581,9 +235,6 @@ export default class InGameScene extends Phaser.Scene {
         // 퀵슬롯 UI 생성 코드
         // 생성된 퀵슬롯 UI 객체들을 담을 배열
         this.QuickSlots = [];
-        // 퀵슬롯의 개수
-        const quickSlotNumber = 8;
-
 
         //옥션 UI 생성
         //크기
@@ -593,8 +244,7 @@ export default class InGameScene extends Phaser.Scene {
         // 옥션의 위치    
         const autionX = this.cameras.main.width / 2 - auctionWidth / 2;
         const autionY = this.cameras.main.height / 2 - auctionHeight / 2;
-        this.auction = new Auction(this, autionX, autionY,
-            auctionWidth, auctionHeight);
+        this.auction = new Auction(this, autionX, autionY, auctionWidth, auctionHeight);
 
         this.auction.setVisible(false);
 
@@ -614,36 +264,26 @@ export default class InGameScene extends Phaser.Scene {
         this.equipQuickSlot(0);
 
         // 인벤토리 UI 추가
-
         // 크기
         const invenWidth = 1000;
         const invenHeight = 500;
-
         // UI 위치 화면 중앙에 배치됨.
         const invenX = this.cameras.main.width / 2 - invenWidth / 2;
         const invenY = this.cameras.main.height / 2 - invenHeight / 2;
-
         //console.log("invenX, invenY : ", invenX, invenY);
-
-        this.inventory = new Inventory(this, invenX, invenY,
-            invenWidth, invenHeight);
-
+        this.inventory = new Inventory(this, invenX, invenY, invenWidth, invenHeight);
         this.inventory.disable();
 
-
-        // 농작물 정보 툴팁
+        // 게임 오브젝트들(농작물, 나무) 정보 툴팁
         this.objectToolTip = new ObjectToolTip(this, 0, 0, 150, 100);
         this.objectToolTip.setVisible(false);
-
         const btnWidth = 60;
         const btnHeight = 60;
         const btnPad = 10;
         const btnX = this.cameras.main.width - btnWidth - btnPad;
         const btnY = this.cameras.main.height - btnHeight - btnPad;
-
         // 특정 UI 보이기 토글 버튼 추가
         this.uiVisibleBtn = new UIVisibleBtn(this, btnX, btnY, btnWidth, btnHeight);
-
 
         const debugGraphics = [];
 
@@ -658,8 +298,7 @@ export default class InGameScene extends Phaser.Scene {
 
         // 제일 밑에 있는 레이어를 가장 먼저 생성한다.
         for (let i = 0; i < this.ingameMap.layers.length; i++) {
-            // 이 방법을 쓰면 레이어 이름을 일일히 지정할 필요가 없음.
-            // 레이어 인덱스 값을 넣어도 됨.
+            // 이 방법을 쓰면 레이어 이름을 일일히 지정할 필요가 없이 레이어 인덱스 값을 넣으면 됨
             const layer = this.ingameMap.createLayer(i, sunnysideworld_tileset, 0, 0);
             // 레이어 깊이 설정. 깊이 값은 레이어 간의 시각적 순서를 결정한다.
             // 낮은 깊이를 가진 레이어가 뒤에 배치되고, 높은 깊이를 가진 레이어가 앞에 배치된다.
@@ -806,16 +445,11 @@ export default class InGameScene extends Phaser.Scene {
         // 'B' 키 입력 이벤트 리스너
         this.tileDebugKey.on('down', () => {
             let isInRect = this.isTileInPlantable(this.getInteractTile(), this.plantableLayer);
-
-
-            // 작동 안함
             // 오브젝트 영역 위치와 크기값 layerScale만큼 곱해야 됨.
             if (isInRect) {
                 console.log("상호작용할 타일이 경작가능 구역에 있음");
             }
         });
-
-
         // I키 누르면 인벤토리 Visible 토글
         this.inventoryKey.on('down', () => {
             // 삼항 연산자 
@@ -826,7 +460,6 @@ export default class InGameScene extends Phaser.Scene {
         this.mapDataKey.on('down', () => {
             console.log("현재 게임 맵 데이터 ", this.mapData);
         });
-
         // 게임 시작시 디버그 그래픽 숨기기
         debugGraphics.forEach((debugGraphic) => {
             debugGraphic.visible = false;
@@ -859,12 +492,8 @@ export default class InGameScene extends Phaser.Scene {
         this.interactPropsTxt = this.add.text(centerX, 0, 'interact tile Properties', txtStyle);
         this.interactPropsTxt.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100); */
 
-        // 박스의 스케일과 뎁스
-        const selectBoxScale = 2;
-        const selectBoxDepth = 3;
-
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
-        this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize, selectBoxScale, selectBoxDepth);
+        this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize);
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -874,7 +503,6 @@ export default class InGameScene extends Phaser.Scene {
     update(time, delta) {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
-
 
         //console.log(this.crops);
         this.crops.forEach((crops, index) => {
@@ -922,8 +550,6 @@ export default class InGameScene extends Phaser.Scene {
 
     }
 
-
-
     // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
     equipQuickSlot(equipNumber) {
 
@@ -934,19 +560,16 @@ export default class InGameScene extends Phaser.Scene {
         // 선 굵기가 굵어지면 top-left 기준점에서 어느 방향으로 굵어지는가
         // 밖으로 굵어지나? 아니면 안밖으로 굵어지나
 
-
         const lineWidth = 5;
 
         const x = this.quickSlotUI.x + 100 * equipNumber + lineWidth / 2;
         const y = this.quickSlotUI.y + lineWidth / 2;
-
 
         this.equipNumber = equipNumber;
         this.equipMarker.clear();
         this.equipMarker.lineStyle(lineWidth, 0xFF0000, 1);
         this.equipMarker.setDepth(100).setScrollFactor(0);
         this.equipMarker.strokeRect(x, y, 100 - lineWidth, 100 - lineWidth);
-
     }
 
     // 캐릭터가 땅을 판 타일의 타일 레이어 1를 밭 타일로 변경한다.
@@ -1260,10 +883,8 @@ export default class InGameScene extends Phaser.Scene {
         this.serverAddItem(1, item_index, addItemInfo, addItemSlot);
     }
 
-
     // 마우스 포인터가 위치한 타일의 픽셀 위치를 구하는 함수
     getMousePointerTile() {
-
         // getTileAt(tileX, tileY, [,nonNull], [, layer])
         // 타일맵에서 주어진 레이어에서 주어진 타일 좌표에 있는 타일을 가져온다.
         // layer 파라미터가 비었으면 현재 레이어가 사용된다.
@@ -1350,7 +971,6 @@ export default class InGameScene extends Phaser.Scene {
     }
 
     // 타일이 경작가능 영역(오브젝트 레이어) 안에 포함되는지 확인한다
-
     isTileInPlantable(tile) {
         // 타일의 중심 좌표 layerScale 곱하기
         let tileWorldX = tile.getCenterX();
@@ -1366,31 +986,13 @@ export default class InGameScene extends Phaser.Scene {
             }
         }
         return false; // 타일이 사각형 영역 내에 없음.
-
-    }
-
-    // 이미지 속성 설정하는 함수
-    configureImage(image, config) {
-        if (config.origin !== undefined) {
-            image.setOrigin(config.origin);
-        }
-        if (config.depth !== undefined) {
-            image.setDepth(config.depth);
-        }
-        if (config.scale !== undefined) {
-            image.setScale(config.scale);
-        }
-        if (config.scrollFactor !== undefined) {
-            image.setScrollFactor(config.scrollFactor);
-        }
-        return image;
     }
 
     // 서버로부터 로그인한 유저의 아이템 목록 받아오기
     async serverGetUserItem() {
 
-
         const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
+
 
         try {
 
@@ -1409,7 +1011,7 @@ export default class InGameScene extends Phaser.Scene {
             this.own_items = await response.json();
 
             // 서버로부터 받은 유저 아이템 정보들
-            //console.log('유저 아이템 목록', this.own_items);
+            console.log('유저 아이템 목록', this.own_items);
 
         } catch (error) {
             console.error('serverGetUserItem() Error : ', error);
@@ -1683,13 +1285,13 @@ export default class InGameScene extends Phaser.Scene {
                 this.mapData.trees.push(tree);
             });
 
-            
-            if( this.mapData.trees.length === 0){
-            console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
-            // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
-            this.serverTrees.push({x: tileSize * 15, y: tileSize * 5, loggingTime: null});
-            this.serverTrees.push({x: tileSize * 18, y: tileSize * 5, loggingTime: null});
-            this.serverTrees.push({x: tileSize * 21, y: tileSize * 5, loggingTime: null});
+
+            if (this.mapData.trees.length === 0) {
+                console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
+                // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
+                this.serverTrees.push({ x: tileSize * 15, y: tileSize * 5, loggingTime: null });
+                this.serverTrees.push({ x: tileSize * 18, y: tileSize * 5, loggingTime: null });
+                this.serverTrees.push({ x: tileSize * 21, y: tileSize * 5, loggingTime: null });
             }
             console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
 
@@ -1786,7 +1388,7 @@ export default class InGameScene extends Phaser.Scene {
                 const treeY = tree.y;
                 let loggingTime = tree.loggingTime;
                 // loggingTime이 존재하면 string -> Date로 변환환다
-                if (loggingTime !== null){
+                if (loggingTime !== null) {
                     loggingTime = new Date(tree.loggingTime);
                 }
 
@@ -1799,87 +1401,6 @@ export default class InGameScene extends Phaser.Scene {
         } catch (error) {
             console.error('serverGetMap() Error : ', error);
         }
-
-    }
-
-
-
-}
-
-// 스프라이트 시트 로더 클래스 - 로드 부분을 따로 클래스로 분리
-class SpriteLoader {
-
-    // 페이저 씬 객체를 생성자에서 받는다.
-    constructor(scene) {
-        this.scene = scene;
-    }
-
-    loadSprite(spriteData) {
-
-        // 선택한 캐릭터가 base(빡빡이)면 경로가 ''로 들어오니
-        // 아무것도 안하면 됨.
-        if (spriteData.path === '') {
-            return;
-        }
-
-        // frameWidth, frameHeight 기본 값 설정
-        if (spriteData.frameWidth === undefined)
-            spriteData.frameWidth = 96;
-        if (spriteData.frameHeight === undefined)
-            spriteData.frameHeight = 64;
-
-        this.scene.load.spritesheet(
-            spriteData.name,
-            spriteData.path, {
-            frameWidth: spriteData.frameWidth,
-            frameHeight: spriteData.frameHeight
-        });
-    }
-
-    createAnimation(animationData) {
-        this.scene.anims.create(animationData);
-    }
-
-}
-
-// 플레이어가 상호작용할 타일을 표시하거나 선택한 아이템을 표시하는 UI 박스
-class SelectBox extends Phaser.GameObjects.Container {
-
-    topLeft;
-    topRight;
-    bottomLeft;
-    bottomRight;
-
-    // scene : 박스 UI가 추가될 씬
-    // x, y 박스 위치 시작점
-    // width, height 박스의 길이와 높이
-    // scale : 박스를 구성하는 UI들의 스케일
-    constructor(scene, x, y, width, height, scale, depth) {
-        super(scene, x, y);
-
-        scene.add.existing(this);
-        // 씬의 물리 시스템에 추가하여 물리적 상호작용을 가능하게 한다.
-        // 디버그용
-        //scene.physics.add.existing(this);
-
-        this.setDepth(depth);
-
-        // 사각형의 각 꼭짓점에 select box UI 추가
-        this.topLeft = scene.add.image(0, 0, 'selectbox_tl');
-        this.topLeft.setOrigin(0, 0).setScale(scale);
-
-        this.topRight = scene.add.image(width, 0, 'selectbox_tr');
-        this.topRight.setOrigin(1, 0).setScale(scale);
-
-        this.bottomLeft = scene.add.image(0, height, 'selectbox_bl');
-        this.bottomLeft.setOrigin(0, 1).setScale(scale);
-
-        this.bottomRight = scene.add.image(width, height, 'selectbox_br');
-        this.bottomRight.setOrigin(1, 1).setScale(scale);
-
-
-
-        this.add([this.topLeft, this.topRight, this.bottomLeft, this.bottomRight]);
 
     }
 

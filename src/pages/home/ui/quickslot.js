@@ -122,6 +122,8 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
     // 서버에서 받아온 소유 아이템들을 퀵슬롯에 추가하기
     initQuick(own_items) {
 
+        //console.log('initQuick 할 때 own_items 확인', own_items);
+
         own_items.forEach((own_item, index) => {
             // 구조 분해 할당 
             const { item, item_count, item_index } = own_item;
