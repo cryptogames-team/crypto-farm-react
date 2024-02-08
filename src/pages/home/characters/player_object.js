@@ -130,11 +130,11 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
             let plantAnim = this.playAnimation('water', this.hairSprite);
             plantAnim.on('animationupdate', (anim, frame) => {
                 if (frame.index === 3) {
-                    scene.addSeed(seedName, plantTile);
-                    //equipSlot.useItem(1);
+                    scene.addCrops(seedName, plantTile);
 
-                    scene.serverUseItem(seedName, 1, equipSlot);
-
+                    // 서버에 아이템 소비 요청하기
+                    const useItemInfo = scene.allItems.get(seedName);
+                    scene.networkManager.serverUseItem(useItemInfo, 1, equipSlot);
                 }
             });
             this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
@@ -366,8 +366,6 @@ class ActionState extends State {
             return;
         }
 
-
-
         //console.log("캐릭터가 현재 장착중인 퀵슬롯 아이템 ", equipItem);
 
         // 씬에 퀵슬롯이 있음
@@ -375,8 +373,6 @@ class ActionState extends State {
             player.stateMachine.transition('idle');
             return;
         }
-
-
 
         // 일단은 장착한 아이템 이름에 따라 동작 실행
         // 삽일 경우 땅 파는 애니메이션 실행
@@ -457,8 +453,6 @@ class ActionState extends State {
 
                         axeRange.destroy();
                     });
-
-                    
                 }
             });
 

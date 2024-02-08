@@ -89,9 +89,7 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         this.setInteractive(new Phaser.Geom.Rectangle(this.width / 2, this.height / 2,
             this.width, this.height),
             Phaser.Geom.Rectangle.Contains);
-
-
-
+            
         // 개별 퀵슬롯이나 퀵슬롯 아이템 이미지에 가려진다.
         // setTopOnly(false) 트리거를 개별 퀵슬롯이나 퀵슬롯 아이템 이미지에 설정한다.
 
@@ -115,7 +113,6 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         this.add(this.toolTip);
 
     }
-
 
     // own_items 서버에서 비동기로 가져오잖아 
     // 로드 완료하기전에 initQuick 실행되서 그런듯

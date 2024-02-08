@@ -30,7 +30,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA2ODQ3NTY4LCJleHAiOjE3MDY4ODM1Njh9.HDxLgFyPblCff0rm8qCF8BwSM-6XFiEBCvAc1ef1mAU"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3Mzc3ODgwLCJleHAiOjE3MDc0MTM4ODB9.YXmA7-0jcyw1XbhRHdaD6PZHbqhfWwcPMfgjsFY0hC4"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -160,7 +160,7 @@ export default class InGameScene extends Phaser.Scene {
         // 서버에 로그인 한 유저의 아이템 목록 요청
         // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
         // Promise 객체에서 원하는 값을 빼올려면 then() 이나 다른 async 함수내에서 await 사용 해야 한다.
-        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then( data => {
+        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then(data => {
             this.own_items = data;
         });
 
@@ -338,14 +338,19 @@ export default class InGameScene extends Phaser.Scene {
         }
 
         // 서버에서 맵 데이터 가져와서 적용
-        this.serverGetMap();
+        this.networkManager.serverGetMap(this.characterInfo.asset_id).then(data => {
+            // 맵 데이터 초기화
+            this.initMapData(data);
+            // 맵 데이터 배열 기반으로 게임 맵 초기화
+            this.initGameMap();
+        });
 
         // 맵 초기화 하고 싶으면 호출
-        //this.serverAddMap();
+        //this.networkManager.serverAddMap(this.mapData);;
+
 
         // 경작 가능오브젝트 레이어 가져오기
         this.plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
-
         // 로드 체크
         //console.log(this.plantableLayer);
 
@@ -655,9 +660,6 @@ export default class InGameScene extends Phaser.Scene {
 
                 //console.log("상태가 변경된 밭 타일이 적용되었는지 확인", this.mapData.objects);
 
-                // 밭 타일 상태 변경 사항 저장
-                this.serverAddMap();
-
                 // 새 아이템이 추가되거나 중복 아이템 수량이 증가할 아이템 슬롯 찾기
                 let addItemSlot = null;
                 addItemSlot = this.findAddItemSlot(crops.name);
@@ -687,25 +689,26 @@ export default class InGameScene extends Phaser.Scene {
                     y: crops.y
                 }
 
-                console.log("compareServerCrops", compareServerCrops);
+                //console.log("compareServerCrops", compareServerCrops);
 
-                console.log("filter 전 this.serverCrops", this.serverCrops);
+                //console.log("filter 전 this.serverCrops", this.serverCrops);
                 // this.serverCrops에서도 참조 제거
                 // x, y 값이 일치하는 요소만 뺀 배열을 반환
                 this.serverCrops = this.serverCrops.filter(serverCrop =>
                     !(compareServerCrops.x === serverCrop.x &&
                         compareServerCrops.y === serverCrop.y));
 
-                console.log("filter 후 this.serverCrops", this.serverCrops);
+                //console.log("filter 후 this.serverCrops", this.serverCrops);
 
 
                 // mapData 객체 내부의 배열 참조를 바꿀려면
                 // 직접 객체의 배열 속성을 수정해야 한다.
                 this.mapData.crops = this.serverCrops;
-                console.log("current Map Data", this.mapData);
+                //console.log("current Map Data", this.mapData);
 
-                // 농작물을 수확하여 옵젝이 제거되었으니 변경 사항 저장 요청
-                this.serverAddMap();
+                // 농작물을 수확하여 옵젝이 제거되었고
+                // 밭 타일에 구멍이 났으니 맵 변경 사항 저장 요청
+                this.networkManager.serverAddMap(this.mapData);
 
                 // 밭 타일에 농작물이 없어졌다고 알림
                 plantTile.properties.crops = false;
@@ -725,7 +728,7 @@ export default class InGameScene extends Phaser.Scene {
     // 씬에 농작물 오브젝트 추가
     // seedName : 심을 씨앗의 이름
     // plantTile : 씨앗을 심을 타일
-    addSeed(seedName, plantTile) {
+    addCrops(seedName, plantTile) {
 
         // 씨앗을 심을 타일의 월드상 픽셀 위치 구하기
         const plantTileX = this.ingameMap.tileToWorldX(plantTile.x);
@@ -770,7 +773,7 @@ export default class InGameScene extends Phaser.Scene {
 
 
         // 농작물 옵젝 변경 사항 서버에 저장
-        this.serverAddMap();
+        this.networkManager.serverAddMap(this.mapData);;
         crops.body.debugShowBody = false;
 
         // 농작물 검색 영역과 농작물 간의 overlap 이벤트 설정
@@ -781,7 +784,6 @@ export default class InGameScene extends Phaser.Scene {
         plantTile.properties.plantable = false
         // 타일에 농작물이 있다고 알림
         plantTile.properties.crops = true;
-
     }
 
     // mapData에 새 밭 타일 추가를 시도함.
@@ -799,7 +801,7 @@ export default class InGameScene extends Phaser.Scene {
                     object.type = 'field';
 
                     // 서버에 맵 데이터 변경 저장 요청
-                    this.serverAddMap();
+                    this.networkManager.serverAddMap(this.mapData);;
                 }
                 return true;
             }
@@ -815,7 +817,7 @@ export default class InGameScene extends Phaser.Scene {
                 type: 'field', tileIndex: 819
             });
             // 서버에 맵 데이터 변경 저장 요청
-            this.serverAddMap();
+            this.networkManager.serverAddMap(this.mapData);;
         }
 
     }
@@ -860,7 +862,7 @@ export default class InGameScene extends Phaser.Scene {
     }
 
     // 아이템 이름으로 아이템 추가 요청할 때 필요한 데이터 모아서 
-    // 서버에 아이템 추가 요청함.
+    // 네트워크 매니저에게 서버에 아이템 추가 요청해달라고 하기.
     sendAddItem(itemName, addItemSlot) {
         // 추가될 아이템 정보 객체
         const addItemInfo = this.allItems.get(itemName);
@@ -878,9 +880,11 @@ export default class InGameScene extends Phaser.Scene {
             item_index = addItemSlot.index;
         }
 
-        console.log('추가될 아이템 정보 객체', addItemInfo);
+        console.log('추가될 아이템 정보 객체와 인덱스', addItemInfo, item_index);
 
-        this.serverAddItem(1, item_index, addItemInfo, addItemSlot);
+        //this.serverAddItem(1, item_index, addItemInfo, addItemSlot);
+
+        this.networkManager.serverAddItem(1, item_index, addItemInfo, addItemSlot);
     }
 
     // 마우스 포인터가 위치한 타일의 픽셀 위치를 구하는 함수
@@ -988,420 +992,127 @@ export default class InGameScene extends Phaser.Scene {
         return false; // 타일이 사각형 영역 내에 없음.
     }
 
-    // 서버로부터 로그인한 유저의 아이템 목록 받아오기
-    async serverGetUserItem() {
+    // 서버로부터 받은 맵 데이터를 씬의 mapData 변수로 초기화
+    initMapData(data) {
+        // data -> mapData에 저장하기
+        data.objects.forEach((object, index) => {
+            this.mapData.objects.push(object);
+        });
+        data.crops.forEach((crop, index) => {
+            this.mapData.crops.push(crop);
+        });
+        data.trees.forEach((tree, index) => {
+            this.mapData.trees.push(tree);
+        });
 
-        const requestURL = APIUrl + 'item/own-item/' + this.characterInfo.user_id;
-
-
-        try {
-
-            // GET 메소드에 바디를 포함할 수 없음
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-
-                },
-            });
-
-            // .json() : 받은 응답을 JSON 형식으로 변환한다.
-            this.own_items = await response.json();
-
-            // 서버로부터 받은 유저 아이템 정보들
-            console.log('유저 아이템 목록', this.own_items);
-
-        } catch (error) {
-            console.error('serverGetUserItem() Error : ', error);
+        if (this.mapData.trees.length === 0) {
+            console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
+            // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
+            this.serverTrees.push({ x: tileSize * 15, y: tileSize * 5, loggingTime: null });
+            this.serverTrees.push({ x: tileSize * 18, y: tileSize * 5, loggingTime: null });
+            this.serverTrees.push({ x: tileSize * 21, y: tileSize * 5, loggingTime: null });
         }
+        console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
 
     }
 
-    // 모든 아이템 정보 받아오기 아이템 배열로 받음
-    async serverGetAllItem() {
+    // 서버로 받은 mapData 기반으로 밭 타일, 게임 오브젝트(농작물, 나무) 생성해서
+    // 게임 맵 초기화
+    initGameMap() {
 
-        const requestURL = APIUrl + 'item/item/all';
+        // 밭 타일 생성
+        this.mapData.objects.forEach((object, index) => {
+            const tileX = object.tileX;
+            const tileY = object.tileY;
+            const ingameMap = this.ingameMap;
 
-        try {
+            // 서버에 저장된 타일의 타입에 따라 사용할 타일셋 변경
+            let layer0Tile = ingameMap.putTileAt(68, tileX, tileY, true, 0);
+            let layer1Tile = null;
+            let layer2Tile = ingameMap.putTileAt(-1, tileX, tileY, true, 2);
 
-            // GET 메소드에 바디를 포함할 수 없음
-            const response = await fetch(requestURL, {
+            // 여기서 object.type에 따라 사용할 타일 변경
+            switch (object.type) {
+                case 'field':
+                    layer1Tile = ingameMap.putTileAt(819, tileX, tileY, true, 1);
+                    // 경작 가능한 타일
+                    layer1Tile.properties.plantable = true;
+                    break;
 
-                // 요청 방식
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
+                // 농작물 수확해서 구멍난 밭타일
+                case 'perforated field':
+                    layer1Tile = ingameMap.putTileAt(1139, tileX, tileY, true, 1);
+                    // 경작 불가능한 타일
+                    layer1Tile.properties.plantable = false;
+                    break;
+            }
 
-                },
-            });
+            // 변경한 레이어의 타일들을 배열에 넣음
+            let tiles = [];
+            tiles.push(layer0Tile, layer1Tile, layer2Tile);
 
-            // .json() : 받은 응답을 JSON 형식으로 변환한다.
-            const data = await response.json();
-
-            // 서버로부터 받은 전체 아이템 정보들
-            console.log('전체 아이템 목록', data);
-
-            // 배열을 해쉬 테이블로 변환한다.
-
-            data.forEach((item, index) => {
-
-                // 구조 분해 할당
-                const { item_name } = item;
-                // 값 추가
-                this.allItems.set(item_name, item);
-            });
-
-
-        } catch (error) {
-            console.error('serverGetAllItem() Error : ', error);
-        }
-
-    }
-
-    // 서버에 로그인 한 유저에게 새 아이템 추가, 기존 아이템 수량 증가 요청하는 함수
-    // 액세스 토큰 필요함
-    async serverAddItem(item_count, item_index, addItemInfo, addItemSlot) {
-
-        const { item_id, item_type, item_name,
-            item_des, seed_time, use_level, item_price } = addItemInfo;
-
-        const requestURL = APIUrl + 'item/add/';
-
-        const requestBody = {
-            'item_id': item_id,
-            'item_count': item_count,
-            'item_index': item_index
-        }
-
-        console.log("서버 아이템 추가 요청에 사용할 바디 ", requestBody);
-
-        try {
-
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    //액세스 토큰 값 보내기
-                    Authorization: 'Bearer ' + this.accessToken
-                },
-
-                // 바디 필요함.
-                body: JSON.stringify(requestBody)
-            });
-
-            // .text() : 받은 응답을 text 형식으로 변환한다.
-            // 성공 시 결과값 'success'로 감
-            const data = await response.text();
-
-            //console.log("받은 응답 헤더의 콘텐츠 타입", response.headers.get("content-type"));
-
-            // 요청이 성공하면 새 아이템의 추가나 중복 아이템 수량 증가 시키기
-            if (data === 'success') {
-
-                console.log('서버 아이템 추가 성공');
-                console.log('아이템이 추가 되거나 수량 증가할 슬롯', addItemSlot);
-
-                // 중복 아이템 수량 증가
-                if (addItemSlot.item !== null) {
-                    addItemSlot.item.count += 1;
-                    addItemSlot.setSlotItem(addItemSlot.item);
+            // 각 레이어의 타일의 회전 제거
+            tiles.forEach((tile) => {
+                if (tile) {
+                    tile.rotation = 0;
+                    // 타일의 X축, Y축 반전 제거
+                    tile.flipX = false;
+                    tile.flipY = false;
                 }
-                // 새 아이템 추가
-                else {
-                    addItemSlot.setSlotItem(
-                        new Item(addItemInfo, item_count));
-                }
-
-            }
-            else {
-                console.log('서버 아이템 추가 실패');
-            }
-
-        } catch (error) {
-            console.error('serverAddItem() Error : ', error);
-        }
-
-    }
-
-    // 서버에 로그인 한 유저의 아이템 소비 요청함.
-    async serverUseItem(item_name, item_count, useItemSlot) {
-
-        const requestURL = APIUrl + 'item/use/';
-
-        const useItemInfo = this.allItems.get(item_name);
-
-        const requestBody = {
-            'item_id': useItemInfo.item_id,
-            'item_count': item_count,
-        }
-
-        //console.log("서버 아이템 사용 요청에 사용할 바디 ", requestBody);
-
-        try {
-
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    //액세스 토큰 값 보내기
-                    Authorization: 'Bearer ' + this.accessToken
-                },
-
-                // 바디 필요함.
-                body: JSON.stringify(requestBody)
             });
+        });
 
-            const data = await response.text();
+        // 농작물 오브젝트 생성
+        this.mapData.crops.forEach((crop, index) => {
+            const cropX = crop.x;
+            const cropY = crop.y;
+            const cropName = crop.name;
 
-            // 요청이 성공하면 클라이언트에서도 아이템 소비와 삭제
-            if (data === 'use success') {
-                //console.log('아이템이 소비되는 슬롯', useItemSlot);
+            // plantTime string -> date로 변경
+            crop.plantTime = new Date(crop.plantTime);
 
-                useItemSlot.useItem(item_count);
-            }
-            else {
-                console.log('서버 아이템 소비 실패');
+            const plantTime = crop.plantTime;
+            const growTime = crop.growTime;
+
+            // 인게임에서 농작물 옵젝 생성
+            const crops = new Crops(this, cropX, cropY, cropName, plantTime, growTime, true);
+            this.crops.push(crops);
+
+
+            // getTileAt()에 픽셀 위치가 아니라 타일 위치를 넣어야 함.
+            // 타일 유닛 위치 구하기
+            const plantTileX = this.ingameMap.worldToTileX(crops.x);
+            const plantTileY = this.ingameMap.worldToTileY(crops.y);
+
+            // plantTile 구하기
+            const plantTile = this.ingameMap.getTileAt(plantTileX, plantTileY, true, 1);
+            // 농작물의 x,y 위치 아니까 농작물이 속한 타일 위치도 알 수 있다.
+            this.setCropsOverlap(crops, plantTile);
+
+            //console.log('plantTile', plantTile);
+
+            // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
+            plantTile.properties.plantable = false
+            // 타일에 농작물이 있다고 알림
+            plantTile.properties.crops = true;
+        });
+
+        // 나무 생성하기
+        this.mapData.trees.forEach((tree, index) => {
+
+            const treeX = tree.x;
+            const treeY = tree.y;
+            let loggingTime = tree.loggingTime;
+            // loggingTime이 존재하면 string -> Date로 변환환다
+            if (loggingTime !== null) {
+                loggingTime = new Date(tree.loggingTime);
             }
 
-        } catch (error) {
-            console.error('serverUseItem() Error : ', error);
-        }
-    }
+            this.trees.push(new Tree(this, treeX, treeY, loggingTime, true));
+        });
 
-    // 서버에 아이템 이동 요청
-    async serverMoveItem(item_name, item_index) {
-
-        // URL에 포함시켜야함.
-
-        const useItemInfo = this.allItems.get(item_name);
-
-        const requestURL = APIUrl + 'item/move/' + useItemInfo.item_id + '/' + item_index;
-
-        try {
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    //액세스 토큰 값 보내기
-                    Authorization: 'Bearer ' + this.accessToken
-                },
-
-            });
-
-            const data = await response.text();
-
-            // 요청이 성공했는지 확인
-            if (data === 'success') {
-                console.log('서버 아이템 이동 성공');
-            }
-            else {
-                console.log('서버 아이템 이동 실패');
-            }
-
-        } catch (error) {
-            console.error('serverMoveItem() Error : ', error);
-        }
-    }
-
-    // 서버에 맵 데이터 추가 및 수정 요청
-    async serverAddMap() {
-        const requestURL = APIUrl + 'map/';
-
-        console.log("서버에 맵 데이터 추가 및 수정 요청");
-
-        try {
-
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: 'Bearer ' + this.accessToken
-                },
-
-                body: JSON.stringify(this.mapData)
-            });
-
-            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
-
-            // .json() : 받은 응답을 JSON 형식으로 변환한다.
-            const data = await response.json();
-
-            // 서버로부터 받은 유저 아이템 정보들
-            //console.log('응답받은 맵 정보', data);
-
-        } catch (error) {
-            console.error('serverAddMap() Error : ', error);
-        }
-    }
-
-    // 로그인 한 유저의 맵 데이터 불러오기
-    async serverGetMap() {
-
-        const requestURL = APIUrl + 'map/' + this.characterInfo.asset_id;
-
-        try {
-
-            const response = await fetch(requestURL, {
-
-                // 요청 방식
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-
-            });
-
-            //console.log("mapData 객체 JSON화", JSON.stringify(this.mapData) );
-
-            // .json() : 받은 응답을 JSON 형식으로 변환한다.
-            const data = await response.json();
-
-            //console.log("serverGetMap() response 확인", response);
-
-            // 서버로부터 받은 유저 아이템 정보들
-            console.log('받은 맵 정보', data);
-
-            // data -> mapData에 저장하기
-            data.objects.forEach((object, index) => {
-                this.mapData.objects.push(object);
-            });
-
-            data.crops.forEach((crop, index) => {
-                this.mapData.crops.push(crop);
-            });
-
-            // trees 확인
-            data.trees.forEach((tree, index) => {
-                this.mapData.trees.push(tree);
-            });
-
-
-            if (this.mapData.trees.length === 0) {
-                console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
-                // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
-                this.serverTrees.push({ x: tileSize * 15, y: tileSize * 5, loggingTime: null });
-                this.serverTrees.push({ x: tileSize * 18, y: tileSize * 5, loggingTime: null });
-                this.serverTrees.push({ x: tileSize * 21, y: tileSize * 5, loggingTime: null });
-            }
-            console.log('받은 맵 정보를 this.mapData에 저장', this.mapData);
-
-
-
-            // 받은 맵 데이터를 기반으로 밭 타일 생성
-            // 나중에 게임 오브젝트(농작물)도 생성할 예정
-            // initGameMap()
-            this.mapData.objects.forEach((object, index) => {
-                const tileX = object.tileX;
-                const tileY = object.tileY;
-                const ingameMap = this.ingameMap;
-
-                // 서버에 저장된 타일의 타입에 따라 사용할 타일셋 변경
-                let layer0Tile = ingameMap.putTileAt(68, tileX, tileY, true, 0);
-                let layer1Tile = null;
-                let layer2Tile = ingameMap.putTileAt(-1, tileX, tileY, true, 2);
-
-                // 여기서 object.type에 따라 타일 변경
-                switch (object.type) {
-
-                    case 'field':
-                        layer1Tile = ingameMap.putTileAt(819, tileX, tileY, true, 1);
-                        // 경작 가능한 타일
-                        layer1Tile.properties.plantable = true;
-                        break;
-
-                    // 농작물 수확해서 구멍난 밭타일
-                    case 'perforated field':
-                        layer1Tile = ingameMap.putTileAt(1139, tileX, tileY, true, 1);
-                        // 경작 불가능한 타일
-                        layer1Tile.properties.plantable = false;
-                        break;
-
-                }
-
-                // 변경한 레이어의 타일들을 배열에 넣음
-                let tiles = [];
-                tiles.push(layer0Tile, layer1Tile, layer2Tile);
-
-                // 각 레이어의 타일의 회전 제거
-                tiles.forEach((tile) => {
-
-                    if (tile) {
-                        tile.rotation = 0;
-                        // 타일의 X축, Y축 반전 제거
-                        tile.flipX = false;
-                        tile.flipY = false;
-                    }
-                });
-
-            });
-
-            // 서버에서 로드한 농작물 정보 기반으로 농작물 오브젝트 생성
-            this.mapData.crops.forEach((crop, index) => {
-                const cropX = crop.x;
-                const cropY = crop.y;
-                const cropName = crop.name;
-
-                // plantTime string -> date로 변경
-                crop.plantTime = new Date(crop.plantTime);
-
-                const plantTime = crop.plantTime;
-                const growTime = crop.growTime;
-
-                // 인게임에서 농작물 옵젝 생성
-                const crops = new Crops(this, cropX, cropY, cropName, plantTime, growTime, true);
-                this.crops.push(crops);
-
-
-                // getTileAt()에 픽셀 위치가 아니라 타일 위치를 넣어야 함.
-                // 타일 유닛 위치 구하기
-                const plantTileX = this.ingameMap.worldToTileX(crops.x);
-                const plantTileY = this.ingameMap.worldToTileY(crops.y);
-
-                // plantTile 구하기
-                const plantTile = this.ingameMap.getTileAt(plantTileX, plantTileY, true, 1);
-                // 농작물의 x,y 위치 아니까 농작물이 속한 타일 위치도 알 수 있다.
-                this.setCropsOverlap(crops, plantTile);
-
-                //console.log('plantTile', plantTile);
-
-                // 씨앗을 심었으니 재배 불가능한 타일로 변경한다
-                plantTile.properties.plantable = false
-                // 타일에 농작물이 있다고 알림
-                plantTile.properties.crops = true;
-            });
-
-
-            // 받은 나무 오브젝트 데이터를 기반으로 나무 생성
-            this.mapData.trees.forEach((tree, index) => {
-
-                const treeX = tree.x;
-                const treeY = tree.y;
-                let loggingTime = tree.loggingTime;
-                // loggingTime이 존재하면 string -> Date로 변환환다
-                if (loggingTime !== null) {
-                    loggingTime = new Date(tree.loggingTime);
-                }
-
-                this.trees.push(new Tree(this, treeX, treeY, loggingTime, true));
-            });
-
-            //console.log("string -> Date mapDate 확인", this.mapData.crops);
-            //console.log("string -> Date serverCrops 확인", this.serverCrops);
-
-        } catch (error) {
-            console.error('serverGetMap() Error : ', error);
-        }
-
+        //console.log("string -> Date mapDate 확인", this.mapData.crops);
+        //console.log("string -> Date serverCrops 확인", this.serverCrops);
     }
 
 }

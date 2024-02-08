@@ -22,7 +22,7 @@ export default class Tree extends Phaser.GameObjects.Container {
     // 벌목된 시간
     loggingTime = null;
     // 재생성 되는 데 걸리는 시간(초)
-    respawnTime = 15;
+    respawnTime = 10;
     // 재생성이 되는 시간
     respawnCompleteTime = null;
     // 재생성까지 남은 시간(초)
@@ -155,7 +155,7 @@ export default class Tree extends Phaser.GameObjects.Container {
 
             } else {
 
-                console.log("재생성 완료");
+                console.log("초기 상태 - 재생성 완료");
                 // 나무 상태로 변경
                 this.state = 'tree';
                 this.treeSprite.setVisible(true);
@@ -175,11 +175,10 @@ export default class Tree extends Phaser.GameObjects.Container {
                     }
                 });
 
-                this.scene.serverAddMap();
+                this.scene.networkManager.serverAddMap(this.scene.mapData);
 
             }
         }
-
     }
 
     // 나무 오브젝트가 속한 씬에서 업데이트
@@ -223,7 +222,6 @@ export default class Tree extends Phaser.GameObjects.Container {
 
             this.remainTime = this.respawnTime;
 
-
             // 벌목된 시간 서버에 저장 x, y 값이 일치하는 요소 찾기
             this.scene.serverTrees.forEach((tree, index) => {
 
@@ -233,7 +231,7 @@ export default class Tree extends Phaser.GameObjects.Container {
                 }
             });
 
-            this.scene.serverAddMap();
+            this.scene.networkManager.serverAddMap(this.scene.mapData);
 
             // 벌목 성공 시 플레이어 인벤에 나무가 추가
             // 새 아이템이 추가되거나 중복 아이템 수량이 증가할 아이템 슬롯 찾기
@@ -259,7 +257,6 @@ export default class Tree extends Phaser.GameObjects.Container {
                     loop: false
                 });
             });
-
 
         } else {
             // 애니메이션 실행 중에 재실행 명령 내리면 무시함
@@ -289,9 +286,7 @@ export default class Tree extends Phaser.GameObjects.Container {
             }
         });
 
-        this.scene.serverAddMap();
-
-
+        this.scene.networkManager.serverAddMap(this.scene.mapData);
     }
     // 남은 초 구하기
     getRemainTime(now) {
