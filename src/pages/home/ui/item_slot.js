@@ -109,7 +109,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         txtConfig.color = 'black';
         txtConfig.fontSize = 15;
 
- 
         this.add([this.countTxt, this.itemImg]);
 
         // 퀵슬롯 UI로 사용시
@@ -251,8 +250,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     toolTip.setPosition(toolTipX, toolTipY);
                 }
             }
-
-
         });
 
         // pointermove가 1회 호출되고 pointerout-> pointerover 순으로 호출된다.
@@ -323,8 +320,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
             this.itemImg.x = pointer.x;
             this.itemImg.y = pointer.y;
-
-
         });
 
         // 슬롯 이미지 드래그 종료
@@ -439,22 +434,22 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 아이템 이미지가 표시되니까 드래그 이벤트 설정
 
         // 아이템 이미지의 width, height
-        console.log('아이템 이미지의 width, height', this.itemImg.width, this.itemImg.height);
+        //console.log('아이템 이미지의 width, height', this.itemImg.width, this.itemImg.height);
 
         // 왜 이럴까...
 
         // 새 텍스처로 교체하면 상호작용 영역 크기가 달라진다.
         // 아이템 이미지 상호작용 영역 설정
-        /* this.itemImg.setInteractive(new Phaser.Geom.Rectangle
+        this.itemImg.setInteractive(new Phaser.Geom.Rectangle
             (-this.itemImg.width / 2,
             -this.itemImg.height / 2,
              this.itemImg.width * 2,
               this.itemImg.height * 2),
-            Phaser.Geom.Rectangle.Contains); */
+            Phaser.Geom.Rectangle.Contains);
 
         // hitArea가 주어지지 않을 경우 텍스처 프레임을 기반으로 직사각형으로 생성한다라...
         // 텍스처 프레임이 뭐지?
-        this.itemImg.setInteractive();
+        //this.itemImg.setInteractive();
 
         // 아이템 이미지 드래그 가능하게 설정
         this.scene.input.setDraggable(this.itemImg);
@@ -462,8 +457,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
 
         // 아이템 이미지 상호작용 영역 보기
-        this.itemImg.setDepth(1500);
-        this.scene.input.enableDebug(this.itemImg);
+        //this.itemImg.setDepth(1500);
+        //this.scene.input.enableDebug(this.itemImg);
     }
 
     // 아이템 소비해서 수량 감소시키는 함수

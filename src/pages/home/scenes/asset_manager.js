@@ -7,10 +7,12 @@ export default class AssetManager {
 
     characterSprites;
     treeSprites;
+    npcSprites;
 
     cropsImages;
     uiImages;
     nineSliceBoxImages;
+    buildingImages;
 
     // 캐릭터 애니메이션 생성에 필요한 정보 담은 객체 배열
     characterAnims;
@@ -97,6 +99,11 @@ export default class AssetManager {
             { name: 'player_do_hair', path: this.hairPath.do },
             { name: 'player_do_body', path: 'DOING/base_doing_strip8.png' },
             { name: 'player_do_hand', path: 'DOING/tools_doing_strip8.png' },
+        ];
+
+        // NPC 스프라이트 시트
+        this.npcSprites = [
+            {name: 'shorthair_idle', path: 'IDLE/shorthair_idle_strip9.png' },
         ];
         // 나무 스프라이트 로드 정보 담은 배열
         this.treeSprites = [
@@ -248,10 +255,11 @@ export default class AssetManager {
             { name: "tab_9slice_tr", path: 'lt_box_9slice_tr.png' },
         ];
 
-        // 애니메이션 정보 객체 배열
-        // 캐릭터 애니메이션 생성에 필요한 정보를 담은 객체 배열 
-        // 텍스처 낫 파운드 뜨는 이유 : preload에서 이미지 로드하기 전에 텍스처를 찾아서 그렇다.
-
+        // 건물 이미지 로드 
+        this.scene.load.path = "assets/buildings/";
+        this.buildingImages = [
+            { name: '씨앗상점', path: 'market.png' },
+        ];
 
     }
 
@@ -280,6 +288,11 @@ export default class AssetManager {
         // 플레이어 캐릭터에 사용할 스프라이트 시트 로드
         this.scene.load.path = 'assets/Character/';
         this.characterSprites.forEach(spriteData => this.loadSprite(spriteData));
+
+        // NPC 스프라이트
+        this.scene.load.path = 'assets/Character/';
+        this.npcSprites.forEach(spriteData => this.loadSprite(spriteData));
+
         // 나무 스프라이트 시트 로드하기
         this.scene.load.path = 'assets/Elements/Trees/';
         this.treeSprites.forEach(spriteData => this.loadSprite(spriteData));
@@ -314,8 +327,12 @@ export default class AssetManager {
         this.nineSliceBoxImages.forEach(imageData => this.loadImage(imageData));
 
         // 농작물 관련 이미지 로드
-        this.scene.load.path = "assets/Elements/Crops/"
+        this.scene.load.path = "assets/Elements/Crops/";
         this.cropsImages.forEach(imageData => this.loadImage(imageData));
+
+        // 건물 관련 이미지 로드
+        this.scene.load.path = "assets/buildings/";
+        this.buildingImages.forEach(imageData => this.loadImage(imageData));
     }
 
     // 애니메이션 정보 객체 만드는 함수
@@ -354,6 +371,9 @@ export default class AssetManager {
             { key: 'do_hair', frames: this.scene.anims.generateFrameNumbers('player_do_hair', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
             { key: 'do_body', frames: this.scene.anims.generateFrameNumbers('player_do_body', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
             { key: 'do_hand', frames: this.scene.anims.generateFrameNumbers('player_do_hand', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
+
+            // NPC 대기 애니메이션 9 프레임
+            { key: 'npc_idle_hair', frames: this.scene.anims.generateFrameNumbers('shorthair_idle', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
 
             // 나무 흔들리는 애니메이션 7 프레임 frameRate <- 초당 프레임 재생 속도
             { key: 'tree_shake', frames: this.scene.anims.generateFrameNumbers('tree', { start: 0, end: 6 }), frameRate: 12, repeat: 0 },

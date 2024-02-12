@@ -11,6 +11,8 @@ import Tree from '../elements/tree';
 import AssetManager from './asset_manager';
 import SelectBox from '../ui/select_box';
 import NetworkManager from './network_manager';
+import SeedStoreNPC from '../npc/seed_store_npc';
+import SeedStoreUI from '../ui/seed_store/seed_store_ui';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -30,7 +32,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3Mzc3ODgwLCJleHAiOjE3MDc0MTM4ODB9.YXmA7-0jcyw1XbhRHdaD6PZHbqhfWwcPMfgjsFY0hC4"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3NzE1NjM5LCJleHAiOjE3MDc3NTE2Mzl9.YMZM1NuEaG_4B7kS3HMR3zFM-07ljyypvWNrVs77odM"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -43,7 +45,6 @@ export default class InGameScene extends Phaser.Scene {
     goldText;
     // 인 게임에 사용할 농장 타일맵 
     ingameMap;
-
 
     // paint tileMap example
     selectedTile;
@@ -126,6 +127,9 @@ export default class InGameScene extends Phaser.Scene {
 
     assetManager;
     networkManager;
+
+    seedStoreNPC;
+    seedStoreUI;
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
@@ -286,6 +290,19 @@ export default class InGameScene extends Phaser.Scene {
         this.uiVisibleBtn = new UIVisibleBtn(this, btnX, btnY, btnWidth, btnHeight);
 
         const debugGraphics = [];
+
+        // 씨앗 상점 npc 추가 원래 위치 16 x 8
+        this.seedStoreNPC = new SeedStoreNPC(this, tileSize * 12 , tileSize * 10);
+
+        // 씨앗 상점 UI 생성
+        //크기
+        const seedStoreWidth = 600;
+        const seedStoreHeight = 500;
+
+        // 옥션의 위치    
+        const seedStoreX = this.cameras.main.width / 2 - seedStoreWidth / 2;
+        const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
+        this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.

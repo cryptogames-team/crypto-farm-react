@@ -229,8 +229,6 @@ export default class TabItem extends Phaser.GameObjects.Container {
             })
 
 
-
-
             this.searchItem_name = scene.add.text(frame_search_x_position + 22, frame_search_y_position + 48, '', {
                 fixedWidth: 250,
                 fixedHeight: 36,
@@ -1746,7 +1744,7 @@ class SelectedSellingItem extends Phaser.GameObjects.Container {
         this.add(this.bottomRight);
 
     }
-    gb
+    
 }
 
 
