@@ -10,7 +10,6 @@ const pad = 19;
 
 export default class Inventory extends Frame {
 
-    
     exitIcon;
 
     // 경계선
@@ -30,7 +29,6 @@ export default class Inventory extends Frame {
     // 아이템 슬롯 배열
     itemSlots = [];
 
-
     // 인벤토리 시작 인덱스
     startIndex = 9;
     // 인벤토리 끝 인덱스
@@ -38,7 +36,6 @@ export default class Inventory extends Frame {
 
     // 퀵슬롯 크기
     quickSize = 9;
-
 
     // 인벤토리의 아이템을 퀵슬롯에 드래그 앤 드랍 한 거 알아내는 법
     // 1. 인벤토리와 퀵슬롯은 같은 씬에 있음.
@@ -157,13 +154,10 @@ export default class Inventory extends Frame {
                 //itemSlot.setDepth(1001).setScrollFactor(0);
                 //scene.input.enableDebug(itemSlot);
 
-
                 // Phaser에선 겹치는 개체들 중에서 가장 상위 객체(마지막에 추가된 객체)에만 
                 // 이벤트를 전달하는 기본동작을 가진다고 한다.
-
                 // 아이템 슬롯 객체가 생성될 때 컨테이너가 만들어지고
                 // 거기에 자식 객체들이 생성되고 추가되는 방식이라서 그런가 봄.
-
 
                 this.add(itemSlot);
                 this.itemSlots.push(itemSlot);

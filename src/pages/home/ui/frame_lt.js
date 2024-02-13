@@ -7,7 +7,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
     // 테두리 크기
     edgeSize;
 
-    // 0일때 외부 박스, 1일때 탭으로 사용
+    // 0일때 외부 박스 프레임, 1일때 탭 버튼 프레임으로 사용
     type = 0;
 
     constructor(scene, x, y, width, height, type = 0) {
@@ -18,6 +18,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
         this.setDepth(100).setScrollFactor(0);
+        this.setSize(width, height);
 
         // 페이저는 HEX 색상 코드가 아니라 16진수 형식으로 받는다.
         // 퀵슬롯 배경
@@ -26,7 +27,6 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
         const edgeSize = 10;
         this.edgeSize = edgeSize;
         this.type = type;
-
 
         if (type === 0) {
             //테두리 추가
@@ -74,6 +74,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
                 this.bottomLeft, this.bottomCenter, this.bottomRight,
             ]);
         }
+        // 가장 왼쪽에 있는 탭 버튼에 씀
         else if (type === 1) {
 
             this.topLeft = scene.add.image(0, 0, 'tab_9slice_tl')
@@ -94,22 +95,74 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
 
             this.center = scene.add.image(edgeSize, edgeSize, 'tab_9slice_c')
                 .setOrigin(0, 0)
-                .setDisplaySize(width - (edgeSize * 2), height - (edgeSize * 2));
+                .setDisplaySize(width - (edgeSize), height - (edgeSize * 2));
 
             this.centerRight = scene.add.image(width - edgeSize, edgeSize, 'tab_9slice_rc')
                 .setOrigin(0, 0)
                 .setDisplaySize(edgeSize, height - (edgeSize * 2));
 
-            this.bottomRight = scene.add.image(width , height, 'tab_9slice_bl')
+            this.bottomLeft = scene.add.image(0, height, 'tab_9slice_lc')
+                .setOrigin(0, 1)
+                .setDisplaySize(edgeSize, edgeSize);
+
+            this.bottomCenter = scene.add.image(edgeSize, height, 'tab_9slice_c')
+                .setOrigin(0, 1)
+                .setDisplaySize(width - (edgeSize ), edgeSize);
+
+            this.bottomRight = scene.add.image(width, height, 'tab_9slice_bl')
                 .setOrigin(1, 1)
                 .setDisplaySize(edgeSize, edgeSize);
 
             this.add([
                 this.topLeft, this.topCenter, this.topRight,
                 this.centerLeft, this.center, this.centerRight,
-                this.bottomRight
+                this.bottomLeft, this.bottomCenter, this.bottomRight
             ]);
+        }
+        // 양쪽이 옆으로 연결되어야 하는 탭 버튼
+        else if (type === 2) {
 
+            this.topLeft = scene.add.image(0, 0, 'tab_9slice_tl')
+                .setOrigin(0, 0)
+                .setDisplaySize(edgeSize, edgeSize);
+
+            this.topCenter = scene.add.image(edgeSize, 0, 'tab_9slice_tc')
+                .setOrigin(0, 0)
+                .setDisplaySize(width - (edgeSize * 2), edgeSize);
+
+            this.topRight = scene.add.image(width, 0, 'tab_9slice_tr')
+                .setOrigin(1, 0)
+                .setDisplaySize(edgeSize, edgeSize);
+
+            this.centerLeft = scene.add.image(0, edgeSize, 'tab_9slice_lc')
+                .setOrigin(0, 0)
+                .setDisplaySize(edgeSize, height - (edgeSize * 2));
+
+            this.center = scene.add.image(edgeSize, edgeSize, 'tab_9slice_c')
+                .setOrigin(0, 0)
+                .setDisplaySize(width - (edgeSize), height - (edgeSize * 2));
+
+            this.centerRight = scene.add.image(width - edgeSize, edgeSize, 'tab_9slice_rc')
+                .setOrigin(0, 0)
+                .setDisplaySize(edgeSize, height - (edgeSize * 2));
+
+            this.bottomLeft = scene.add.image(0, height, 'tab_9slice_br')
+                .setOrigin(0, 1)
+                .setDisplaySize(edgeSize, edgeSize);
+
+            this.bottomCenter = scene.add.image(0, height, 'tab_9slice_c')
+                .setOrigin(0, 1)
+                .setDisplaySize(width, edgeSize);
+
+            this.bottomRight = scene.add.image(width, height, 'tab_9slice_bl')
+                .setOrigin(1, 1)
+                .setDisplaySize(edgeSize, edgeSize);
+
+            this.add([
+                this.topLeft, this.topCenter, this.topRight,
+                this.centerLeft, this.center, this.centerRight,
+                this.bottomCenter, this.bottomLeft, this.bottomRight
+            ]);
         }
 
         this.setDepth(1000);

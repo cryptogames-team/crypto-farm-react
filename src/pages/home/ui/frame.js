@@ -31,6 +31,7 @@ export default class Frame extends Phaser.GameObjects.Container {
 
 
         this.setDepth(100).setScrollFactor(0);
+        this.setSize(width, height);
 
         
         const edgeSize=10;
@@ -101,7 +102,6 @@ export default class Frame extends Phaser.GameObjects.Container {
 
         // 9분할 박스 UI 크기 변경
         setUISize(width, height){
-            console.log('setUISize 호출됨.');
     
             const edgeSize = this.edgeSize;
     

@@ -6,6 +6,8 @@ const pad = 7;
 
 export default class ItemSlot extends Phaser.GameObjects.Container {
 
+    scene;
+
     // 퀵슬롯으로 사용시 슬롯 번호 텍스트
     slotNumberTxt;
     // 퀵슬롯으로 사용 시 슬롯 번호
@@ -36,8 +38,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
     // 아이템 슬롯의 인벤토리나 퀵슬롯 내의 인덱스
     index;
-
-    scene;
 
     // 퀵슬롯 크기 서버에서 인벤 인덱스는 9부터임
     quickSize = 9;

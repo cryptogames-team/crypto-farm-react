@@ -15,6 +15,7 @@ export default class ToolTip extends Frame_LT {
     seedTimeTxt;
     timerIcon;
     priceTxt;
+    goldIcon;
 
     // 컨테이너 패딩
     pad = 15;
@@ -32,9 +33,9 @@ export default class ToolTip extends Frame_LT {
         const nameX = this.pad;
         const nameY = this.pad;
 
-        this.nameTxt = scene.add.text(nameX, nameY, '양배추', {
+        this.nameTxt = scene.add.text(nameX, nameY, '아이템 이름', {
             fontFamily: 'Arial',
-            fontSize: 30,
+            fontSize: 25,
             color: 'black',
             fontStyle: 'bold'
         });
@@ -63,7 +64,7 @@ export default class ToolTip extends Frame_LT {
         .setOrigin(0,0).setDisplaySize(width - (this.edgeSize * 2), this.edgeSize );
 
 
-        // 아이템 설명 텍스트 <- 여기 자동 줄 바꿈되어야 하는데
+        // 아이템 설명 텍스트
         const desX = this.pad;
         const desY = headerY + this.headerLine.displayHeight + this.space;
 
@@ -83,9 +84,27 @@ export default class ToolTip extends Frame_LT {
 
         //console.log("desTxt 높이", this.desTxt.height);
 
+
+        // 가격 텍스트 중앙 배치
+        const priceX = (this.width - this.edgeSize * 2 ) / 2;
+        const priceY = desY + this.desTxt.height + this.space;
+        this.priceTxt = scene.add.text(priceX, priceY, '아이템 가격' , {
+            fontFamily: 'Arial',
+            fontSize: 15,
+            color: 'white',
+            fontStyle: 'bold'
+        });
+        this.priceTxt.setOrigin(0.5, 0);
+
+        // 골드 아이콘 가격 텍스트 왼쪽 옆에 추가
+        const goldX = priceX - this.priceTxt.width / 2 - this.pad * 2;
+        const goldY = priceY;
+        this.goldIcon = scene.add.image(goldX, goldY, 'goldIcon');
+        this.goldIcon.setOrigin(0,0).setDisplaySize(18, 18);
+
         // 성장 시간 텍스트 <- 중앙배치
         const seedTimeX = (this.width - this.edgeSize * 2 ) / 2;
-        const seedTimeY = desY + this.desTxt.height + this.space;
+        const seedTimeY = priceY + this.priceTxt.height + this.space;
 
         // 텍스트에 멀 넣든 고정 크기를 가진다.
         this.seedTimeTxt = scene.add.text(seedTimeX, seedTimeY, '성장 시간' , {
@@ -102,13 +121,13 @@ export default class ToolTip extends Frame_LT {
         const timerY = seedTimeY;
 
         this.timerIcon = scene.add.image(timerX , timerY, 'timer');
-        this.timerIcon.setOrigin(0,0).setDisplaySize(15, 15);
+        this.timerIcon.setOrigin(0,0).setDisplaySize(18, 18);
 
         //console.log("seedTimeTxt 높이", this.seedTimeTxt.height);
 
         // 툴팁 컨테이너에 추가한다.
-        this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt, this.seedTimeTxt,
-        this.timerIcon]);
+        this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt, 
+            this.priceTxt, this.goldIcon, this.seedTimeTxt, this.timerIcon]);
     }
 
 
@@ -124,6 +143,10 @@ export default class ToolTip extends Frame_LT {
         this.seedTimeTxt.setText('');
         // 타이머도 안보이게 함
         this.timerIcon.setVisible(false);
+
+        // 아이템 가격 텍스트, 골드 아이콘 안 보이게 하기
+        this.priceTxt.setVisible(false);
+        this.goldIcon.setVisible(false);
 
         if( item.type === 0 ){
             type = '씨앗';

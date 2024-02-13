@@ -296,7 +296,7 @@ export default class InGameScene extends Phaser.Scene {
 
         // 씨앗 상점 UI 생성
         //크기
-        const seedStoreWidth = 600;
+        const seedStoreWidth = 650;
         const seedStoreHeight = 500;
 
         // 옥션의 위치    

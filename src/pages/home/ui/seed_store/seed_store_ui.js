@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Frame from "../frame";
 import Frame_LT from "../frame_lt";
+import StoreTabBody from "./store_tab_body";
 
 
 export default class SeedStoreUI extends Frame {
@@ -22,10 +23,10 @@ export default class SeedStoreUI extends Frame {
         this.setScrollFactor(0).setDepth(500);
 
 
-        // 헤더 만들기 제목 텍스트, 구매, 판매 탭 포함
+        // 헤더 만들기 제목 텍스트, 구매, 판매 탭 버튼 포함
         const headerSpaceX = 20;
         const headerSpaceY = 10;
-        const headerPad = 10;
+        const headerPad = this.edgeSize + 10;
         const txtStyle = {
             fontFamily: 'Arial',
             fontSize: 25,
@@ -35,52 +36,59 @@ export default class SeedStoreUI extends Frame {
             stroke: 'black', // 외곽선
             strokeThickness: 5 // 외곽선 두께  
         };
-        const titleX = this.edgeSize + headerPad;
-        const titleY = this.edgeSize + headerPad;
+        const titleX = headerPad;
+        const titleY = headerPad;
         this.titleTxt = scene.add.text(titleX, titleY, '씨앗 상점', txtStyle);
 
-        // 구매 탭 만들기
-        txtStyle.fontSize = 20;
-        const purchaseX = this.edgeSize + headerPad;
+        // 구매 탭 버튼 만들기
+        const purchaseX = headerPad;
         const purchaseY = titleY + this.titleTxt.height + headerSpaceY;
-        this.purchaseTxt = scene.add.text(purchaseX, purchaseY, '구매', txtStyle);
+        this.purchaseTab = new Frame_LT(scene, purchaseX, purchaseY, 100, 50, 1);
 
-        // 판매 탭 만들기
-        const saleX = purchaseX + this.purchaseTxt.width + headerSpaceX;
+        // 구매 탭 버튼 텍스트 추가
+        txtStyle.fontSize = 20;
+        const purchaseTxtX = purchaseX + this.purchaseTab.width / 2;
+        const purchaseTxtY = purchaseY + this.purchaseTab.height / 2;
+        this.purchaseTxt = scene.add.text(purchaseTxtX, purchaseTxtY, '구매', txtStyle);
+        this.purchaseTxt.setOrigin(0.5, 0.5);
+
+
+        //판매 탭 버튼 만들기
+        const saleX = purchaseX + this.purchaseTab.width;
         const saleY = purchaseY;
-        this.saleTxt = scene.add.text(saleX, saleY, '판매', txtStyle);
+        this.saleTab = new Frame_LT(scene, saleX, saleY, 100, 50, 2);
 
-        // frame_lt 쓴 건가?
-        // 밑이 뚫린 프레임을 직접 만들었음.
+        //판매 탭 버튼 텍스트 추가
+        txtStyle.fontSize = 20;
+        const saleTxtX = saleX + this.saleTab.width / 2;
+        const saleTxtY = saleY + this.saleTab.height / 2;
+        this.saleTxt = scene.add.text(saleTxtX, saleTxtY, '판매', txtStyle);
+        this.saleTxt.setOrigin(0.5, 0.5);
+        
 
-        // 구매 탭에 사용할 프레임 만들기
+        // 탭 바디 만들기 크기 , 높이 변수화
+        const tabBodyX = this.purchaseTab.x;
+        const tabBodyY = this.purchaseTab.y + this.purchaseTab.height - this.purchaseTab.edgeSize;
+        const tabBodyWidth = this.width - headerPad * 2;
+        const tabBodyheight = this.height - headerPad * 2  - (this.titleTxt.height + this.purchaseTab.height);
+        this.tabBody = new StoreTabBody(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyheight);
 
-        this.purchaseTab = new Frame_LT(scene, 0, 0, 100, 100, 1);
-        //this.tab_tc = scene.add.image(purchaseX, );
-
-        // 새로 만드는 게 낫겠음.
-
-        /* this.topLeft = scene.add.image(purchaseX, purchaseY, 'tab_9slice_tl')
-        .setOrigin(0, 0)
-        .setDisplaySize(this.edgeSize, this.edgeSize);
-
-        this.topCenter = scene.add.image(purchaseX + this.edgeSize, purchaseY, 'tab_9slice_tc')     
-        .setOrigin(0, 0)
-        .setDisplaySize(this.purchaseTxt.width-(this.edgeSize*2),this.edgeSize);
-
-        this.topRight = scene.add.image(this.purchaseTxt.width + this.edgeSize * 2, purchaseY, 'tab_9slice_tr')
-        .setOrigin(1, 0)
-        .setDisplaySize(this.edgeSize,this.edgeSize); */
-
+        // 카테고리 표시
+        /* const categoryX = purchaseTxtX;
+        const categoryY = tabBodyY + 10;
+        this.categoryTxt = scene.add.text(categoryX, categoryY, '농작물', txtStyle);
+        this.categoryTxt.setOrigin(0.5, 0); */
 
 
 
+        this.add([this.titleTxt]);
+        this.add([this.tabBody]);
+        this.add([this.purchaseTab, this.purchaseTxt]);
+        this.add([this.saleTab, this.saleTxt]);
 
-        // 헤더랑 바디로 나눠져있다고 생각해본다.
-        // 바디도 탭 아이템에 다 몰아 넣은건가?
 
-
-        this.add([this.titleTxt, this.purchaseTxt, this.saleTxt, this.purchaseTab]);
+        //this.purchaseTab.setVisible(false);
+        this.saleTab.setVisible(false);
     }
 
 }
