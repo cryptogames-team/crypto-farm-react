@@ -24,7 +24,7 @@ export default class Frame extends Phaser.GameObjects.Container {
 
         super(scene,x, y);
 
-        // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.]]]]]
+        // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
         // UI 객체라서 물리 효과가 필요 없지만 바디로 경계 확인할려고 추가
         //scene.physics.add.existing(this);

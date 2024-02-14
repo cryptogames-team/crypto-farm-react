@@ -3,6 +3,7 @@ import Frame_LT from "../frame_lt";
 import StoreItemSlot from "./store_item_slot";
 import Frame from "../frame";
 import ToolTip from "../tooltip";
+import SelectBox from "../select_box";
 
 const pad = 20;
 // Ui 요소간의 간격
@@ -28,6 +29,12 @@ export default class StoreTabBody extends Frame_LT {
     // 아이템 슬롯과 툴팁 나누는 경계선
     borderLine;
 
+    // 구매 가능한 씨앗 리스트
+    purchaseList = ['감자 씨앗','호박 씨앗','당근 씨앗','양배추 씨앗',
+    '사탕무 씨앗','무 씨앗','밀 씨앗','케일 씨앗'];
+    // 판매 가능한 농작물 리스트
+    saleList = ['감자','호박','당근','양배추','사탕무','무','밀','케일'];
+
     constructor(scene, x, y, width, height) {
 
         super(scene, x, y, width, height, 0);
@@ -45,6 +52,7 @@ export default class StoreTabBody extends Frame_LT {
         const categoryX = pad;
         const categoryY = pad;
         this.categoryTxt = scene.add.text(categoryX, categoryY, '농작물 씨앗', txtStyle);
+        this.add([this.categoryTxt]);
 
         // 아이템 슬롯 시작 위치
         const slotSize = 75;
@@ -60,21 +68,18 @@ export default class StoreTabBody extends Frame_LT {
                 let slotX = slotStartX + slotSize * col + slotSpace * col;
                 let slotY = slotStartY + slotSize * row + slotSpace * row;
 
+                // 전체 인덱스
+                let index = row * this.gridCol + col;
+
+                // 아이템 이미지 게임에 존재하는 농작물 씨앗들을 표시하게 변경
                 const itemSlot = new StoreItemSlot(scene, slotX, slotY, slotSize, slotSize);
+                itemSlot.setItemImg(this.purchaseList[index]);
+
 
                 this.add([itemSlot]);
                 this.itemSlots.push(itemSlot);
             }
         }
-        this.add([this.categoryTxt]);
-
-        // 경계선 추가
-        const borderX = slotStartX + slotSize * this.gridCol + slotSpace * (this.gridCol + 1);
-        const borderY = this.edgeSize;
-        /* this.borderLine = scene.add.image(borderX, borderY, 'tab_9slice_lc');
-        this.borderLine.setOrigin(0,0).setDisplaySize(this.edgeSize, this.height - (this.edgeSize * 2));
-
-        this.add([this.borderLine]); */
 
         // 아이템 정보 툴팁 추가 하기전에 위치 잡기
         const toolTipPad = 15;
@@ -100,6 +105,11 @@ export default class StoreTabBody extends Frame_LT {
 
         this.purchaseBtn = new Frame(scene, btnX, btnY, btnWidth, btnHeight );
         this.add([this.purchaseBtn]);
+
+        // 셀렉트 박스
+        this.selectBox = new SelectBox(scene, slotStartX, slotStartY, slotSize, slotSize);
+        this.selectBox.setScale(3);
+        this.add([this.selectBox]);
 
     }
 }

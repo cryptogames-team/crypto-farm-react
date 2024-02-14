@@ -253,6 +253,16 @@ export default class AssetManager {
             { name: "tab_9slice_tc", path: 'lt_box_9slice_tc.png' },
             { name: "tab_9slice_tl", path: 'lt_box_9slice_tl.png' },
             { name: "tab_9slice_tr", path: 'lt_box_9slice_tr.png' },
+            // 햐안색 프레임 박스
+            { name: "w_9slice_tl", path: 'w_box_9slice_tl.png' },
+            { name: "w_9slice_tc", path: 'w_box_9slice_tc.png' },
+            { name: "w_9slice_tr", path: 'w_box_9slice_tr.png' },
+            { name: "w_9slice_lc", path: 'w_box_9slice_lc.png' },
+            { name: "w_9slice_rc", path: 'w_box_9slice_rc.png' },
+            { name: "w_9slice_c", path: 'w_box_9slice_c.png' },
+            { name: "w_9slice_bl", path: 'w_box_9slice_bl.png' },
+            { name: "w_9slice_bc", path: 'w_box_9slice_bc.png' },
+            { name: "w_9slice_br", path: 'w_box_9slice_br.png' },
         ];
 
         // 건물 이미지 로드 

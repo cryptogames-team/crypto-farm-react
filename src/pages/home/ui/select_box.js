@@ -40,4 +40,11 @@ export default class SelectBox extends Phaser.GameObjects.Container {
         this.add([this.topLeft, this.topRight, this.bottomLeft, this.bottomRight]);
     }
 
+    setScale(scale){
+        this.topLeft.setScale(scale);
+        this.topRight.setScale(scale);
+        this.bottomLeft.setScale(scale);
+        this.bottomRight.setScale(scale);
+    }
+
 }

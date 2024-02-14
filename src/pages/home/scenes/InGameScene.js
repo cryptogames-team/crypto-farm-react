@@ -292,7 +292,7 @@ export default class InGameScene extends Phaser.Scene {
         const debugGraphics = [];
 
         // 씨앗 상점 npc 추가 원래 위치 16 x 8
-        this.seedStoreNPC = new SeedStoreNPC(this, tileSize * 12 , tileSize * 10);
+        this.seedStoreNPC = new SeedStoreNPC(this, tileSize * 16 , tileSize * 2);
 
         // 씨앗 상점 UI 생성
         //크기

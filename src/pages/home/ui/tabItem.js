@@ -146,9 +146,6 @@ export default class TabItem extends Phaser.GameObjects.Container {
         const edgeSize = 10;
         this.setSize(120, 100);
 
-
-
-
         if (index == 0) {
             this.button_tl = scene.add.image(18, 80, 'tab_9slice_tl')
                 .setOrigin(0, 0)
