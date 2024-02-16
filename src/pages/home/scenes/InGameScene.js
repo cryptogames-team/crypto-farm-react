@@ -13,6 +13,7 @@ import SelectBox from '../ui/select_box';
 import NetworkManager from './network_manager';
 import SeedStoreNPC from '../npc/seed_store_npc';
 import SeedStoreUI from '../ui/seed_store/seed_store_ui';
+import Frame_LT from '../ui/frame_lt';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -32,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3NzE1NjM5LCJleHAiOjE3MDc3NTE2Mzl9.YMZM1NuEaG_4B7kS3HMR3zFM-07ljyypvWNrVs77odM"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3OTcyNTYyLCJleHAiOjE3MDgwMDg1NjJ9.gFFbXSE3ozF13PDFD52eZdkQz0m92QD1x8WzDPYnvik"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -86,10 +87,10 @@ export default class InGameScene extends Phaser.Scene {
     // 플레이어 소유 아이템 목록
     own_items;
 
-    // 서버에서 전체 아이템 목록을 요청한 다음 그게 배열로 오는데
-    // 해쉬 테이블에 저장시킴
-    // 모든 아이템 정보 <- 해쉬 테이블
-    allItems = new Map();
+    // 전체 아이템 정보 해쉬 테이블
+    allItemMap = new Map();
+    // 전체 아이템 정보 목록
+    allItemList = [];
 
     // 경작 가능 영역 표시하는 오브젝트 레이어
     plantableLayer;
@@ -175,8 +176,12 @@ export default class InGameScene extends Phaser.Scene {
                 // 구조 분해 할당
                 const { item_name } = item;
                 // 값 추가
-                this.allItems.set(item_name, item);
+                this.allItemMap.set(item_name, item);
             });
+
+            // 받은 배열 저장
+            this.allItemList = data;
+            //console.log('allItemList 확인',this.allItemList);
         });
 
         // assetManager로 스프라이트 시트로드가 잘 되는지 테스트
@@ -303,6 +308,7 @@ export default class InGameScene extends Phaser.Scene {
         const seedStoreX = this.cameras.main.width / 2 - seedStoreWidth / 2;
         const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
         this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
+        this.seedStoreUI.setVisible(false);
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
@@ -771,7 +777,7 @@ export default class InGameScene extends Phaser.Scene {
         const plantTime = new Date();
 
         // 아이템 정보 가져와야 함. seed_time
-        const seedItem = this.allItems.get(seedName);
+        const seedItem = this.allItemMap.get(seedName);
 
         // 농작물 게임 오브젝트 추가
         // 컨테이너 객체는 origin이 중앙임
@@ -882,7 +888,7 @@ export default class InGameScene extends Phaser.Scene {
     // 네트워크 매니저에게 서버에 아이템 추가 요청해달라고 하기.
     sendAddItem(itemName, addItemSlot) {
         // 추가될 아이템 정보 객체
-        const addItemInfo = this.allItems.get(itemName);
+        const addItemInfo = this.allItemMap.get(itemName);
 
         // 아이템이 추가되거나 수량이 증가할 슬롯의 인덱스
         // 인벤토리의 시작 인덱스는 9부터

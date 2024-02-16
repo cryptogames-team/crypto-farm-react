@@ -17,7 +17,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
 
-        this.setDepth(100).setScrollFactor(0);
+        this.setDepth(1000).setScrollFactor(0);
         this.setSize(width, height);
 
         // 페이저는 HEX 색상 코드가 아니라 16진수 형식으로 받는다.
@@ -107,7 +107,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
 
             this.bottomCenter = scene.add.image(edgeSize, height, 'tab_9slice_c')
                 .setOrigin(0, 1)
-                .setDisplaySize(width - (edgeSize ), edgeSize);
+                .setDisplaySize(width - (edgeSize), edgeSize);
 
             this.bottomRight = scene.add.image(width, height, 'tab_9slice_bl')
                 .setOrigin(1, 1)
@@ -164,10 +164,7 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
                 this.bottomCenter, this.bottomLeft, this.bottomRight
             ]);
         }
-
-        this.setDepth(1000);
     }
-
 
     // 9분할 박스 UI 크기 변경
     setUISize(width, height) {
@@ -196,4 +193,17 @@ export default class Frame_LT extends Phaser.GameObjects.Container {
         }
     }
 
+    // 프레임 이미지 보임 여부 설정
+    setImgVisible(value) {
+
+        this.topLeft.setVisible(value);
+        this.topCenter.setVisible(value);
+        this.topRight.setVisible(value);
+        this.centerLeft.setVisible(value);
+        this.center.setVisible(value);
+        this.centerRight.setVisible(value);
+        this.bottomLeft.setVisible(value);
+        this.bottomCenter.setVisible(value);
+        this.bottomRight.setVisible(value);
+    }
 }

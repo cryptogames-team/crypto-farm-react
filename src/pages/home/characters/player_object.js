@@ -133,7 +133,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
                     scene.addCrops(seedName, plantTile);
 
                     // 서버에 아이템 소비 요청하기
-                    const useItemInfo = scene.allItems.get(seedName);
+                    const useItemInfo = scene.allItemMap.get(seedName);
                     scene.networkManager.serverUseItem(useItemInfo, 1, equipSlot);
                 }
             });

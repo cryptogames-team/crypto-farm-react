@@ -406,7 +406,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         }
 
         // 이동할 아이템 정보 찾아오기
-        const moveItemInfo = this.scene.allItems.get(item_name);
+        const moveItemInfo = this.scene.allItemMap.get(item_name);
         // 아이템 이동 요청
         this.scene.networkManager.serverMoveItem(moveItemInfo, move_index);
 

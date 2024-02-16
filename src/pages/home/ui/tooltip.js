@@ -60,8 +60,8 @@ export default class ToolTip extends Frame_LT {
         const headerX = this.edgeSize;
         const headerY = typeY + this.typeTxt.height + this.space;
 
-        this.headerLine = scene.add.image(headerX, headerY , 'tab_9slice_tc')
-        .setOrigin(0,0).setDisplaySize(width - (this.edgeSize * 2), this.edgeSize );
+        this.headerLine = scene.add.image(headerX, headerY, 'tab_9slice_tc')
+            .setOrigin(0, 0).setDisplaySize(width - (this.edgeSize * 2), this.edgeSize);
 
 
         // 아이템 설명 텍스트
@@ -70,15 +70,15 @@ export default class ToolTip extends Frame_LT {
 
         this.desTxt = scene.add.text(desX, desY, '아이템 설명', {
             fontFamily: 'Arial',
-            fontSize: 20,
+            fontSize: 18,
             color: 'black',
             fontStyle: 'bold',
             // 텍스트가 일정 길이 이상 길어질 때 자동으로 줄 바꿈
-            wordWrap : {
+            wordWrap: {
                 // 줄바꿈할 최대 너비
-                width : this.width - this.edgeSize * 2,
+                width: this.width - this.edgeSize * 2,
                 // 고급 줄 바꿈 옵션 : 공백이 아닌 문자에서도 줄바꿈을 허용한다.
-                useAdvancedWrap : true
+                useAdvancedWrap: true
             }
         });
 
@@ -86,9 +86,9 @@ export default class ToolTip extends Frame_LT {
 
 
         // 가격 텍스트 중앙 배치
-        const priceX = (this.width - this.edgeSize * 2 ) / 2;
+        const priceX = (this.width - this.edgeSize * 2) / 2;
         const priceY = desY + this.desTxt.height + this.space;
-        this.priceTxt = scene.add.text(priceX, priceY, '아이템 가격' , {
+        this.priceTxt = scene.add.text(priceX, priceY, '아이템 가격', {
             fontFamily: 'Arial',
             fontSize: 15,
             color: 'white',
@@ -100,14 +100,14 @@ export default class ToolTip extends Frame_LT {
         const goldX = priceX - this.priceTxt.width / 2 - this.pad * 2;
         const goldY = priceY;
         this.goldIcon = scene.add.image(goldX, goldY, 'goldIcon');
-        this.goldIcon.setOrigin(0,0).setDisplaySize(18, 18);
+        this.goldIcon.setOrigin(0, 0).setDisplaySize(18, 18);
 
         // 성장 시간 텍스트 <- 중앙배치
-        const seedTimeX = (this.width - this.edgeSize * 2 ) / 2;
+        const seedTimeX = (this.width - this.edgeSize * 2) / 2;
         const seedTimeY = priceY + this.priceTxt.height + this.space;
 
         // 텍스트에 멀 넣든 고정 크기를 가진다.
-        this.seedTimeTxt = scene.add.text(seedTimeX, seedTimeY, '성장 시간' , {
+        this.seedTimeTxt = scene.add.text(seedTimeX, seedTimeY, '성장 시간', {
             fontFamily: 'Arial',
             fontSize: 15,
             color: 'white',
@@ -120,22 +120,24 @@ export default class ToolTip extends Frame_LT {
         const timerX = seedTimeX - this.seedTimeTxt.width / 2 - this.pad * 2;
         const timerY = seedTimeY;
 
-        this.timerIcon = scene.add.image(timerX , timerY, 'timer');
-        this.timerIcon.setOrigin(0,0).setDisplaySize(18, 18);
+        this.timerIcon = scene.add.image(timerX, timerY, 'timer');
+        this.timerIcon.setOrigin(0, 0).setDisplaySize(18, 18);
 
         //console.log("seedTimeTxt 높이", this.seedTimeTxt.height);
 
         // 툴팁 컨테이너에 추가한다.
-        this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt, 
-            this.priceTxt, this.goldIcon, this.seedTimeTxt, this.timerIcon]);
+        this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt,
+        this.priceTxt, this.goldIcon, this.seedTimeTxt, this.timerIcon]);
     }
 
 
     // 아이템 툴팁 내용 재설정하기
-    setToolTip(item){
-        
+    setToolTip(item) {
+
         // 반드시 표시되어야 하는 항목 : 아이템 이름, 타입, 헤더 라인, 아이템 설명
         // 아이템 타입에 따라 표시되어야 하는 항목 : 성장 시간
+
+        console.log('전달받은 아이템 객체', item);
 
         let type = null;
 
@@ -148,16 +150,15 @@ export default class ToolTip extends Frame_LT {
         this.priceTxt.setVisible(false);
         this.goldIcon.setVisible(false);
 
-        if( item.type === 0 ){
+        if (item.type === 0) {
             type = '씨앗';
-
-        }else if ( item.type === 1){
+        } else if (item.type === 1) {
             type = '농작물';
-        }else if ( item.type === 2 ){
+        } else if (item.type === 2) {
             type = '제작 재료';
-        }else if ( item.type === 3){
+        } else if (item.type === 3) {
             type = '요리 재료';
-        }else if ( item.type === 4){
+        } else if (item.type === 4) {
             type = '도구';
         }
 
@@ -167,31 +168,14 @@ export default class ToolTip extends Frame_LT {
 
 
         // 성장 시간 표시
-        if( type === '씨앗'){
-
+        if (type === '씨앗') {
 
             // 성장 시간 표시하는 텍스트 내용
-            let seedTimeTxt = '';
-            // 성장 시간(초)를 몇분 몇초로 변환한다.
+            let seedTimeTxt = this.setSeedTime(item.seed_Time);
 
-            // 제일 긴게 3000초임 3600초가 1시간
-            // 지금은 분 초로 표현가능
-
-            // 분 구하기
-            // 정수 부분만 필요하니 소수 부분은 버림.
-            const seedMin = Math.floor(item.seed_Time / 60);
-            if(seedMin !== 0){
-                seedTimeTxt += seedMin + '분'
-            }
-
-            // 나머지 연산
-            const seedSec = item.seed_Time % 60;
-            if(seedSec !== 0){
-                seedTimeTxt += ' ' + seedSec + '초';
-            }
 
             // 텍스트 위치 변경 해야됨 왜? 아이템 마다 설명 길이가 다르니까
-            const seedTimeX = (this.width - this.edgeSize * 2 ) / 2;
+            const seedTimeX = (this.width - this.edgeSize * 2) / 2;
             const seedTimeY = this.desTxt.y + this.desTxt.height + this.space;
             this.seedTimeTxt.x = seedTimeX;
             this.seedTimeTxt.y = seedTimeY;
@@ -205,9 +189,101 @@ export default class ToolTip extends Frame_LT {
             this.timerIcon.x = timerX;
             this.timerIcon.y = timerY;
         }
+    }
+
+    // 상점에 표시할 아이템 툴팁 설정
+    setStoreToolTip(item) {
+
+        const { item_id, item_type, item_name,
+            item_des, seed_time, use_level, item_price } = item;
+
+        //console.log('setStoreToolTip item', item);
+
+        // 성장 시간 표시 초기화
+        this.seedTimeTxt.setText('');
+        // 아이콘들 안보이게 설정
+        this.timerIcon.setVisible(false);
+        this.goldIcon.setVisible(false);
 
 
+        // 타입 표시 텍스트
+        let type = null;
+        if (item_type === 0) {
+            type = '씨앗';
+        } else if (item_type === 1) {
+            type = '농작물';
+        } else if (item_type === 2) {
+            type = '제작 재료';
+        } else if (item_type === 3) {
+            type = '요리 재료';
+        } else if (item_type === 4) {
+            type = '도구';
+        }
+
+        // null이라고
+        console.log('type : ', type);
+
+        this.nameTxt.setText(item_name);
+        this.typeTxt.setText(type);
+        this.desTxt.setText(item_des);
+
+
+        // 아이템 타입에 따라 표시될 텍스트들과 아이콘 설정
+        // 가격 텍스트 위치, 내용 설정
+        const priceX = (this.width - this.edgeSize * 2) / 2;
+        const priceY = this.desTxt.y + this.desTxt.height + this.space;
+        this.priceTxt.x = priceX;
+        this.priceTxt.y = priceY;
+        this.priceTxt.setText(item_price);
+        // 골드 아이콘 위치 설정
+        const goldX = priceX - this.priceTxt.width / 2 - this.pad * 2;
+        const goldY = priceY;
+        this.goldIcon.x = goldX;
+        this.goldIcon.y = goldY;
+        this.goldIcon.setVisible(true);
+
+
+        // 농작물 씨앗일때만 표시한다
+        if (type === '씨앗') {
+            // 성장 시간 표시하는 텍스트에 들어갈 내용
+            let seedTimeTxt = this.setSeedTime(seed_time);
+
+            // 성장 시간 텍스트
+            const seedTimeX = (this.width - this.edgeSize * 2) / 2;
+            const seedTimeY = this.priceTxt.y + this.priceTxt.height + this.space;
+            this.seedTimeTxt.x = seedTimeX;
+            this.seedTimeTxt.y = seedTimeY;
+            this.seedTimeTxt.setText(seedTimeTxt);
+
+            // 타이머 아이콘
+            const timerX = seedTimeX - this.seedTimeTxt.width / 2 - this.pad * 2;
+            const timerY = seedTimeY;
+            this.timerIcon.x = timerX;
+            this.timerIcon.y = timerY;
+            this.timerIcon.setVisible(true);
+        }
 
     }
 
+    // 씨앗 아이템의 성장 시간(초)를 몇분 몇초 형식으로 변환하고 리턴
+    setSeedTime(seedTime) {
+
+        // 성장 시간 표시하는 텍스트 내용
+        let seedTimeTxt = '';
+        // 성장 시간(초)를 몇분 몇초 형식으로 변환한다.
+
+        // 분 구하기
+        // 정수 부분만 필요하니 소수 부분은 버림.
+        const seedMin = Math.floor(seedTime / 60);
+        if (seedMin !== 0) {
+            seedTimeTxt += seedMin + '분'
+        }
+
+        // 나머지 연산해서 '초' 구하기
+        const seedSec = seedTime % 60;
+        if (seedSec !== 0) {
+            seedTimeTxt += ' ' + seedSec + '초';
+        }
+        return seedTimeTxt;
+    }
 }

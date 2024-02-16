@@ -6,7 +6,7 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3Mzc3ODgwLCJleHAiOjE3MDc0MTM4ODB9.YXmA7-0jcyw1XbhRHdaD6PZHbqhfWwcPMfgjsFY0hC4';
+    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3OTcyNTYyLCJleHAiOjE3MDgwMDg1NjJ9.gFFbXSE3ozF13PDFD52eZdkQz0m92QD1x8WzDPYnvik';
 
     constructor(scene) {
         this.scene = scene;

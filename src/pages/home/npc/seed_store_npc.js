@@ -105,12 +105,15 @@ export default class SeedStoreNPC extends Phaser.GameObjects.Container {
 
         this.building.on('pointerdown', (pointer) => {
             //console.log("씨앗 상점 NPC 클릭됨!");
+
+            // 상점 UI 창 오픈
+            this.scene.seedStoreUI.setVisible(true);
         });
 
 
         // 상호작용 영역보기
-        this.building.setDepth(10);
-        this.scene.input.enableDebug(this.building);
+        /* this.building.setDepth(10);
+        this.scene.input.enableDebug(this.building); */
 
 
         this.add([this.building, this.npcBody, this.npcHair, this.npcHand, this.nameTag]);

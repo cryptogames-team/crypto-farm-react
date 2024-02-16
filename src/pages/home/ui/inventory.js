@@ -312,8 +312,8 @@ export default class Inventory extends Frame {
                     // 서버에서 인벤 인덱스 시작이 9부터임.
                     const dupIndex = index + this.quickSize;
 
-                    console.log("인벤에서 중복 아이템 발견",itemSlot.item.name, itemName );
-                    console.log("중복 아이템이 있는 슬롯 인덱스", dupIndex);
+                    //console.log("인벤에서 중복 아이템 발견",itemSlot.item.name, itemName );
+                    //console.log("중복 아이템이 있는 슬롯 인덱스", dupIndex);
 
                     // 중복 아이템 있는 슬롯 찾음
                     dupSlot = itemSlot;
