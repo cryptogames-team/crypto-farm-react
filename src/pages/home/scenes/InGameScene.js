@@ -33,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3OTcyNTYyLCJleHAiOjE3MDgwMDg1NjJ9.gFFbXSE3ozF13PDFD52eZdkQz0m92QD1x8WzDPYnvik"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4MzIyNzE1LCJleHAiOjE3MDgzNTg3MTV9.4RMATaBAUTBpnADsbxF8oi7OhzxfGwCrTKAGtztwnZY"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -145,10 +145,17 @@ export default class InGameScene extends Phaser.Scene {
     init(characterInfo) {
 
         // 로그인 씬으로부터 파라미터를 전달 받는다.
-        console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo)
+        console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo);
+
         this.characterInfo = characterInfo;
         this.assetManager = new AssetManager(this);
         this.networkManager = new NetworkManager(this);
+
+        if (this.characterInfo) {
+            console.log('this.characterInfo 존재');
+        } else {
+            console.log('this.characterInfo 존재 안함');
+        }
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
         this.characterInfo = {
@@ -156,7 +163,7 @@ export default class InGameScene extends Phaser.Scene {
             user_name: 'park',
             exp: 1000,
             level: 1,
-            cft: 1500000,
+            cft: 1000,
             asset_id: 4563456
         }
 
@@ -297,18 +304,18 @@ export default class InGameScene extends Phaser.Scene {
         const debugGraphics = [];
 
         // 씨앗 상점 npc 추가 원래 위치 16 x 8
-        this.seedStoreNPC = new SeedStoreNPC(this, tileSize * 16 , tileSize * 2);
+        this.seedStoreNPC = new SeedStoreNPC(this, tileSize * 16, tileSize * 2);
 
         // 씨앗 상점 UI 생성
-        //크기
+        // 크기
         const seedStoreWidth = 650;
         const seedStoreHeight = 500;
 
-        // 옥션의 위치    
+        // 위치
         const seedStoreX = this.cameras.main.width / 2 - seedStoreWidth / 2;
         const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
         this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
-        this.seedStoreUI.setVisible(false);
+        //this.seedStoreUI.setVisible(false);
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
@@ -861,9 +868,9 @@ export default class InGameScene extends Phaser.Scene {
             // 인벤토리에 중복 아이템이 있는지 확인하기
             addItemSlot = this.inventory.findDupSlot(itemName);
 
-
             // 중복 아이템이 없을 경우
             if (addItemSlot === null) {
+
                 // 없으면 인벤에 빈 공간이 있는지 확인하기
                 addItemSlot = this.inventory.findEmptySlot();
 
@@ -904,8 +911,6 @@ export default class InGameScene extends Phaser.Scene {
         }
 
         console.log('추가될 아이템 정보 객체와 인덱스', addItemInfo, item_index);
-
-        //this.serverAddItem(1, item_index, addItemInfo, addItemSlot);
 
         this.networkManager.serverAddItem(1, item_index, addItemInfo, addItemSlot);
     }

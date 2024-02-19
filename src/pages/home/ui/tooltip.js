@@ -221,7 +221,7 @@ export default class ToolTip extends Frame_LT {
         }
 
         // null이라고
-        console.log('type : ', type);
+        //console.log('type : ', type);
 
         this.nameTxt.setText(item_name);
         this.typeTxt.setText(type);

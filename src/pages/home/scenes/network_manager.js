@@ -6,7 +6,7 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA3OTcyNTYyLCJleHAiOjE3MDgwMDg1NjJ9.gFFbXSE3ozF13PDFD52eZdkQz0m92QD1x8WzDPYnvik';
+    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4MzIyNzE1LCJleHAiOjE3MDgzNTg3MTV9.4RMATaBAUTBpnADsbxF8oi7OhzxfGwCrTKAGtztwnZY';
 
     constructor(scene) {
         this.scene = scene;
@@ -233,7 +233,7 @@ export default class NetworkManager {
             });
 
             const data = await response.json();
-            // 서버로부터 받은 유저 아이템 정보들
+            // 서버로부터 받은 맵 정보
             console.log('받은 맵 정보', data);
 
             return data;
@@ -241,5 +241,70 @@ export default class NetworkManager {
             console.error('serverGetMap() Error : ', error);
             return null;
         }
+    }
+
+    // 아이템 구매 요청
+    // 아이템 구매가 성공하면 새 아이템 추가하거나, 기존 아이템 수량 증가시킨다.
+    async serverBuyItem(item_count, item_index, buyItemInfo, addItemSlot, tabBody) {
+
+        //console.log('buyItemInfo : ', buyItemInfo);
+
+        const { item_id, item_type, item_name,
+            item_des, seed_time, use_level, item_price } = buyItemInfo;
+
+        const requestURL = this.apiURL + 'item/buyItem/'
+        const requestBody = {
+            'item_id': item_id,
+            'item_count': item_count,
+            'item_price': item_price * item_count,
+            item_index: item_index
+        };
+
+        try {
+            const response = await fetch(requestURL, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            // 아이템 구매 결과
+            console.log('아이템 구매 결과', data);
+
+            // 소지금 변동
+            this.scene.characterInfo.cft -= item_price * item_count;
+
+            // 중복 아이템 수량 증가
+            if (addItemSlot.item !== null) {
+                addItemSlot.item.count += item_count;
+                addItemSlot.setSlotItem(addItemSlot.item);
+            }
+            // 새 아이템 추가
+            else {
+                addItemSlot.setSlotItem(new Item(buyItemInfo, item_count));
+            }
+
+            // 상점 아이템 슬롯의 아이템 개수도 변경
+            tabBody.itemSlots.forEach( (itemSlot, index) => {
+                itemSlot.setItemImg(tabBody.purchaseList[index].item_name);
+
+                const ownItemSlot = tabBody.scene.findAddItemSlot(tabBody.purchaseList[index].item_name);
+                // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
+                if (ownItemSlot.item) {
+                    itemSlot.setItemCount(ownItemSlot.item.count);
+                }
+            });
+
+            // 변동된 소지금 표시
+            tabBody.storeUI.setCFTTxt();
+
+        } catch (error) {
+            console.error('serverGetMap() Error : ', error);
+            return null;
+        }
+
     }
 }

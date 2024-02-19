@@ -18,6 +18,13 @@ export default class SeedStoreUI extends Frame {
 
     exitIcon;
 
+    // 유저 소지금 표시
+    cftBox;
+    cftTxt;
+    cftIcon;
+    // 유저 소지금 저장 변수
+    userCFT;
+
     tabs = [];
 
     constructor(scene, x, y, width, height) {
@@ -50,13 +57,33 @@ export default class SeedStoreUI extends Frame {
         this.titleTxt = scene.add.text(titleX, titleY, '씨앗 상점', txtStyle);
 
         // 나가기 버튼
-        this.exitIcon = scene.add.image(this.width - headerPad, headerPad, 'exit_icon');
+        this.exitIcon = scene.add.image(this.width - headerPad + 5, headerPad - 5, 'exit_icon');
         this.exitIcon.setOrigin(1, 0).setDisplaySize(30, 30).setScrollFactor(0)
-            .setInteractive();
+        .setInteractive();
         //scene.input.enableDebug(this.exitIcon);
         this.exitIcon.on('pointerdown', (event) => {
             this.setVisible(false);
         });
+
+        // 유저 소지금 표시 프레임
+        const cftWidth = 200;
+        const cftHeight = 45;
+        const cftX = this.width - cftWidth - headerPad;
+        const cftY = titleY + this.titleTxt.height;
+        this.cftBox = new Frame(scene, cftX, cftY, cftWidth, cftHeight);
+
+        // 소지금 텍스트
+        let cftTxtX = cftX + cftWidth - 10;
+        let cftTxtY = cftY + cftHeight / 2;
+        txtStyle.fontSize = 20;
+        this.cftTxt = scene.add.text(cftTxtX, cftTxtY, scene.characterInfo.cft.toLocaleString(), txtStyle);
+        this.cftTxt.setOrigin(1, 0.5);
+
+        // 소지금 아이콘
+        let cftIconX = cftX + 10;
+        let cftIconY = cftY + cftHeight / 2;
+        this.cftIcon = scene.add.image(cftIconX, cftIconY, 'goldIcon');
+        this.cftIcon.setDisplaySize(25, 25).setOrigin(0, 0.5);
 
         // 구매 탭 버튼 만들기
         const purchaseX = headerPad;
@@ -73,15 +100,15 @@ export default class SeedStoreUI extends Frame {
         });
         this.purchaseTab.on('pointerdown', (pointer) => {
 
-            if(this.state === 'purchase')
-            return;
+            if (this.state === 'purchase')
+                return;
 
             //console.log("구매 탭 전환");
             this.saleTab.setImgVisible(false);
             this.purchaseTab.setImgVisible(true);
 
             this.state = 'purchase';
-            
+
             this.tabBody.switchTabs(0);
         });
 
@@ -109,8 +136,8 @@ export default class SeedStoreUI extends Frame {
         });
         this.saleTab.on('pointerdown', (pointer) => {
 
-            if(this.state === 'sale')
-            return;
+            if (this.state === 'sale')
+                return;
 
             //console.log("판매 탭 전환");
             // 절대로 visible 건들면 안됨.
@@ -134,14 +161,22 @@ export default class SeedStoreUI extends Frame {
         const tabBodyY = this.purchaseTab.y + this.purchaseTab.height - this.purchaseTab.edgeSize;
         const tabBodyWidth = this.width - headerPad * 2;
         const tabBodyheight = this.height - headerPad * 2 - (this.titleTxt.height + this.purchaseTab.height);
-        this.tabBody = new StoreTabBody(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyheight, 0);
+        this.tabBody = new StoreTabBody(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyheight, 0, this);
+        
         // 컨테이너에 추가
-        this.add([this.titleTxt, this.exitIcon]);
+        this.add([this.titleTxt, this.cftBox, this.cftTxt, this.cftIcon]);
+        this.add([this.exitIcon])
         this.add([this.tabBody]);
         this.add([this.purchaseTab, this.purchaseTxt]);
         this.add([this.saleTab, this.saleTxt]);
 
         this.saleTab.setImgVisible(false);
+    }
+
+    // 소지금 변동
+    setCFTTxt(){
+        //console.log('유저 소지금 변동', this.scene.characterInfo.cft.toLocaleString());
+        this.cftTxt.setText(this.scene.characterInfo.cft.toLocaleString());
     }
 
 }

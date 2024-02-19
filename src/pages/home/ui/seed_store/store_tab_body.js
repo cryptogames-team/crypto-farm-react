@@ -12,6 +12,7 @@ const space = 10;
 export default class StoreTabBody extends Frame_LT {
 
     scene;
+    storeUI;
 
     // 0 : 구매 탭, 1 : 판매 탭
     type;
@@ -25,21 +26,22 @@ export default class StoreTabBody extends Frame_LT {
     singleTradeBtn;
     // 10개 구매/판매 버튼
     multiTradeBtn;
-
-
-    saleBtn;
+    // 전체 거래 버튼
+    allTradeBtn;
 
     // 아이템 슬롯 행, 열 개수
     gridRow = 2;
     gridCol = 4;
-
 
     // 구매 가능한 씨앗 리스트
     purchaseList = [];
     // 판매 가능한 농작물 아이템 정보 리스트
     saleList = [];
 
-    constructor(scene, x, y, width, height, type = 0) {
+    // 지금 선택중인 슬롯의 인덱스
+    selectIndex;
+
+    constructor(scene, x, y, width, height, type = 0, storeUI = null) {
 
         super(scene, x, y, width, height, 0);
 
@@ -54,6 +56,7 @@ export default class StoreTabBody extends Frame_LT {
         //console.log('판매 가능 아이템 리스트 초기화', this.saleList);
 
         this.type = type;
+        this.storeUI = storeUI;
 
         if (type === 0) {
 
@@ -116,15 +119,15 @@ export default class StoreTabBody extends Frame_LT {
                         });
 
                         // 클릭한 아이템 슬롯 인덱스
-                        const index = itemSlot.index;
+                        this.selectIndex = itemSlot.index;;
 
                         // 표시할 아이템 객체
                         let item = null;
 
-                        if(this.type === 0)
-                        item = this.purchaseList[index];
-                        else if(this.type === 1)
-                        item = this.saleList[index];
+                        if (this.type === 0)
+                            item = this.purchaseList[this.selectIndex];
+                        else if (this.type === 1)
+                            item = this.saleList[this.selectIndex];
 
                         // 클릭한 아이템 정보를 툴팁에 표시한다.
                         this.itemToolTips.setStoreToolTip(item);
@@ -148,12 +151,13 @@ export default class StoreTabBody extends Frame_LT {
 
             this.add([this.itemToolTips]);
 
-            // 10개 거래 버튼 추가
+            // 버튼 공용 변수들
             const btnPad = 10;
             const btnSpace = 5;
             const btnWidth = this.itemToolTips.width - btnPad * 2;
-            const btnHeight = 50;
+            const btnHeight = 45;
 
+            // 10개 거래 버튼 추가
             const multiBtnX = toolTipX + btnPad;
             const multiBtnY = toolTipY + this.itemToolTips.height - btnHeight - btnPad;
             this.multiTradeBtn = new Frame(scene, multiBtnX, multiBtnY, btnWidth, btnHeight);
@@ -173,8 +177,48 @@ export default class StoreTabBody extends Frame_LT {
 
             // 낱개 거래 버튼 추가
             const singleBtnX = multiBtnX;
-            const singleBtnY = multiBtnY - this.multiTradeBtn.height - btnSpace; 
+            const singleBtnY = multiBtnY - this.multiTradeBtn.height - btnSpace;
             this.singleTradeBtn = new Frame(scene, singleBtnX, singleBtnY, btnWidth, btnHeight);
+
+            // 낱개 거래 버튼 상호작용 영역 설정하기
+            const hitArea = new Phaser.Geom.Rectangle(this.singleTradeBtn.width / 2,
+                this.singleTradeBtn.height / 2,
+                this.singleTradeBtn.width, this.singleTradeBtn.height);
+            const hitCallback = Phaser.Geom.Rectangle.Contains;
+            this.singleTradeBtn.setInteractive(hitArea, hitCallback);
+
+            /* this.singleTradeBtn.setDepth(1000);
+            scene.input.enableDebug(this.singleTradeBtn); */
+
+            // 낱개 거래 버튼 이벤트 리스너 설정
+            this.singleTradeBtn.on('pointerover', (pointer) => {
+                document.body.style.cursor = 'pointer';
+            });
+            this.singleTradeBtn.on('pointerout', (pointer) => {
+                document.body.style.cursor = 'default';
+            });
+            this.singleTradeBtn.on('pointerdown', (pointer) => {
+
+                // 구매하는 아이템 정보
+                let buyItemInfo = this.purchaseList[this.selectIndex];
+
+                // 구매한 아이템이 들어갈 아이템 슬롯 찾기
+                let addItemSlot = scene.findAddItemSlot(buyItemInfo.item_name);
+                console.log('구매할 아이템이 들어갈 템슬롯', addItemSlot);
+
+                // 구매할 아이템이 들어갈 슬롯 인덱스 구하기
+                let item_index = 0;
+                if (addItemSlot.type === 0) {
+                    item_index = addItemSlot.index + scene.quickSlotUI.size;
+                } else {
+                    item_index = addItemSlot.index;
+                }
+                console.log('구매할 아이템이 들어갈 슬롯 인덱스', item_index);
+
+                // 서버에 아이템 구매 요청
+                scene.networkManager.serverBuyItem(1, item_index, buyItemInfo, addItemSlot, this);
+            });
+
             // 낱개 거래 텍스트
             const singleTxtX = singleBtnX + this.singleTradeBtn.width / 2;
             const singleTxtY = singleBtnY + this.singleTradeBtn.height / 2;
@@ -188,6 +232,7 @@ export default class StoreTabBody extends Frame_LT {
             // 기본 아이템(감자 씨앗, 감자) 선택되있는 상태로 만들기
             this.itemToolTips.setStoreToolTip(this.purchaseList[0]);
             this.itemSlots[0].selectBox.setVisible(true);
+            this.selectIndex = 0;
 
         }
 
@@ -195,7 +240,7 @@ export default class StoreTabBody extends Frame_LT {
 
 
     // 구매 탭, 판매 탭 전환
-    switchTabs(type){
+    switchTabs(type) {
 
         this.type = type;
 
@@ -205,11 +250,11 @@ export default class StoreTabBody extends Frame_LT {
         });
 
         // 구매 탭
-        if ( type === 0){
+        if (type === 0) {
 
             this.categoryTxt.setText('씨앗');
 
-            this.itemSlots.forEach( (itemSlot, index) => {
+            this.itemSlots.forEach((itemSlot, index) => {
                 itemSlot.setItemImg(this.purchaseList[index].item_name);
 
                 const ownItemSlot = this.scene.findAddItemSlot(this.purchaseList[index].item_name);
@@ -217,9 +262,6 @@ export default class StoreTabBody extends Frame_LT {
                 if (ownItemSlot.item) {
                     itemSlot.setItemCount(ownItemSlot.item.count);
                 }
-
-                // 클릭 이벤트 리스너 제거
-                
 
             });
 
@@ -230,13 +272,14 @@ export default class StoreTabBody extends Frame_LT {
             // 기본 아이템 선택된 상태로 변경
             this.itemToolTips.setStoreToolTip(this.purchaseList[0]);
             this.itemSlots[0].selectBox.setVisible(true);
+            this.selectIndex = 0;
         }
         // 판매 탭
-        else if ( type === 1){
+        else if (type === 1) {
 
             this.categoryTxt.setText('농작물');
 
-            this.itemSlots.forEach( (itemSlot, index) => {
+            this.itemSlots.forEach((itemSlot, index) => {
                 itemSlot.setItemImg(this.saleList[index].item_name);
 
                 const ownItemSlot = this.scene.findAddItemSlot(this.saleList[index].item_name);
@@ -254,6 +297,7 @@ export default class StoreTabBody extends Frame_LT {
             // 기본 아이템 선택된 상태로 변경
             this.itemToolTips.setStoreToolTip(this.saleList[0]);
             this.itemSlots[0].selectBox.setVisible(true);
+            this.selectIndex = 0;
         }
 
     }

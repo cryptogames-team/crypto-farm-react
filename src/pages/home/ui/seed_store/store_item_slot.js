@@ -88,7 +88,6 @@ export default class StoreItemSlot extends Frame {
             document.body.style.cursor = 'default';
         });
 
-
     }
 
     // 아이템 이미지 설정
