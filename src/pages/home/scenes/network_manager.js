@@ -6,7 +6,7 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4MzIyNzE1LCJleHAiOjE3MDgzNTg3MTV9.4RMATaBAUTBpnADsbxF8oi7OhzxfGwCrTKAGtztwnZY';
+    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDE0NDUxLCJleHAiOjE3MDg0NTA0NTF9.Z7CUyjNWpveNDr4HrXtYk5TUPvCjahLIhI-htapxe7g';
 
     constructor(scene) {
         this.scene = scene;
@@ -300,6 +300,10 @@ export default class NetworkManager {
 
             // 변동된 소지금 표시
             tabBody.storeUI.setCFTTxt();
+
+            // 거래 버튼들 상태 설정
+            tabBody.setSingleBtnState(buyItemInfo);
+            tabBody.setMultiBtnState(buyItemInfo);
 
         } catch (error) {
             console.error('serverGetMap() Error : ', error);

@@ -41,6 +41,9 @@ export default class StoreTabBody extends Frame_LT {
     // 지금 선택중인 슬롯의 인덱스
     selectIndex;
 
+    // 포인터 다운 리스너
+    downListener = null;
+
     constructor(scene, x, y, width, height, type = 0, storeUI = null) {
 
         super(scene, x, y, width, height, 0);
@@ -119,19 +122,23 @@ export default class StoreTabBody extends Frame_LT {
                         });
 
                         // 클릭한 아이템 슬롯 인덱스
-                        this.selectIndex = itemSlot.index;;
+                        this.selectIndex = itemSlot.index;
 
                         // 표시할 아이템 객체
-                        let item = null;
+                        let selectItem = null;
 
                         if (this.type === 0)
-                            item = this.purchaseList[this.selectIndex];
+                            selectItem = this.purchaseList[this.selectIndex];
                         else if (this.type === 1)
-                            item = this.saleList[this.selectIndex];
+                            selectItem = this.saleList[this.selectIndex];
 
                         // 클릭한 아이템 정보를 툴팁에 표시한다.
-                        this.itemToolTips.setStoreToolTip(item);
+                        this.itemToolTips.setStoreToolTip(selectItem);
                         itemSlot.selectBox.setVisible(true);
+
+                        // 거래 버튼들 상태 설정
+                        this.setSingleBtnState(selectItem);
+                        this.setMultiBtnState(selectItem);
                     });
 
                     this.add([itemSlot]);
@@ -162,12 +169,23 @@ export default class StoreTabBody extends Frame_LT {
             const multiBtnY = toolTipY + this.itemToolTips.height - btnHeight - btnPad;
             this.multiTradeBtn = new Frame(scene, multiBtnX, multiBtnY, btnWidth, btnHeight);
 
-            // 10개 거래 버튼 텍스트
+            // 10개 거래 버튼 상호작용 영역 설정
+            const multiHitArea = new Phaser.Geom.Rectangle(this.multiTradeBtn.width / 2,
+                this.multiTradeBtn.height / 2,
+                this.multiTradeBtn.width, this.multiTradeBtn.height);
+            const multiHitCallback = Phaser.Geom.Rectangle.Contains;
+            this.multiTradeBtn.setInteractive(multiHitArea, multiHitCallback);
+
+            // 10개 거래 버튼 상호작용 영역 보이게 하기
+            /* this.multiTradeBtn.setDepth(1000);
+            scene.input.enableDebug(this.multiTradeBtn); */
+
+            // 10개 거래 텍스트 스타일
             txtStyle.fontSize = 18;
             txtStyle.color = 'white';
             txtStyle.stroke = 'black';
             txtStyle.strokeThickness = 5;
-
+            // 10개 거래 텍스트 추가
             const multiTxtX = multiBtnX + this.multiTradeBtn.width / 2;
             const multiTxtY = multiBtnY + this.multiTradeBtn.height / 2;
             this.multiTxt = scene.add.text(multiTxtX, multiTxtY, '10개 구매', txtStyle);
@@ -181,43 +199,14 @@ export default class StoreTabBody extends Frame_LT {
             this.singleTradeBtn = new Frame(scene, singleBtnX, singleBtnY, btnWidth, btnHeight);
 
             // 낱개 거래 버튼 상호작용 영역 설정하기
-            const hitArea = new Phaser.Geom.Rectangle(this.singleTradeBtn.width / 2,
+            const singleHitArea = new Phaser.Geom.Rectangle(this.singleTradeBtn.width / 2,
                 this.singleTradeBtn.height / 2,
                 this.singleTradeBtn.width, this.singleTradeBtn.height);
-            const hitCallback = Phaser.Geom.Rectangle.Contains;
-            this.singleTradeBtn.setInteractive(hitArea, hitCallback);
+            const singleHitCallback = Phaser.Geom.Rectangle.Contains;
+            this.singleTradeBtn.setInteractive(singleHitArea, singleHitCallback);
 
             /* this.singleTradeBtn.setDepth(1000);
             scene.input.enableDebug(this.singleTradeBtn); */
-
-            // 낱개 거래 버튼 이벤트 리스너 설정
-            this.singleTradeBtn.on('pointerover', (pointer) => {
-                document.body.style.cursor = 'pointer';
-            });
-            this.singleTradeBtn.on('pointerout', (pointer) => {
-                document.body.style.cursor = 'default';
-            });
-            this.singleTradeBtn.on('pointerdown', (pointer) => {
-
-                // 구매하는 아이템 정보
-                let buyItemInfo = this.purchaseList[this.selectIndex];
-
-                // 구매한 아이템이 들어갈 아이템 슬롯 찾기
-                let addItemSlot = scene.findAddItemSlot(buyItemInfo.item_name);
-                console.log('구매할 아이템이 들어갈 템슬롯', addItemSlot);
-
-                // 구매할 아이템이 들어갈 슬롯 인덱스 구하기
-                let item_index = 0;
-                if (addItemSlot.type === 0) {
-                    item_index = addItemSlot.index + scene.quickSlotUI.size;
-                } else {
-                    item_index = addItemSlot.index;
-                }
-                console.log('구매할 아이템이 들어갈 슬롯 인덱스', item_index);
-
-                // 서버에 아이템 구매 요청
-                scene.networkManager.serverBuyItem(1, item_index, buyItemInfo, addItemSlot, this);
-            });
 
             // 낱개 거래 텍스트
             const singleTxtX = singleBtnX + this.singleTradeBtn.width / 2;
@@ -227,17 +216,119 @@ export default class StoreTabBody extends Frame_LT {
 
             this.add([this.singleTradeBtn, this.singleTxt]);
 
-
             // UI 생성할 때
             // 기본 아이템(감자 씨앗, 감자) 선택되있는 상태로 만들기
-            this.itemToolTips.setStoreToolTip(this.purchaseList[0]);
+            const selectItem = this.purchaseList[0];
+
+            this.itemToolTips.setStoreToolTip(selectItem);
             this.itemSlots[0].selectBox.setVisible(true);
             this.selectIndex = 0;
 
+            // 거래 버튼 상태 설정
+            this.setSingleBtnState(selectItem);
+            this.setMultiBtnState(selectItem);
         }
+    }
+
+    // 1개 거래 버튼 상태 설정
+    // 지금은 1개 구매 상태만 설정한다.
+    // 나중에 1개 판매 상태일 때도 설정해야 한다.
+    setSingleBtnState(selectItem) {
+
+        // 모든 이벤트 리스너 제거
+        this.singleTradeBtn.removeAllListeners();
+
+        // 구매할 아이템 가격
+        let item_price = selectItem.item_price;
+
+        // 유저 소지금이 충분하다면
+        if (this.scene.characterInfo.cft >= item_price) {
+            console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 충분하다.`);
+
+            // 포인터 오버
+            this.singleTradeBtn.on('pointerover', (pointer) => {
+                document.body.style.cursor = 'pointer';
+            });
+
+            // 포인터 다운 이벤트 추가
+            this.singleTradeBtn.on('pointerdown', (pointer) => {
+                this.sendPurchaseRequest(1);
+            });
+
+            // 버튼 알파값 조정
+            this.singleTradeBtn.setAlpha(1);
+            this.singleTxt.setAlpha(1);
+        }
+        // 유저 소지금이 부족하다면
+        else {
+            console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 부족하다.`);
+
+            // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
+            this.singleTradeBtn.on('pointerover', (pointer) => {
+                document.body.style.cursor = 'not-allowed';
+            });
+            // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 구매 불가능하게 막음.
+
+            // 버튼, 텍스트 알파 값 조정
+            this.singleTradeBtn.setAlpha(0.5);
+            this.singleTxt.setAlpha(0.5);
+        }
+
+        // 포인터 아웃 이벤트 설정
+        this.singleTradeBtn.on('pointerout', (pointer) => {
+            document.body.style.cursor = 'default';
+        });
 
     }
 
+    // 10개 거래 버튼 상태 설정
+    setMultiBtnState(selectItem){
+
+        // 모든 이벤트 리스너 제거
+        this.multiTradeBtn.removeAllListeners();
+
+        // 구매할 아이템 가격
+        let item_price = selectItem.item_price * 10;
+
+        // 유저 소지금이 충분하다면
+        if (this.scene.characterInfo.cft >= item_price) {
+            console.log(`유저 소지금이 ${selectItem.item_name} 10개를 사는데 충분하다.`);
+
+            // 포인터 오버
+            this.multiTradeBtn.on('pointerover', (pointer) => {
+                document.body.style.cursor = 'pointer';
+            });
+
+            // 포인터 다운 이벤트 추가
+            this.multiTradeBtn.on('pointerdown', (pointer) => {
+                this.sendPurchaseRequest(10);
+            });
+
+            // 버튼 알파값 조정
+            this.multiTradeBtn.setAlpha(1);
+            this.multiTxt.setAlpha(1);
+        }
+        // 유저 소지금이 부족하다면
+        else {
+            console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 부족하다.`);
+
+            // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
+            this.multiTradeBtn.on('pointerover', (pointer) => {
+                document.body.style.cursor = 'not-allowed';
+            });
+            // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 구매 불가능하게 막음.
+
+            // 버튼, 텍스트 알파 값 조정
+            this.multiTradeBtn.setAlpha(0.5);
+            this.multiTxt.setAlpha(0.5);
+        }
+
+        // 포인터 아웃 이벤트 설정
+        this.multiTradeBtn.on('pointerout', (pointer) => {
+            document.body.style.cursor = 'default';
+        });
+
+    }
 
     // 구매 탭, 판매 탭 전환
     switchTabs(type) {
@@ -301,4 +392,27 @@ export default class StoreTabBody extends Frame_LT {
         }
 
     }
+
+    // 네트워크 매니저에게 서버에 아이템 구매 요청 보내달라고 전달한다.
+    sendPurchaseRequest(item_count) {
+        // 구매하는 아이템 정보
+        let buyItemInfo = this.purchaseList[this.selectIndex];
+
+        // 구매한 아이템이 들어갈 아이템 슬롯 찾기
+        let addItemSlot = this.scene.findAddItemSlot(buyItemInfo.item_name);
+        console.log('구매할 아이템이 들어갈 템슬롯', addItemSlot);
+
+        // 구매할 아이템이 들어갈 슬롯 인덱스 구하기
+        let item_index = 0;
+        if (addItemSlot.type === 0) {
+            item_index = addItemSlot.index + this.scene.quickSlotUI.size;
+        } else {
+            item_index = addItemSlot.index;
+        }
+        console.log('구매할 아이템이 들어갈 슬롯 인덱스', item_index);
+
+        // 서버에 아이템 구매 요청
+        this.scene.networkManager.serverBuyItem(item_count, item_index, buyItemInfo, addItemSlot, this);
+    }
+
 }

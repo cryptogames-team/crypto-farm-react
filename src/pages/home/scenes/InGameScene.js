@@ -33,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4MzIyNzE1LCJleHAiOjE3MDgzNTg3MTV9.4RMATaBAUTBpnADsbxF8oi7OhzxfGwCrTKAGtztwnZY"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDE0NDUxLCJleHAiOjE3MDg0NTA0NTF9.Z7CUyjNWpveNDr4HrXtYk5TUPvCjahLIhI-htapxe7g"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스

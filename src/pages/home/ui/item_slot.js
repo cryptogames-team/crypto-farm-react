@@ -221,8 +221,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     const toolTipX = pointer.x - scene.inventory.x + toolTipPad;
                     const toolTipY = pointer.y - scene.inventory.y;
 
-                    toolTip.setToolTip(scene.hoverSlot.item);
-                    toolTip.setVisible(true);
                     toolTip.setPosition(toolTipX, toolTipY);
                 }
                 // 퀵슬롯일 경우
@@ -245,8 +243,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                     const toolTipX = pointer.x + toolTipPad;
                     const toolTipY = pointer.y - scene.quickSlotUI.toolTip.height;
 
-                    toolTip.setToolTip(scene.hoverSlot.item);
-                    toolTip.setVisible(true);
                     toolTip.setPosition(toolTipX, toolTipY);
                 }
             }

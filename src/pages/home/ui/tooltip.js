@@ -137,7 +137,7 @@ export default class ToolTip extends Frame_LT {
         // 반드시 표시되어야 하는 항목 : 아이템 이름, 타입, 헤더 라인, 아이템 설명
         // 아이템 타입에 따라 표시되어야 하는 항목 : 성장 시간
 
-        console.log('전달받은 아이템 객체', item);
+        //console.log('전달받은 아이템 객체', item);
 
         let type = null;
 
