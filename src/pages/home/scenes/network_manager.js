@@ -6,7 +6,7 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDE0NDUxLCJleHAiOjE3MDg0NTA0NTF9.Z7CUyjNWpveNDr4HrXtYk5TUPvCjahLIhI-htapxe7g';
+    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDk3NTE3LCJleHAiOjE3MDg1MzM1MTd9.oHTQhzfYTQgbKiT9NY9FYJxef5uJNWVq-Rb5eihWg6I';
 
     constructor(scene) {
         this.scene = scene;
@@ -288,7 +288,7 @@ export default class NetworkManager {
             }
 
             // 상점 아이템 슬롯의 아이템 개수도 변경
-            tabBody.itemSlots.forEach( (itemSlot, index) => {
+            tabBody.itemSlots.forEach((itemSlot, index) => {
                 itemSlot.setItemImg(tabBody.purchaseList[index].item_name);
 
                 const ownItemSlot = tabBody.scene.findAddItemSlot(tabBody.purchaseList[index].item_name);
@@ -306,7 +306,77 @@ export default class NetworkManager {
             tabBody.setMultiBtnState(buyItemInfo);
 
         } catch (error) {
-            console.error('serverGetMap() Error : ', error);
+            console.error('serverBuyItem() Error : ', error);
+            return null;
+        }
+
+    }
+
+    // 아이템 판매 요청
+    // 아이템 판매가 성공되면 전부 판매했을 경우 아이템을 삭제하거나 기존 아이템 수량을 감소시킨다.
+    // tabBody : 상점 탭 바디 참조해서 소지금과 아이템 수량 표시 업데이트
+    async serverSellItem(item_count, item_index, sellItemInfo, sellItemSlot, tabBody) {
+
+        const { item_id, item_type, item_name,
+            item_des, seed_time, use_level, item_price } = sellItemInfo;
+
+        console.log('판매될 아이템 슬롯 인덱스', item_index);
+
+        // 아이템 총 판매 가격
+        let sell_price = item_count * item_price;
+
+        const requestURL = this.apiURL + 'item/sellItem/';
+        const requestBody = {
+            'item_id': item_id,
+            'item_count': item_count,
+            'item_price': sell_price,
+            'item_index': item_index
+        };
+
+        try {
+            const response = await fetch(requestURL, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.text();
+            // 아이템 판매 결과 - 성공하면 'success'
+            console.log('아이템 판매 결과', data);
+
+            if (data === '') {
+
+                // 소지금 변동
+                this.scene.characterInfo.cft += sell_price;
+
+                // 판매한 아이템 수량 감소
+                sellItemSlot.useItem(item_count);
+
+                // 판매한 상점 아이템 슬롯의 아이템 개수도 변경
+                tabBody.itemSlots.forEach((itemSlot, index) => {
+                    itemSlot.setItemImg(tabBody.saleList[index].item_name);
+
+                    const ownItemSlot = tabBody.scene.findAddItemSlot(tabBody.saleList[index].item_name);
+                    // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
+                    if (ownItemSlot.item) {
+                        itemSlot.setItemCount(ownItemSlot.item.count);
+                    }
+                });
+
+                // 변동된 소지금 표시
+                tabBody.storeUI.setCFTTxt();
+
+                // 거래 버튼들 상태 설정
+                tabBody.setSingleBtnState(sellItemInfo);
+                tabBody.setMultiBtnState(sellItemInfo);
+
+            }
+
+        } catch (error) {
+            console.error('serverSellItem() Error : ', error);
             return null;
         }
 

@@ -165,8 +165,6 @@ export default class Inventory extends Frame {
             }
         }
 
-        this.initInventory(scene.own_items);
-
         // 아이템 툴팁 생성하기
         this.toolTip = new ToolTip(scene, 0 ,0, 250, 250);
         this.toolTip.setVisible(false);
@@ -183,7 +181,6 @@ export default class Inventory extends Frame {
     }
 
     // own_items : 서버에서 비동기로 받아오는 아이템 목록 배열. 
-    // 서버에서 로드되기 전에 먼저 이 함수가 실행될 수 있음.
     initInventory(own_items) {
 
         own_items.forEach((own_item, index) => {

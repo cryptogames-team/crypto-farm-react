@@ -107,7 +107,7 @@ export default class SeedStoreNPC extends Phaser.GameObjects.Container {
             //console.log("씨앗 상점 NPC 클릭됨!");
 
             // 상점 UI 창 오픈
-            this.scene.seedStoreUI.setVisible(true);
+            this.scene.seedStoreUI.enable();
         });
 
 

@@ -99,7 +99,7 @@ export default class StoreTabBody extends Frame_LT {
                     const { item_id, item_type, item_name,
                         item_des, seed_time, use_level, item_price } = this.purchaseList[index];
 
-                    // 유저 소유 아이템 중에서 감자 씨앗 찾기
+
                     const ownItemSlot = scene.findAddItemSlot(item_name);
                     //console.log('소유 아이템 슬롯', ownItemSlot);
 
@@ -112,6 +112,8 @@ export default class StoreTabBody extends Frame_LT {
                     // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
                     if (ownItemSlot.item) {
                         itemSlot.setItemCount(ownItemSlot.item.count);
+                    } else { // 없으면 0개로 표시
+                        itemSlot.setItemCount(0);
                     }
 
                     // 슬롯 클릭
@@ -228,112 +230,275 @@ export default class StoreTabBody extends Frame_LT {
             this.setSingleBtnState(selectItem);
             this.setMultiBtnState(selectItem);
         }
+
     }
 
     // 1개 거래 버튼 상태 설정
-    // 지금은 1개 구매 상태만 설정한다.
-    // 나중에 1개 판매 상태일 때도 설정해야 한다.
+    // 아이템 구매, 판매 기능
     setSingleBtnState(selectItem) {
 
         // 모든 이벤트 리스너 제거
         this.singleTradeBtn.removeAllListeners();
 
-        // 구매할 아이템 가격
-        let item_price = selectItem.item_price;
+        // 현재 탭의 상태에 따라 버튼의 기능이 달라짐
+        // type === 0 - 1개 구매
+        // type === 1 - 1개 판매
+        if (this.type === 0) {
 
-        // 유저 소지금이 충분하다면
-        if (this.scene.characterInfo.cft >= item_price) {
-            console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 충분하다.`);
+            // 구매할 아이템 가격
+            let item_price = selectItem.item_price;
 
-            // 포인터 오버
-            this.singleTradeBtn.on('pointerover', (pointer) => {
-                document.body.style.cursor = 'pointer';
+            // 유저 소지금이 충분하다면
+            if (this.scene.characterInfo.cft >= item_price) {
+                console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 충분하다.`);
+
+                // 포인터 오버
+                this.singleTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'pointer';
+                });
+
+                // 포인터 다운 이벤트 추가
+                this.singleTradeBtn.on('pointerdown', (pointer) => {
+                    this.sendPurchaseRequest(1);
+                });
+
+                // 버튼 알파값 조정
+                this.singleTradeBtn.setAlpha(1);
+                this.singleTxt.setAlpha(1);
+            }
+            // 유저 소지금이 부족하다면
+            else {
+                console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 부족하다.`);
+
+                // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
+                this.singleTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'not-allowed';
+                });
+                // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 구매 불가능하게 막음.
+
+                // 버튼, 텍스트 알파 값 조정
+                this.singleTradeBtn.setAlpha(0.5);
+                this.singleTxt.setAlpha(0.5);
+            }
+
+            // 포인터 아웃 이벤트 설정
+            this.singleTradeBtn.on('pointerout', (pointer) => {
+                document.body.style.cursor = 'default';
             });
-
-            // 포인터 다운 이벤트 추가
-            this.singleTradeBtn.on('pointerdown', (pointer) => {
-                this.sendPurchaseRequest(1);
-            });
-
-            // 버튼 알파값 조정
-            this.singleTradeBtn.setAlpha(1);
-            this.singleTxt.setAlpha(1);
         }
-        // 유저 소지금이 부족하다면
-        else {
-            console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 부족하다.`);
+        else if (this.type === 1) {
+            //console.log('낱개 거래 버튼은 1개 판매 기능을 가짐');
+            //console.log('selectItem 정보', selectItem);
 
-            // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
-            this.singleTradeBtn.on('pointerover', (pointer) => {
-                document.body.style.cursor = 'not-allowed';
+            // selectItem으로 선택한 아이템을 몇개 소유했는지 확인하기
+            const ownItemSlot = this.scene.findAddItemSlot(selectItem.item_name);
+
+            let own_item_count = 0;
+            let sell_item_count = 1;
+
+            if (ownItemSlot.item)
+                own_item_count = ownItemSlot.item.count;
+
+            //console.log(`현재 ${selectItem.item_name}를 ${own_item_count}개 소유중`);
+
+            // 소유한 아이템이 1개 이상이면 판매 가능하게 변경한다.
+            if (own_item_count >= sell_item_count) {
+               //console.log("판매할 아이템 개수가 1개보다 많아서 1개 판매 가능함");
+
+                // 포인터 오버
+                this.singleTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'pointer';
+                });
+
+                // 포인터 다운 이벤트 추가
+                this.singleTradeBtn.on('pointerdown', (pointer) => {
+                    //console.log("1개 판매");
+
+                    // 서버에 아이템 판매 요청 보내기 sendSellRequest
+
+                    // 판매하려는 아이템 정보
+                    let sellItemInfo = this.saleList[this.selectIndex];
+
+                    // 아이템이 판매될 슬롯 찾기
+                    let sellItemSlot = this.scene.findAddItemSlot(sellItemInfo.item_name);
+
+                    // 아이템이 판매될 슬롯의 인덱스 구하기
+                    let item_index = 0;
+                    if (sellItemSlot.type === 0) {
+                        item_index = sellItemSlot.index + this.scene.quickSlotUI.size;
+                    } else {
+                        item_index = sellItemSlot.index;
+                    }
+
+                    // 서버에 아이템 판매 요청하기
+                    this.scene.networkManager.serverSellItem(1, item_index, sellItemInfo, sellItemSlot, this);
+                });
+
+                // 버튼 알파값 조정
+                this.singleTradeBtn.setAlpha(1);
+                this.singleTxt.setAlpha(1);
+            }else{
+                console.log(`유저가 소유한 ${selectItem.item_name} 개수가 1개보다 적어서 판매 불가`);
+                // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
+                this.singleTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'not-allowed';
+                });
+                // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 판매 불가능하게 막는다.
+
+                // 버튼, 텍스트 알파 값 조정
+                this.singleTradeBtn.setAlpha(0.5);
+                this.singleTxt.setAlpha(0.5);
+            }
+
+            // 포인터 아웃 이벤트 설정
+            this.singleTradeBtn.on('pointerout', (pointer) => {
+                document.body.style.cursor = 'default';
             });
-            // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 구매 불가능하게 막음.
 
-            // 버튼, 텍스트 알파 값 조정
-            this.singleTradeBtn.setAlpha(0.5);
-            this.singleTxt.setAlpha(0.5);
         }
-
-        // 포인터 아웃 이벤트 설정
-        this.singleTradeBtn.on('pointerout', (pointer) => {
-            document.body.style.cursor = 'default';
-        });
 
     }
 
     // 10개 거래 버튼 상태 설정
-    setMultiBtnState(selectItem){
+    // 아이템 구매 기능만 가능함.
+    setMultiBtnState(selectItem) {
 
         // 모든 이벤트 리스너 제거
         this.multiTradeBtn.removeAllListeners();
 
-        // 구매할 아이템 가격
-        let item_price = selectItem.item_price * 10;
+        // 현재 탭의 상태에 따라 구매/판매 기능을 한다.
+        if (this.type === 0) {
 
-        // 유저 소지금이 충분하다면
-        if (this.scene.characterInfo.cft >= item_price) {
-            console.log(`유저 소지금이 ${selectItem.item_name} 10개를 사는데 충분하다.`);
+            // 구매할 아이템 가격
+            let item_price = selectItem.item_price * 10;
 
-            // 포인터 오버
-            this.multiTradeBtn.on('pointerover', (pointer) => {
-                document.body.style.cursor = 'pointer';
+            // 유저 소지금이 충분하다면
+            if (this.scene.characterInfo.cft >= item_price) {
+                console.log(`유저 소지금이 ${selectItem.item_name} 10개를 사는데 충분하다.`);
+
+                // 포인터 오버
+                this.multiTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'pointer';
+                });
+
+                // 포인터 다운 이벤트 추가
+                this.multiTradeBtn.on('pointerdown', (pointer) => {
+                    this.sendPurchaseRequest(10);
+                });
+
+                // 버튼 알파값 조정
+                this.multiTradeBtn.setAlpha(1);
+                this.multiTxt.setAlpha(1);
+            }
+            // 유저 소지금이 부족하다면
+            else {
+                console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 부족하다.`);
+
+                // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
+                this.multiTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'not-allowed';
+                });
+                // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 구매 불가능하게 막음.
+
+                // 버튼, 텍스트 알파 값 조정
+                this.multiTradeBtn.setAlpha(0.5);
+                this.multiTxt.setAlpha(0.5);
+            }
+
+            // 포인터 아웃 이벤트 설정
+            this.multiTradeBtn.on('pointerout', (pointer) => {
+                document.body.style.cursor = 'default';
             });
+        } else if (this.type === 1) {
 
-            // 포인터 다운 이벤트 추가
-            this.multiTradeBtn.on('pointerdown', (pointer) => {
-                this.sendPurchaseRequest(10);
+            //console.log('여러개 거래 버튼은 10개 판매로 설정됨.');
+
+            // selectItem으로 선택한 아이템을 몇개 소유했는지 확인하기
+            const ownItemSlot = this.scene.findAddItemSlot(selectItem.item_name);
+
+            let own_item_count = 0;
+            let sell_item_count = 10;       
+
+            if(ownItemSlot.item)
+                own_item_count = ownItemSlot.item.count;
+
+            //console.log(`현재 ${selectItem.item_name}를 ${own_item_count}개 소유중`);
+            
+            // 판매할려는 아이템을 10개 이상 소유중이면 판매 가능하게 변경한다.
+            if(own_item_count >= sell_item_count){
+
+                // 포인터 오버
+                this.multiTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'pointer';
+                });
+
+                // 포인터 다운 이벤트 추가
+                this.multiTradeBtn.on('pointerdown', (pointer) => {
+                    console.log("10개 판매 요청");
+
+                    // 서버에 아이템 판매 요청 보내기 sendSellRequest
+
+                    // 판매하려는 아이템 정보
+                    let sellItemInfo = this.saleList[this.selectIndex];
+
+                    // 아이템이 판매될 슬롯 찾기
+                    let sellItemSlot = this.scene.findAddItemSlot(sellItemInfo.item_name);
+
+                    // 아이템이 판매될 슬롯의 인덱스 구하기
+                    let item_index = 0;
+                    if (sellItemSlot.type === 0) {
+                        item_index = sellItemSlot.index + this.scene.quickSlotUI.size;
+                    } else {
+                        item_index = sellItemSlot.index;
+                    }
+
+                    // 서버에 아이템 판매 요청하기
+                    this.scene.networkManager.serverSellItem(sell_item_count, item_index, sellItemInfo, sellItemSlot, this);
+                });
+
+                // 버튼 알파값 조정
+                this.singleTradeBtn.setAlpha(1);
+                this.singleTxt.setAlpha(1);  
+            }else{
+
+                console.log(`유저가 소유한 ${selectItem.item_name} 개수가 10개보다 적어서 판매 불가`);
+                // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
+                this.multiTradeBtn.on('pointerover', (pointer) => {
+                    document.body.style.cursor = 'not-allowed';
+                });
+                // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 판매 불가능하게 막는다.
+
+                // 버튼, 텍스트 알파 값 조정
+                this.multiTradeBtn.setAlpha(0.5);
+                this.multiTxt.setAlpha(0.5);
+            }
+
+            // 포인터 아웃 이벤트 설정
+            this.multiTradeBtn.on('pointerout', (pointer) => {
+                document.body.style.cursor = 'default';
             });
-
-            // 버튼 알파값 조정
-            this.multiTradeBtn.setAlpha(1);
-            this.multiTxt.setAlpha(1);
         }
-        // 유저 소지금이 부족하다면
-        else {
-            console.log(`유저 소지금이 ${selectItem.item_name} 1개를 사는데 부족하다.`);
+    }
 
-            // 포인터 오버 - 마우스 포인터 모양을 금지로 변경
-            this.multiTradeBtn.on('pointerover', (pointer) => {
-                document.body.style.cursor = 'not-allowed';
-            });
-            // 포인터 다운 이벤트 리스너 설정 안함 <- 아이템 구매 불가능하게 막음.
+    // 기본 아이템 선택된 상태로 변경
+    setDefaultItem(type) {
+        const selectItem = this.purchaseList[0];
 
-            // 버튼, 텍스트 알파 값 조정
-            this.multiTradeBtn.setAlpha(0.5);
-            this.multiTxt.setAlpha(0.5);
-        }
+        this.itemToolTips.setStoreToolTip(selectItem);
+        this.itemSlots[0].selectBox.setVisible(true);
+        this.selectIndex = 0;
 
-        // 포인터 아웃 이벤트 설정
-        this.multiTradeBtn.on('pointerout', (pointer) => {
-            document.body.style.cursor = 'default';
-        });
-
+        // 거래 버튼 상태 설정
+        this.setSingleBtnState(selectItem);
+        this.setMultiBtnState(selectItem);
     }
 
     // 구매 탭, 판매 탭 전환
     switchTabs(type) {
 
         this.type = type;
+
+        let selectItem = null;
 
         // 셀렉트 박스 visible 끄기
         this.itemSlots.forEach(itemSlot => {
@@ -344,6 +509,7 @@ export default class StoreTabBody extends Frame_LT {
         if (type === 0) {
 
             this.categoryTxt.setText('씨앗');
+            selectItem = this.purchaseList[0];
 
             this.itemSlots.forEach((itemSlot, index) => {
                 itemSlot.setItemImg(this.purchaseList[index].item_name);
@@ -352,31 +518,40 @@ export default class StoreTabBody extends Frame_LT {
                 // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
                 if (ownItemSlot.item) {
                     itemSlot.setItemCount(ownItemSlot.item.count);
+                } else { // 없으면 0개로 표시
+                    itemSlot.setItemCount(0);
                 }
 
             });
 
-            // 판매 버튼으로 설정
+            // 구매 버튼으로 설정
             this.singleTxt.setText('1개 구매');
             this.multiTxt.setText('10개 구매');
 
             // 기본 아이템 선택된 상태로 변경
-            this.itemToolTips.setStoreToolTip(this.purchaseList[0]);
+            this.itemToolTips.setStoreToolTip(selectItem);
             this.itemSlots[0].selectBox.setVisible(true);
             this.selectIndex = 0;
+
+            this.setSingleBtnState(selectItem);
+            this.setMultiBtnState(selectItem);
         }
         // 판매 탭
         else if (type === 1) {
 
             this.categoryTxt.setText('농작물');
+            selectItem = this.saleList[0];
 
             this.itemSlots.forEach((itemSlot, index) => {
                 itemSlot.setItemImg(this.saleList[index].item_name);
 
                 const ownItemSlot = this.scene.findAddItemSlot(this.saleList[index].item_name);
+
                 // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
                 if (ownItemSlot.item) {
                     itemSlot.setItemCount(ownItemSlot.item.count);
+                } else { // 없으면 0개로 표시
+                    itemSlot.setItemCount(0);
                 }
 
             });
@@ -386,9 +561,13 @@ export default class StoreTabBody extends Frame_LT {
             this.multiTxt.setText('10개 판매');
 
             // 기본 아이템 선택된 상태로 변경
-            this.itemToolTips.setStoreToolTip(this.saleList[0]);
+            this.itemToolTips.setStoreToolTip(selectItem);
             this.itemSlots[0].selectBox.setVisible(true);
             this.selectIndex = 0;
+
+            this.setSingleBtnState(selectItem);
+            this.setMultiBtnState(selectItem);
+
         }
 
     }

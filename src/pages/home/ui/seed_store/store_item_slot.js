@@ -19,7 +19,7 @@ export default class StoreItemSlot extends Frame {
     // 수량 관련 변수들
     countBox;
     countTxt;
-    count = 0;
+    count;
 
     // 셀렉트 박스
     selectBox;

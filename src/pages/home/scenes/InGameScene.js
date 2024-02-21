@@ -33,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDE0NDUxLCJleHAiOjE3MDg0NTA0NTF9.Z7CUyjNWpveNDr4HrXtYk5TUPvCjahLIhI-htapxe7g"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDk3NTE3LCJleHAiOjE3MDg1MzM1MTd9.oHTQhzfYTQgbKiT9NY9FYJxef5uJNWVq-Rb5eihWg6I"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -75,7 +75,6 @@ export default class InGameScene extends Phaser.Scene {
     // E 키 객체
     harvestKey;
 
-
     // 현재 마우스가 올려진 슬롯 참조
     hoverSlot = null;
     startSlot;
@@ -85,7 +84,7 @@ export default class InGameScene extends Phaser.Scene {
     isDragging = false;
 
     // 플레이어 소유 아이템 목록
-    own_items;
+    own_items = [];
 
     // 전체 아이템 정보 해쉬 테이블
     allItemMap = new Map();
@@ -167,15 +166,6 @@ export default class InGameScene extends Phaser.Scene {
             asset_id: 4563456
         }
 
-        //this.serverGetUserItem();
-
-        // 서버에 로그인 한 유저의 아이템 목록 요청
-        // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
-        // Promise 객체에서 원하는 값을 빼올려면 then() 이나 다른 async 함수내에서 await 사용 해야 한다.
-        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then(data => {
-            this.own_items = data;
-        });
-
         // 모든 아이템 정보 목록 요청
         this.networkManager.serverGetAllItem().then(data => {
             // 받은 아이템 배열을 해쉬 테이블로 변환
@@ -208,7 +198,6 @@ export default class InGameScene extends Phaser.Scene {
 
         // 게임에 필요한 이미지 전부 로드
         assetManager.loadAllImage();
-
     }
 
     create() {
@@ -248,9 +237,6 @@ export default class InGameScene extends Phaser.Scene {
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
         const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
-        // 퀵슬롯 UI 생성 코드
-        // 생성된 퀵슬롯 UI 객체들을 담을 배열
-        this.QuickSlots = [];
 
         //옥션 UI 생성
         //크기
@@ -290,6 +276,26 @@ export default class InGameScene extends Phaser.Scene {
         this.inventory = new Inventory(this, invenX, invenY, invenWidth, invenHeight);
         this.inventory.disable();
 
+        // 서버에 로그인 한 유저의 아이템 목록 요청
+        // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
+        // Promise 객체에서 원하는 값을 빼올려면 then() 이나 다른 async 함수내에서 await 사용 해야 한다.
+        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then(data => {
+            this.own_items = data;
+
+            // 퀵슬롯, 인벤 유저 소유 아이템 표시하게 초기화
+            this.quickSlotUI.initQuick(this.own_items);
+            this.inventory.initInventory(this.own_items);
+
+            // 씨앗 상점 소유 아이템 개수 표시
+            // 판매 탭 열게 기본 상태 변경함.
+
+            this.seedStoreUI.state = 'sale';
+            this.seedStoreUI.purchaseTab.setImgVisible(false);
+            this.seedStoreUI.saleTab.setImgVisible(true);
+
+            this.seedStoreUI.tabBody.switchTabs(1);
+        });
+
         // 게임 오브젝트들(농작물, 나무) 정보 툴팁
         this.objectToolTip = new ObjectToolTip(this, 0, 0, 150, 100);
         this.objectToolTip.setVisible(false);
@@ -315,7 +321,7 @@ export default class InGameScene extends Phaser.Scene {
         const seedStoreX = this.cameras.main.width / 2 - seedStoreWidth / 2;
         const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
         this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
-        //this.seedStoreUI.setVisible(false);
+        //this.seedStoreUI.disable();
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.

@@ -26,6 +26,7 @@ export default class SeedStoreUI extends Frame {
     userCFT;
 
     tabs = [];
+    tabBody;
 
     constructor(scene, x, y, width, height) {
 
@@ -177,6 +178,19 @@ export default class SeedStoreUI extends Frame {
     setCFTTxt(){
         //console.log('유저 소지금 변동', this.scene.characterInfo.cft.toLocaleString());
         this.cftTxt.setText(this.scene.characterInfo.cft.toLocaleString());
+    }
+
+    // 상점 창 활성화
+    enable(){
+        this.setVisible(true);
+
+        // 상점 UI창의 상태를
+        // 기본 아이템 선택된 구매 탭이 열린 상태로 변경한다.
+        this.tabBody.switchTabs(0);
+    }
+    // 상점 창 비활성화
+    disable(){
+        this.setVisible(false);
     }
 
 }
