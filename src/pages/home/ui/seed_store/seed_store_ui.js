@@ -186,6 +186,13 @@ export default class SeedStoreUI extends Frame {
 
         // 상점 UI창의 상태를
         // 기본 아이템 선택된 구매 탭이 열린 상태로 변경한다.
+
+        // 탭 버튼도 구매 선택된 상태로 변경
+        this.saleTab.setImgVisible(false);
+        this.purchaseTab.setImgVisible(true);
+
+        this.state = 'purchase';
+
         this.tabBody.switchTabs(0);
     }
     // 상점 창 비활성화

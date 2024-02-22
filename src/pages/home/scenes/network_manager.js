@@ -6,7 +6,7 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDk3NTE3LCJleHAiOjE3MDg1MzM1MTd9.oHTQhzfYTQgbKiT9NY9FYJxef5uJNWVq-Rb5eihWg6I';
+    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NTgyNjk3LCJleHAiOjE3MDg2MTg2OTd9.8gcUmLYXGSBfZZRwRcRhjBvmshdnKjjHKY1e1VcASHA';
 
     constructor(scene) {
         this.scene = scene;
@@ -301,9 +301,10 @@ export default class NetworkManager {
             // 변동된 소지금 표시
             tabBody.storeUI.setCFTTxt();
 
-            // 거래 버튼들 상태 설정
-            tabBody.setSingleBtnState(buyItemInfo);
-            tabBody.setMultiBtnState(buyItemInfo);
+            // 낱개 거래 버튼 상태 설정
+            tabBody.setTradeBtnState(tabBody.singleTradeBtn, tabBody.singleTxt, buyItemInfo, 1);
+            // 10개 거래 버튼 상태 설정
+            tabBody.setTradeBtnState(tabBody.multiTradeBtn, tabBody.multiTxt, buyItemInfo, 10);
 
         } catch (error) {
             console.error('serverBuyItem() Error : ', error);
@@ -347,7 +348,7 @@ export default class NetworkManager {
             // 아이템 판매 결과 - 성공하면 'success'
             console.log('아이템 판매 결과', data);
 
-            if (data === '') {
+            if (data === 'success') {
 
                 // 소지금 변동
                 this.scene.characterInfo.cft += sell_price;
@@ -360,18 +361,23 @@ export default class NetworkManager {
                     itemSlot.setItemImg(tabBody.saleList[index].item_name);
 
                     const ownItemSlot = tabBody.scene.findAddItemSlot(tabBody.saleList[index].item_name);
-                    // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
+                    // 남은 아이템 수량 표시
                     if (ownItemSlot.item) {
                         itemSlot.setItemCount(ownItemSlot.item.count);
+                    }
+                    // 아이템 다 팔았으면 0개로 표시
+                    else {
+                        itemSlot.setItemCount(0);
                     }
                 });
 
                 // 변동된 소지금 표시
                 tabBody.storeUI.setCFTTxt();
 
-                // 거래 버튼들 상태 설정
-                tabBody.setSingleBtnState(sellItemInfo);
-                tabBody.setMultiBtnState(sellItemInfo);
+                // 낱개 거래 버튼 상태 설정
+                tabBody.setTradeBtnState(tabBody.singleTradeBtn, tabBody.singleTxt, sellItemInfo, 1);
+                // 10개 거래 버튼 상태 설정
+                tabBody.setTradeBtnState(tabBody.multiTradeBtn, tabBody.multiTxt, sellItemInfo, 10);
 
             }
 

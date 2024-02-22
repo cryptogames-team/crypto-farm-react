@@ -13,6 +13,7 @@ export default class AssetManager {
     uiImages;
     nineSliceBoxImages;
     buildingImages;
+    foodImages;
 
     // 캐릭터 애니메이션 생성에 필요한 정보 담은 객체 배열
     characterAnims;
@@ -271,6 +272,19 @@ export default class AssetManager {
             { name: '씨앗상점', path: 'market.png' },
         ];
 
+
+        // 음식 이미지 로드
+        this.foodImages = [
+            { name : '으깬 감자', path : 'mashed_potato.png'},
+            { name : '호박 수프', path : 'pumpkin_soup.png'},
+            { name : '브로쓰', path : 'broth.png'},
+            { name : '케일 스튜', path : 'kale_stew.png'},
+            { name : '야채 구이', path : 'roast_veggies.png'},
+            { name : '샐러드', path : 'salad.png'},
+            { name : '채식 버거', path : 'veggies_burger.png'},
+            { name : '샌드위치', path : 'sandwich.png'},
+        ];
+
     }
 
     loadSprite(spriteData) {
@@ -343,6 +357,10 @@ export default class AssetManager {
         // 건물 관련 이미지 로드
         this.scene.load.path = "assets/buildings/";
         this.buildingImages.forEach(imageData => this.loadImage(imageData));
+
+        // 음식 관련 이미지 로드
+        this.scene.load.path = "assets/food/";
+        this.foodImages.forEach(imageData => this.loadImage(imageData));
     }
 
     // 애니메이션 정보 객체 만드는 함수

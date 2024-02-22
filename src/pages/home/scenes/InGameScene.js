@@ -33,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NDk3NTE3LCJleHAiOjE3MDg1MzM1MTd9.oHTQhzfYTQgbKiT9NY9FYJxef5uJNWVq-Rb5eihWg6I"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NTgyNjk3LCJleHAiOjE3MDg2MTg2OTd9.8gcUmLYXGSBfZZRwRcRhjBvmshdnKjjHKY1e1VcASHA"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -287,13 +287,13 @@ export default class InGameScene extends Phaser.Scene {
             this.inventory.initInventory(this.own_items);
 
             // 씨앗 상점 소유 아이템 개수 표시
-            // 판매 탭 열게 기본 상태 변경함.
+            // 기본 탭 : 판매
+            this.seedStoreUI.tabBody.switchTabs(0);
 
-            this.seedStoreUI.state = 'sale';
+            /* this.seedStoreUI.state = 'sale'; 판매 탭 버튼 활성화 코드
             this.seedStoreUI.purchaseTab.setImgVisible(false);
             this.seedStoreUI.saleTab.setImgVisible(true);
-
-            this.seedStoreUI.tabBody.switchTabs(1);
+            this.seedStoreUI.tabBody.switchTabs(1); */
         });
 
         // 게임 오브젝트들(농작물, 나무) 정보 툴팁
@@ -882,13 +882,13 @@ export default class InGameScene extends Phaser.Scene {
 
                 // 인벤에 빈 공간이 없으면
                 if (addItemSlot === null) {
-                    console.log("인벤토리에 빈 공간이 없음.");
+                    //console.log("인벤토리에 빈 공간이 없음.");
 
                     // 퀵슬롯에서 빈 공간 찾기
                     addItemSlot = this.quickSlotUI.findEmptySlot();
 
                 } else {
-                    console.log("인벤토리에 빈 공간이 있음.");
+                    //console.log("인벤토리에 빈 공간이 있음.");
                 }
             }
         }
