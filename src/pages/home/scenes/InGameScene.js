@@ -33,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NjY3NDkyLCJleHAiOjE3MDg3MDM0OTJ9.AIl4zUld2SBvwgkiAkMeHIHY00kXtHUF2O6CZTWf8ak"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4ODQyMjM5LCJleHAiOjE3MDg4NzgyMzl9.S7bwKQrmJ0l8q429sxyp5LzA-V1_Bn8maBN-7OH6t0c"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -162,7 +162,7 @@ export default class InGameScene extends Phaser.Scene {
             user_name: 'park',
             exp: 1000,
             level: 1,
-            cft: 90,
+            cft: 1000,
             asset_id: 4563456
         }
 
