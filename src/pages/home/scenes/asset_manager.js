@@ -272,7 +272,6 @@ export default class AssetManager {
             { name: '씨앗상점', path: 'market.png' },
         ];
 
-
         // 음식 이미지 로드
         this.foodImages = [
             { name : '으깬 감자', path : 'mashed_potato.png'},
@@ -284,7 +283,6 @@ export default class AssetManager {
             { name : '채식 버거', path : 'veggies_burger.png'},
             { name : '샌드위치', path : 'sandwich.png'},
         ];
-
     }
 
     loadSprite(spriteData) {

@@ -33,7 +33,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NTgyNjk3LCJleHAiOjE3MDg2MTg2OTd9.8gcUmLYXGSBfZZRwRcRhjBvmshdnKjjHKY1e1VcASHA"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4NjY3NDkyLCJleHAiOjE3MDg3MDM0OTJ9.AIl4zUld2SBvwgkiAkMeHIHY00kXtHUF2O6CZTWf8ak"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -162,7 +162,7 @@ export default class InGameScene extends Phaser.Scene {
             user_name: 'park',
             exp: 1000,
             level: 1,
-            cft: 1000,
+            cft: 90,
             asset_id: 4563456
         }
 
@@ -321,7 +321,7 @@ export default class InGameScene extends Phaser.Scene {
         const seedStoreX = this.cameras.main.width / 2 - seedStoreWidth / 2;
         const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
         this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
-        //this.seedStoreUI.disable();
+        this.seedStoreUI.disable();
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
