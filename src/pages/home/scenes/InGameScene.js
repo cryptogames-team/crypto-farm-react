@@ -13,6 +13,8 @@ import SelectBox from '../ui/select_box';
 import NetworkManager from './network_manager';
 import SeedStoreNPC from '../npc/seed_store_npc';
 import SeedStoreUI from '../ui/seed_store/seed_store_ui';
+import FirePitNPC from '../npc/fire_pit_npc';
+import FirePitUI from '../ui/fire_pit/fire_pit_ui';
 import Frame_LT from '../ui/frame_lt';
 
 // 현재 맵 크기
@@ -130,6 +132,7 @@ export default class InGameScene extends Phaser.Scene {
 
     seedStoreNPC;
     seedStoreUI;
+    firePitNPC;
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
@@ -201,7 +204,6 @@ export default class InGameScene extends Phaser.Scene {
     }
 
     create() {
-
 
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;
@@ -322,6 +324,18 @@ export default class InGameScene extends Phaser.Scene {
         const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
         this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
         this.seedStoreUI.disable();
+
+        // 화덕(요리) NPC 추가
+        this.firePitNPC = new FirePitNPC(this, tileSize * 8, tileSize * 3);
+
+        // 화덕 UI 생성
+        // 크기
+        const firePitWidth = 650;
+        const firePitHeight = 500;
+        // 위치
+        const firePitX = this.cameras.main.width / 2 - firePitWidth / 2;
+        const firePitY = this.cameras.main.height / 2 - firePitHeight / 2;
+        this.FirePitUI = new FirePitUI(this, firePitX, firePitY, firePitWidth, firePitHeight);
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.

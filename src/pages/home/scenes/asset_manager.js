@@ -100,11 +100,14 @@ export default class AssetManager {
             { name: 'player_do_hair', path: this.hairPath.do },
             { name: 'player_do_body', path: 'DOING/base_doing_strip8.png' },
             { name: 'player_do_hand', path: 'DOING/tools_doing_strip8.png' },
+
+            // NPC에 사용할 캐릭터 스프라이트 시트
+            {name: 'shorthair_idle', path: 'IDLE/shorthair_idle_strip9.png' },
         ];
 
         // NPC 스프라이트 시트
         this.npcSprites = [
-            {name: 'shorthair_idle', path: 'IDLE/shorthair_idle_strip9.png' },
+            {name: 'cook', path: 'cook_idle.png', frameWidth: 14, frameHeight : 16},
         ];
         // 나무 스프라이트 로드 정보 담은 배열
         this.treeSprites = [
@@ -267,9 +270,10 @@ export default class AssetManager {
         ];
 
         // 건물 이미지 로드 
-        this.scene.load.path = "assets/buildings/";
+        this.scene.load.path = "assets/Buildings/";
         this.buildingImages = [
             { name: '씨앗상점', path: 'market.png' },
+            { name: '화덕', path: 'fire_pit.png'},
         ];
 
         // 음식 이미지 로드
@@ -312,7 +316,7 @@ export default class AssetManager {
         this.characterSprites.forEach(spriteData => this.loadSprite(spriteData));
 
         // NPC 스프라이트
-        this.scene.load.path = 'assets/Character/';
+        this.scene.load.path = 'assets/NPCs/';
         this.npcSprites.forEach(spriteData => this.loadSprite(spriteData));
 
         // 나무 스프라이트 시트 로드하기
@@ -353,7 +357,7 @@ export default class AssetManager {
         this.cropsImages.forEach(imageData => this.loadImage(imageData));
 
         // 건물 관련 이미지 로드
-        this.scene.load.path = "assets/buildings/";
+        this.scene.load.path = "assets/Buildings/";
         this.buildingImages.forEach(imageData => this.loadImage(imageData));
 
         // 음식 관련 이미지 로드
@@ -400,11 +404,13 @@ export default class AssetManager {
 
             // NPC 대기 애니메이션 9 프레임
             { key: 'npc_idle_hair', frames: this.scene.anims.generateFrameNumbers('shorthair_idle', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
+            // 화덕 NPC 8 프레임
+            { key: 'npc_cook_idle', frames: this.scene.anims.generateFrameNumbers('cook', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
 
             // 나무 흔들리는 애니메이션 7 프레임 frameRate <- 초당 프레임 재생 속도
             { key: 'tree_shake', frames: this.scene.anims.generateFrameNumbers('tree', { start: 0, end: 6 }), frameRate: 12, repeat: 0 },
             // 나무 벌목당했을 때 애니메이션 13프레임 1.5배 배속
-            { key: 'tree_chop', frames: this.scene.anims.generateFrameNumbers('chopped', { start: 0, end: 12 }), frameRate: 16, repeat: 0 }
+            { key: 'tree_chop', frames: this.scene.anims.generateFrameNumbers('chopped', { start: 0, end: 12 }), frameRate: 16, repeat: 0 },
         ];
     }
 

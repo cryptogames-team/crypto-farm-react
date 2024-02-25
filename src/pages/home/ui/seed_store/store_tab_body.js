@@ -3,7 +3,7 @@ import Frame_LT from "../frame_lt";
 import StoreItemSlot from "./store_item_slot";
 import Frame from "../frame";
 import ToolTip from "../tooltip";
-import SelectBox from "../select_box";
+
 
 const pad = 20;
 // Ui 요소간의 간격

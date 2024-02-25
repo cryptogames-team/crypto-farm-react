@@ -58,7 +58,6 @@ export default class SeedStoreNPC extends Phaser.GameObjects.Container {
 
 
         // NPC 이름표 추가
-        // 하얀색 프레임 사용하는 것도 괜찮을듯
         const txtStyle = {
             fontFamily: 'Arial',
             fontSize: 18,

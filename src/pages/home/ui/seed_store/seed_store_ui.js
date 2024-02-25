@@ -40,7 +40,7 @@ export default class SeedStoreUI extends Frame {
         // 기본 상태 : 구매 탭
         this.state = 'purchase';
 
-        // 헤더 만들기 제목 텍스트, 구매, 판매 탭 버튼 포함
+        // 헤더 만들기 제목 텍스트, 나가기 버튼, 유저 소지금, 구매, 판매 탭 버튼 포함
         const headerSpaceX = 20;
         const headerSpaceY = 10;
         const headerPad = this.edgeSize + 10;
@@ -58,13 +58,13 @@ export default class SeedStoreUI extends Frame {
         this.titleTxt = scene.add.text(titleX, titleY, '씨앗 상점', txtStyle);
 
         // 나가기 버튼
-        this.exitIcon = scene.add.image(this.width - headerPad + 5, headerPad - 5, 'exit_icon');
+        const exitX = this.width - headerPad + 5;
+        const exitY = headerPad - 5;
+        this.exitIcon = scene.add.image(exitX, exitY, 'exit_icon');
         this.exitIcon.setOrigin(1, 0).setDisplaySize(30, 30).setScrollFactor(0)
         .setInteractive();
         //scene.input.enableDebug(this.exitIcon);
-        this.exitIcon.on('pointerdown', (event) => {
-            this.setVisible(false);
-        });
+        this.exitIcon.on('pointerdown', (event) => this.disable());
 
         // 유저 소지금 표시 프레임
         const cftWidth = 200;
@@ -161,8 +161,8 @@ export default class SeedStoreUI extends Frame {
         const tabBodyX = this.purchaseTab.x;
         const tabBodyY = this.purchaseTab.y + this.purchaseTab.height - this.purchaseTab.edgeSize;
         const tabBodyWidth = this.width - headerPad * 2;
-        const tabBodyheight = this.height - headerPad * 2 - (this.titleTxt.height + this.purchaseTab.height);
-        this.tabBody = new StoreTabBody(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyheight, 0, this);
+        const tabBodyHeight = this.height - headerPad * 2 - (this.titleTxt.height + this.purchaseTab.height);
+        this.tabBody = new StoreTabBody(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyHeight, 0, this);
         
         // 컨테이너에 추가
         this.add([this.titleTxt, this.cftBox, this.cftTxt, this.cftIcon]);
