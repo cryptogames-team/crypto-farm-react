@@ -234,6 +234,9 @@ export default class AssetManager {
             { name: "삽", path: 'shovel.png' },
             { name: "곡괭이", path: 'pickaxe.png' },
             { name: "도끼", path: 'axe.png' },
+
+            // 아이콘 로드
+            { name: "expIcon", path: 'expIcon.png' },
         ];
         // nine-slice 로드 - 외부 박스
         this.nineSliceBoxImages = [

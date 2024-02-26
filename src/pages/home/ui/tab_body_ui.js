@@ -1,8 +1,8 @@
 import Phaser from "phaser";
-import StoreItemSlot from "../seed_store/store_item_slot";
-import ToolTip from "../tooltip";
-import Frame from "../frame";
-import Frame_LT from "../frame_lt";
+import StoreItemSlot from "./seed_store/store_item_slot";
+import ToolTip from "./tooltip";
+import Frame from "./frame";
+import Frame_LT from "./frame_lt";
 
 
 
@@ -12,18 +12,15 @@ const space = 10;
 export default class TabBodyUI extends Frame_LT {
 
     scene;
-    // 부모 컨테이너 클래스 참조
-    parentRef;
 
-    type;
     categoryTxt;
 
     itemSlots = [];
     itemToolTip;
 
     // 아이템 슬롯 행, 열 개수
-    gridRow = 2;
-    gridCol = 4;
+    gridRow = 0;
+    gridCol = 0;
 
     // 지금 선택중인 슬롯의 인덱스
     selectIndex;
@@ -32,13 +29,13 @@ export default class TabBodyUI extends Frame_LT {
     cookingBtn;
     cookingTxt;
 
-    constructor(scene, x, y, width, height, parentRef = null, type = 0){
+    constructor(scene, x, y, width, height, gridRow, gridCol){
 
         super(scene, x, y, width, height, 0);
 
-        this.parentRef = parentRef;
-        this.type = type;
-        
+        this.gridRow = gridRow;
+        this.gridCol = gridCol;
+
         // 카테고리 텍스트 추가
         const txtStyle = {
             fontFamily: 'Arial',
@@ -68,10 +65,8 @@ export default class TabBodyUI extends Frame_LT {
                 const itemSlot = new StoreItemSlot(scene, slotX, slotY, slotSize, slotSize, index);
                 itemSlot.setItemCount(0);
 
-
                 this.add([itemSlot]);
                 this.itemSlots.push(itemSlot);
-
             }
         }
 
@@ -85,30 +80,6 @@ export default class TabBodyUI extends Frame_LT {
 
         this.itemToolTip = new ToolTip(scene, toolTipX, toolTipY, toolTipWidth, toolTipheight);
 
-        // 요리 버튼 추가 나중에 분리
-        const btnPad = 10;
-        const btnSpace = 5;
-        const btnWidth = this.itemToolTip.width - btnPad * 2;
-        const btnHeight = 45;
-
-        const cookingBtnX = toolTipX + btnPad;
-        const cookingBtnY = toolTipY + this.itemToolTip.height - btnHeight - btnPad;
-        this.cookingBtn = new Frame(scene, cookingBtnX, cookingBtnY, btnWidth, btnHeight);
-
-        // 버튼 텍스트 추가
-        txtStyle.fontSize = 18;
-        txtStyle.color = 'white';
-        txtStyle.stroke = 'black';
-        txtStyle.strokeThickness = 5;
-        // 10개 거래 텍스트 추가
-        const cookingTxtX = cookingBtnX + this.cookingBtn.width / 2;
-        const cookingTxtY = cookingBtnY + this.cookingBtn.height / 2;
-        this.cookingTxt = scene.add.text(cookingTxtX, cookingTxtY, '요리하기', txtStyle);
-        this.cookingTxt.setOrigin(0.5, 0.5);
-
         this.add([this.categoryTxt, this.itemToolTip]);
-        this.add([this.cookingBtn, this.cookingTxt]);
-
     }
-
 }

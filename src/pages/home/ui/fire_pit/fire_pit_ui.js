@@ -1,7 +1,8 @@
 import Phaser from "phaser";
 import Frame from "../frame";
 import Frame_LT from "../frame_lt";
-import TabBodyUI from "./tab_body_ui";
+import TabBodyUI from "../tab_body_ui";
+import CookingTab from "./cooking_tab";
 
 
 export default class FirePitUI extends Frame {
@@ -70,12 +71,7 @@ export default class FirePitUI extends Frame {
         const tabBodyY = this.cookingTab.y + this.cookingTab.height - this.edgeSize;
         const tabBodyWidth = this.width - headerPad * 2;
         const tabBodyHeight = this.height - headerPad * 2 - (this.titleTxt.height + this.cookingTab.height);
-        this.tabBody = new TabBodyUI(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyHeight, this, 0);
-
-        // 탭 바디를 어떻게 만들까
-        // 공용 탭 바디 만들기
-
-
+        this.tabBody = new CookingTab(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyHeight, 2, 4);
 
 
         // UI 컨테이너에 추가

@@ -96,7 +96,6 @@ export default class StoreTabBody extends Frame_LT {
                 const ownItemSlot = scene.findAddItemSlot(item_name);
                 //console.log('소유 아이템 슬롯', ownItemSlot);
 
-                // 
                 const itemSlot = new StoreItemSlot(scene, slotX, slotY, slotSize, slotSize, index);
                 itemSlot.setItemImg(item_name);
 

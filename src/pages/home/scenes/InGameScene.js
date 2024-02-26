@@ -35,7 +35,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4ODQyMjM5LCJleHAiOjE3MDg4NzgyMzl9.S7bwKQrmJ0l8q429sxyp5LzA-V1_Bn8maBN-7OH6t0c"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4OTMzNDgzLCJleHAiOjE3MDg5Njk0ODN9.FEXPZabzqzYiRt85bFjfbfZowQuGq0Q8q8zuKma4nF4"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -133,6 +133,18 @@ export default class InGameScene extends Phaser.Scene {
     seedStoreNPC;
     seedStoreUI;
     firePitNPC;
+
+    // 요리 레시피들
+    cookRecipes = [
+        {name: '으깬 감자', ingredients: [{name: '감자', quantity : 2}]},
+        {name: '호박 수프', ingredients: [{name: '호박', quantity : 2}]},
+        {name: '브로쓰', ingredients: [{name: '당근', quantity : 1}, {name: '양배추', quantity : 1}]},
+        {name: '케일 스튜', ingredients: [{name: '케일', quantity : 2}]},
+        {name: '야채 구이', ingredients: [{name: '무', quantity : 1}, {name: '당근', quantity : 1}]},
+        {name: '샐러드', ingredients: [{name: '사탕무', quantity : 1}, {name: '양배추', quantity : 1}]},
+        {name: '채식 버거', ingredients: [{name: '밀', quantity : 1}, {name: '양배추', quantity : 1}]},
+        {name: '샌드위치', ingredients: [{name: '케일', quantity : 1}, {name: '밀', quantity : 1}]},
+    ];
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
