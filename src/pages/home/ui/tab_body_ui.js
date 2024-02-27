@@ -25,9 +25,6 @@ export default class TabBodyUI extends Frame_LT {
     // 지금 선택중인 슬롯의 인덱스
     selectIndex;
 
-    // 나중에 분리해야될 요리 버튼
-    cookingBtn;
-    cookingTxt;
 
     constructor(scene, x, y, width, height, gridRow, gridCol){
 
@@ -82,4 +79,5 @@ export default class TabBodyUI extends Frame_LT {
 
         this.add([this.categoryTxt, this.itemToolTip]);
     }
+
 }

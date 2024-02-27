@@ -148,7 +148,6 @@ export default class ToolTip extends Frame_LT {
 
         // 요리 재료 1 아이콘 추가 - 텍스트 옆 배치
         ingredient1X = ingredient1X - this.ingredient1Txt.width / 2 - this.pad * 2;
-        ingredient1Y = ingredient1Y;
         this.ingredient1Icon = scene.add.image(ingredient1X, ingredient1Y, '감자');
         this.ingredient1Icon.setOrigin(0, 0).setDisplaySize(18, 18);
 
@@ -165,7 +164,6 @@ export default class ToolTip extends Frame_LT {
 
         // 요리 재료 2 아이콘 추가
         ingredient2X = ingredient2X - this.ingredient2Txt.width / 2 - this.pad * 2;
-        ingredient2Y = ingredient2Y;
         this.ingredient2Icon = scene.add.image(ingredient2X, ingredient2Y, '양배추');
         this.ingredient2Icon.setOrigin(0, 0).setDisplaySize(18, 18);
 
@@ -182,7 +180,6 @@ export default class ToolTip extends Frame_LT {
 
         // 경험치 아이콘 expIcon
         expX = expX - this.expTxt.width / 2 - this.pad * 2;
-        expY = expY;
         this.expIcon = scene.add.image(expX, expY, 'expIcon');
         this.expIcon.setOrigin(0, 0).setDisplaySize(18, 18);
 
@@ -210,9 +207,17 @@ export default class ToolTip extends Frame_LT {
         // 타이머도 안보이게 함
         this.timerIcon.setVisible(false);
 
-        // 아이템 가격 텍스트, 골드 아이콘 안 보이게 하기
+        // 텍스트 안보이게 하기
+        this.ingredient1Txt.setVisible(false);
+        this.ingredient2Txt.setVisible(false);
+        this.expTxt.setVisible(false);
+
+        // 아이템 가격 텍스트, 골드 아이콘, 요리 재료, 경험치량 안보이게 하기
         this.priceTxt.setVisible(false);
         this.goldIcon.setVisible(false);
+        this.ingredient1Icon.setVisible(false);
+        this.ingredient2Icon.setVisible(false);
+        this.expIcon.setVisible(false);
 
         if (item.type === 0) {
             type = '씨앗';
@@ -257,6 +262,8 @@ export default class ToolTip extends Frame_LT {
     // 상점, 화덕 UI에 표시할 아이템 툴팁 설정
     setStoreToolTip(item) {
 
+        // 객체에 없는 속성을 분해해도 문제 없음
+        // undefined가 할당된다
         const { item_id, item_type, item_name,
             item_des, seed_time, use_level, item_price, ingredients } = item;
 
@@ -295,7 +302,6 @@ export default class ToolTip extends Frame_LT {
         this.nameTxt.setText(item_name);
         this.typeTxt.setText(type);
         this.desTxt.setText(item_des);
-
 
         // 아이템 타입이 씨앗 이거나 농작물일 때 표시될 텍스트들과 아이콘 설정
         if (type === '씨앗' || type === '농작물') {
@@ -359,7 +365,6 @@ export default class ToolTip extends Frame_LT {
             } else {
                 this.ingredient1Txt.setColor('white');
             }
-
 
             // 아이콘
             ingredient1X = ingredient1X - this.ingredient1Txt.width / 2 - this.pad * 2;

@@ -6,7 +6,7 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4OTMzNDgzLCJleHAiOjE3MDg5Njk0ODN9.FEXPZabzqzYiRt85bFjfbfZowQuGq0Q8q8zuKma4nF4';
+    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MDEyODA2LCJleHAiOjE3MDkwNDg4MDZ9.U4k2nL6xnfvHNmWHkR-HDexdzHRRtezjmP46gfOLPe8';
 
     constructor(scene) {
         this.scene = scene;
@@ -287,7 +287,7 @@ export default class NetworkManager {
                 addItemSlot.setSlotItem(new Item(buyItemInfo, item_count));
             }
 
-            // 상점 아이템 슬롯의 아이템 개수도 변경
+            // 상점 아이템 슬롯의 아이템 개수도 업데이트
             tabBody.itemSlots.forEach((itemSlot, index) => {
                 itemSlot.setItemImg(tabBody.purchaseList[index].item_name);
 
@@ -383,6 +383,106 @@ export default class NetworkManager {
 
         } catch (error) {
             console.error('serverSellItem() Error : ', error);
+            return null;
+        }
+
+    }
+
+    // 서버에 요리 제작 요청
+    // 성공하면 요리 아이템 추가, 기존 요리 아이템 수량 증가
+    async serverCook(cookingItemInfo, item_index, cookingItemSlot){
+
+        const { item_id, item_type, item_name,
+            item_des, seed_time, use_level, item_price, ingredients } = cookingItemInfo;
+
+        const requestURL = this.apiURL + 'cook/';
+
+        // 요리를 만드는 데 필요한 재료의 종류
+        let needIngrType = ingredients.length;
+        //console.log(`${item_name}을 만드는 데 요리 재료 ${needIngrType}종류가 필요함.`);
+
+        // 요리 재료 1 id
+        let ingr1_id = 0;
+        // 요리 재료 2 id
+        let ingr2_id = 0;
+
+        // 요리 재료 1종류 필요할 때
+        if( needIngrType === 1){
+            ingr1_id = this.scene.allItemMap.get(ingredients[0].name).item_id;
+            ingr2_id = ingr1_id;
+        }
+        else if( needIngrType === 2){ // 2종류 필요할 때
+            ingr1_id = this.scene.allItemMap.get(ingredients[0].name).item_id;
+            ingr2_id = this.scene.allItemMap.get(ingredients[1].name).item_id;
+        }
+
+        const requestBody = {
+            "cook": item_id,
+            "ingredient1": ingr1_id,
+            "ingredient2": ingr2_id,
+            "item_index": item_index
+        };
+
+        console.log('serverCook() 리퀘스트 바디 : ', requestBody);
+
+        try {
+            const response = await fetch(requestURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.text();
+            // 요리 요청 결과 - 성공하면 'success'
+            console.log('요리 요청 결과', data);
+
+            if (data === 'success') {
+
+                // 기존 요리 아이템 수량 증가
+                if (cookingItemSlot.item !== null){
+                    cookingItemSlot.item.count += 1;
+                    cookingItemSlot.setSlotItem(cookingItemSlot.item);
+                }else{ // 새 요리 아이템 추가 
+                    cookingItemSlot.setSlotItem(new Item(cookingItemInfo,1));
+                }
+
+                // 화덕 UI 아이템 슬롯의 개수 표시 업데이트
+                // 화덕 UI의 cookingTab 참조
+                const cookingTab = this.scene.FirePitUI.tabBody;
+
+                cookingTab.itemSlots.forEach((itemSlot, index) => {
+                    // 요리 아이템 이미지 새로 설정
+                    let item_name = cookingTab.cookingList[index].item_name;
+                    itemSlot.setItemImg(item_name);
+                    // 요리 아이템 이미지 스케일은 3.5
+                    itemSlot.itemImg.setScale(3.5);
+
+                    const ownItemSlot = this.scene.findAddItemSlot(item_name);
+                    // 유저가 인벤토리이나 퀵슬롯에 요리 아이템을 소유하고 있을 경우 아이템 개수를 연동함.
+                    if(ownItemSlot.item) {
+                        itemSlot.setItemCount(ownItemSlot.item.count);
+                    }
+                });
+
+                // 재료 아이템 소비된 거 수량 감소하고 표시 업데이트
+                // (서버에서 이미 소비가 된 상태라서 아이템 소비 요청 보낼 필요 없음)
+                ingredients.forEach((ingr, index) => {
+                    const ingrSlot = this.scene.findAddItemSlot(ingr.name);
+                    ingrSlot.useItem(ingr.quantity);
+                });
+
+                // 요리 버튼 상태 재설정
+                cookingTab.setCookBtnState(cookingItemInfo);
+
+                // 툴팁 상태도 재설정
+                cookingTab.itemToolTip.setStoreToolTip(cookingItemInfo);
+            }
+
+        } catch (error) {
+            console.error('serverCook() Error : ', error);
             return null;
         }
 

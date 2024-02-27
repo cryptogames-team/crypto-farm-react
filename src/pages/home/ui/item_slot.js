@@ -467,7 +467,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             item = this.item;
         }
 
-
         // 사용할 개수 만큼 수량이 남아 있는지 체크
         if (item.count >= spend) {
             // 사용 개수 만큼 수량 감소

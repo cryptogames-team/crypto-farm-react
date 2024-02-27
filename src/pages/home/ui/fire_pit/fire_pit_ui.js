@@ -84,6 +84,8 @@ export default class FirePitUI extends Frame {
     // UI창 활성화
     enable(){
         this.setVisible(true);
+
+        this.tabBody.syncItemCount();
     }
     // UI창 비활성화
     disable(){

@@ -35,7 +35,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA4OTMzNDgzLCJleHAiOjE3MDg5Njk0ODN9.FEXPZabzqzYiRt85bFjfbfZowQuGq0Q8q8zuKma4nF4"
+    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MDEyODA2LCJleHAiOjE3MDkwNDg4MDZ9.U4k2nL6xnfvHNmWHkR-HDexdzHRRtezjmP46gfOLPe8"
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -348,6 +348,7 @@ export default class InGameScene extends Phaser.Scene {
         const firePitX = this.cameras.main.width / 2 - firePitWidth / 2;
         const firePitY = this.cameras.main.height / 2 - firePitHeight / 2;
         this.FirePitUI = new FirePitUI(this, firePitX, firePitY, firePitWidth, firePitHeight);
+        this.FirePitUI.disable();
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
@@ -531,7 +532,6 @@ export default class InGameScene extends Phaser.Scene {
         debugGraphics.forEach((debugGraphic) => {
             debugGraphic.visible = false;
         });
-
 
         // 카메라 참조
         this.camera = this.cameras.main;
@@ -807,7 +807,6 @@ export default class InGameScene extends Phaser.Scene {
 
         // y축 위치를 1픽셀 만큼 내려야 함.
         // 지금 맵 크기가 4배 커져있으니 총 4픽셀만큼 내려야된다.
-
 
         // seedName '감자 씨앗'으로 오니까 ' 씨앗' 부분 빼야됨.
         let newSeedName = seedName.replace(' 씨앗', '');
