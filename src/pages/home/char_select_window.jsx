@@ -49,7 +49,7 @@ function CharSelectWindow({accountName, onCharSelect}) {
   // 캐릭터 생성 성공 시 생성된 캐릭터를 unregChars에서 제거한다.
   const rmCreateChar = (characterToRemove) => {
 
-    console.log("제거될 캐릭터 정보", characterToRemove);
+    console.log("미등록 캐릭터 배열에서 제거될 캐릭터 정보", characterToRemove);
 
 
     // 캐릭터가 미등록 배열에서 제거 되지 않고 있음.
@@ -117,7 +117,7 @@ function CharSelectWindow({accountName, onCharSelect}) {
 
       });
 
-      console.log("크립토 팜 NFT 정보에서 필요한 거만 빼옴",my_nfts);
+      console.log("크립토 팜 NFT 정보에서 필요한 거만 빼옴", my_nfts);
 
 
 

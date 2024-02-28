@@ -10,7 +10,6 @@ const pad = 19;
 
 export default class Inventory extends Frame {
 
-    
     exitIcon;
 
     // 경계선
@@ -30,7 +29,6 @@ export default class Inventory extends Frame {
     // 아이템 슬롯 배열
     itemSlots = [];
 
-
     // 인벤토리 시작 인덱스
     startIndex = 9;
     // 인벤토리 끝 인덱스
@@ -38,7 +36,6 @@ export default class Inventory extends Frame {
 
     // 퀵슬롯 크기
     quickSize = 9;
-
 
     // 인벤토리의 아이템을 퀵슬롯에 드래그 앤 드랍 한 거 알아내는 법
     // 1. 인벤토리와 퀵슬롯은 같은 씬에 있음.
@@ -157,21 +154,16 @@ export default class Inventory extends Frame {
                 //itemSlot.setDepth(1001).setScrollFactor(0);
                 //scene.input.enableDebug(itemSlot);
 
-
                 // Phaser에선 겹치는 개체들 중에서 가장 상위 객체(마지막에 추가된 객체)에만 
                 // 이벤트를 전달하는 기본동작을 가진다고 한다.
-
                 // 아이템 슬롯 객체가 생성될 때 컨테이너가 만들어지고
                 // 거기에 자식 객체들이 생성되고 추가되는 방식이라서 그런가 봄.
-
 
                 this.add(itemSlot);
                 this.itemSlots.push(itemSlot);
 
             }
         }
-
-        this.initInventory(scene.own_items);
 
         // 아이템 툴팁 생성하기
         this.toolTip = new ToolTip(scene, 0 ,0, 250, 250);
@@ -189,7 +181,6 @@ export default class Inventory extends Frame {
     }
 
     // own_items : 서버에서 비동기로 받아오는 아이템 목록 배열. 
-    // 서버에서 로드되기 전에 먼저 이 함수가 실행될 수 있음.
     initInventory(own_items) {
 
         own_items.forEach((own_item, index) => {
@@ -312,8 +303,8 @@ export default class Inventory extends Frame {
                     // 서버에서 인벤 인덱스 시작이 9부터임.
                     const dupIndex = index + this.quickSize;
 
-                    console.log("인벤에서 중복 아이템 발견",itemSlot.item.name, itemName );
-                    console.log("중복 아이템이 있는 슬롯 인덱스", dupIndex);
+                    //console.log("인벤에서 중복 아이템 발견",itemSlot.item.name, itemName );
+                    //console.log("중복 아이템이 있는 슬롯 인덱스", dupIndex);
 
                     // 중복 아이템 있는 슬롯 찾음
                     dupSlot = itemSlot;

@@ -86,6 +86,7 @@ export default class SellingItem extends Phaser.GameObjects.Container {
                 this.itemSlot = scene.findAddItemSlot(this.sellingInfo.item.item_name)
                 this.emptySlotIndex = this.itemSlot.index
                 const url = scene.APIurl + '/auction/' + this.sellingInfo.auction_id + '/' + this.emptySlotIndex
+                
                 console.log("auction_id : " + this.sellingInfo.auction_id)
                 //요청 보내기
                 fetch(url, {

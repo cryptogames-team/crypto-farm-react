@@ -43,7 +43,7 @@ function LoginWindow({onLogin}) {
       // 로컬스토리지에 계정이름을 저장한다.
       localStorage.setItem("account_name", nameValue);
       // 로컬스토리지에 계정이름을 가져온다.
-      console.log("로컬 스토리지 확인", localStorage.getItem("account_name"))
+      console.log("로컬 스토리지에 저장한 지갑 계정 이름", localStorage.getItem("account_name"))
 
       console.log(`계정 이름 : ${nameValue}, 공개 키 : ${keyValue}`);
 

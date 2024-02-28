@@ -127,7 +127,7 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
             .on('pointerup', () => {
 
 
-                this.itemSlot = scene.findAddItemSlot(this.itemInfo.item_name)
+               this.itemSlot = scene.findAddItemSlot(this.itemInfo.item_name)
                 this.emptySlotIndex = this.itemSlot.index
               
                 const url = scene.APIurl+'/auction/buy'

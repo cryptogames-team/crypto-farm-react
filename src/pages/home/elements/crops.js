@@ -16,160 +16,351 @@ export default class Crops extends Phaser.GameObjects.Container {
 
     // 농작물 이름 
     name = null;
-
     // 농작물이 존재할 씬 객체
     scene;
-
+    // 이 오브젝트의 타입
+    type = 'crops';
     // 밭 타일 중앙 위치에서 몇 픽셀 만큼 떨어져야 되는지
     // 이걸로 이미지를 밭 타일에 딱 맞춘다.
     offsetX = 1 * scale;
     offsetY = 1 * scale;
 
     cropSprite;
+    // 성장 진행도 게이지 UI
+    progressBar;
+    // 남은 성장 시간 텍스트로 표시
+    progressText;
+    progressContent;
 
     // 농작물의 현재 상태를 나타낸다
     // 처음엔 새싹 상태
     state = 'sprout';
 
-    constructor(scene, x, y, texture, seedName) {
+    // 심은 시간
+    plantTime;
+    // 성장 시간(단위 : 초)
+    growSec;
+    // 전체 성장 완료 시간
+    growCompleteTime;
+    // 성장 완료까지 남은 시간(초)
+    remainTime;
+
+    // 각 성장 단계에 도달하는 시간
+    // 성장 1
+    grow1Time;
+    // 성장 2
+    grow2Time;
+    // 열매(수확기)
+    harvestTime;
+
+    // 다음 성장 단계에 도달하는데 남은 시간(단위 : 밀리초)
+    nextGrowRemain = null;
+    // 다음 성장 단계까지 필요한 총 성장 시간
+    nextGrowingTime = null;
+
+    // 농작물 스프라이트가 사용할 텍스처 키
+    imgKey;
+
+    // 게임에서 심은건지 게임 맵에서 불러온 건지 구별한다.
+    isload;
+
+    constructor(scene, x, y, seedName, plantTime, growSec, isload = false) {
         super(scene, x, y);
 
         this.name = seedName;
         this.scene = scene;
-
-
-
-        //console.log("농작물 객체 생성 : " + this.name);
+        this.imgKey = seedName + '_01';
+        this.plantTime = plantTime;
+        this.growSec = growSec;
+        this.isload = isload;
 
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
         // 씬의 물리 시스템에 추가하여 물리적 상호작용을 가능하게 한다.
-        // 디버그용
         scene.physics.add.existing(this);
 
         this.setSize(tileSize, tileSize);
-        
-        //console.log("Crops Container Origin :", this.originX, this.originY);
-
-
-        // 물리 바디 오프셋 설정 가능하다.
-        //this.body.setOffset(tileSize / 2, tileSize / 2);
-
-        // body 사이즈는 Scale에 영향받음.
-        //this.body.setSize(tileSize, tileSize);
         this.setDepth(depth);
 
-        // 컨테이너 객체는 기본적으로 크기나 모양이 없기 때문에 setInteractive() 호출 전에
-        // 크기를 지정하거나 대화형 영역을 명시적으로 설정해야 한다.
+
+        //console.log("심은 농작물 이름 :", this.name);
+        //console.log("이 농작물의 심은 시간", plantTime);
+        //console.log("이 농작물의 전체 성장에 필요한 초", growSec);
+
+        // 성장 완료 시간 계산하기
+        this.growCompleteTime = new Date(plantTime.getTime() + growSec * 1000);
+        //console.log("이 농작물의 전체 성장 완료 시간", this.growCompleteTime);
+
+        // 다음 성장 단계까지 필요한 총 성장 시간
+        this.nextGrowingTime = growSec / 3 * 1000;
+        const nextGrowingTime = this.nextGrowingTime;
+
+        // 각 성장 단계에 도달하는 시간 계산
+        this.grow1Time = new Date(plantTime.getTime() + nextGrowingTime);
+        this.grow2Time = new Date(this.grow1Time.getTime() + nextGrowingTime);
+        this.harvestTime = new Date(this.grow2Time.getTime() + nextGrowingTime);
+        //console.log("성장 1단계 도달시간", this.grow1Time);
+        //console.log("성장 2단계 도달시간", this.grow2Time);
+        //console.log("수확기 도달시간", this.harvestTime);
 
 
-        // 컨테이너를 클릭 가능하게 변경한다.
-/*         this.setInteractive();
-        this.on('pointerdown', () => {
-            console.log(this.name + " 클릭함.");
-        }); */
+        // 유저가 게임에 접속하여 농작물 옵젝 정보를 받아와 생성한 시간을
+        // 성장 완료 시간과 비교한다.
+        if (this.isload === true) {
+            // 성장 완료까지 남은 시간 계산
+            //console.log("서버에서 불러옴.");
+            this.remainTime = this.getRemainTime(new Date());
+
+        } else {
+            // 성장 완료까지 남은 시간 계산
+            //console.log("인게임에서 농작물 심음.");
+            this.remainTime = this.getRemainTime(plantTime);
+        }
+
+        //console.log("농작물 성장 완료까지 남은 시간(초) ", this.remainTime);
+
+
+        // 심은 시간으로부터 일정 시간 뒤 구하기
+        // 유저가 성장 중간에 들어온 경우를 가정해서 테스트 가능하다.
+        // const nowDate = new Date();
+        // nowDate.getTime() + 15 * 1000
+
+        // 농작물이 생성된 시간
+        // 인 게임에서 농작물을 심었을 때 1ms밖에 차이가 안나서 그냥 냅둠.
+        const now = new Date();
+
+        //console.log('plantTime.getTime()', plantTime.getTime());
+        //console.log('now.getTime()', now.getTime());
+
+        // 생성된 시간에서 일정시간만큼 더해보기
+        // 유저가 농작물을 심고 일정 시간 후에 재접속했다는 것을 가정함.
+        //const nowPlus = new Date(now.getTime() + 11 * 1000);
+
+        // 농작물 초기 성장 단계 설정
+        // 현재 시간이랑 성장 완료 시간 비교
+        this.setInitialStage(now);
 
         // 농작물 스프라이트 생성
-        // 새싹 이미지로 설정한다.
-        // 스프라이트 상대 위치는 컨테이너 중앙 위치(0, 0)에서 
+        // 스프라이트 초기 상대 위치는 컨테이너 중앙 위치(0, 0)에서 
         // 1픽셀 아래인 (0, 4)에 배치시킨다. 
-        this.cropSprite = scene.add.sprite(0, this.offsetY, texture);
+        this.cropSprite = scene.add.sprite(0, this.offsetY, this.imgKey);
         this.cropSprite.setScale(scale).setOrigin(0.5, 1);
+        this.setSpritePosition();
+        // 농작물 옵젝을 상호작용 가능하게 변경함.
+        this.setInteractive();
+        // 상호작용 영역 확인
+        //scene.input.enableDebug(this);
 
-        // 컨테이너에 자식 오브젝트 추가
-        this.add([this.cropSprite]);
+        this.on('pointerover', () => {
+            //console.log(this.name + "에 마우스 오버함.");
 
+            // 성장 완료되지 않은 농작물만 툴팁뜨게 만들기
+            if (this.state !== 'harvest') {
 
-        // 타이머 이벤트 추가
-        // 주의 : callback 부분에 존재하지 않는 함수 등록해도 에러 발생 안됨.
-        scene.time.addEvent({
-            delay: 1000, // 단위 : ms
-            callback: this.grow1,
-            callbackScope: this,
-            loop: false
+                scene.objectToolTip.setVisible(true);
+
+                // 이거 위치 기준이 뭐지?
+                // 아마 컨테이너 실제 영역이랑, 상호작용 영역이 다른듯
+                scene.objectToolTip.x = this.x - scene.objectToolTip.width / 2;
+                scene.objectToolTip.y = this.y - scene.objectToolTip.height - (this.height / 2) - scene.objectToolTip.space;
+
+                scene.objectToolTip.setObject(this);
+            }
+
         });
 
+        this.on('pointerout', (pointer) => {
+            //console.log(this.name + "에 마우스 아웃");
+            scene.objectToolTip.setObject(null);
+            scene.objectToolTip.setVisible(false).setPosition(0, 0);
+        });
+
+        // 성장 진행도 UI 표시
+        this.progressBar = scene.add.image(0, 0, 'greenbar00');
+        this.progressBar.setDisplaySize(this.progressBar.width * 4, this.progressBar.height * 3)
+            .setOrigin(0.5, 1);
+        this.progressBar.y += this.progressBar.displayHeight + this.offsetY;
+
+
+        if (this.state === 'grow1') {
+            this.progressBar.setTexture('greenbar02');
+        } else if (this.state === 'grow2') {
+            this.progressBar.setTexture('greenbar04');
+        } else if (this.state === 'harvest') {
+            this.progressBar.setVisible(false);
+        }
+
+
+        const txtStyle = {
+            fontFamily: 'Arial',
+            fontSize: 15,
+            color: 'white',
+            fontStyle: 'bold',
+            align: 'center',
+            stroke: 'black', // 외곽선
+            strokeThickness: 5 // 외곽선 두께  
+        };
+
+
+        // 남은 성장 시간 텍스트 내용초기화
+        this.setProgressContent();
+
+        // 남은 성장 시간 표시하는 타이머 텍스트
+        this.progressText = scene.add.text(0, -this.offsetY, this.progressContent, txtStyle);
+        this.progressText.setOrigin(0.5, 0.5);
+
+        // uiVisible 확인
+        if (scene.uiVisibleBtn.uiVisible === false) {
+            this.progressBar.setVisible(false);
+            this.progressText.setVisible(false);
+        }
+
+
+        // 컨테이너에 자식 오브젝트 추가
+        this.add([this.cropSprite, this.progressBar, this.progressText]);
     }
 
-    setInitialStage() {
-        // 농작물의 초기 텍스처 설정
-        this.setTexture('seedTexture');
+    // 농작물 오브젝트가 속한 씬에서 업데이트를 해줘야함.
+    update(delta) {
+        //console.log('농작물 성장중...');
+
+        if (this.remainTime >= 0) {
+            // delta가 밀리초 단위니까 초단위랑 계산하려면 변환해줘야됨.
+            this.remainTime -= delta / 1000;
+
+            //남은 성장 시간 텍스트 내용초기화
+            this.setProgressContent();
+            this.progressText.setText(this.progressContent);
+        }
+    }
+
+    // 초기 성장단계 설정
+    setInitialStage(now) {
+
+        // 농작물 초기 성장 단계 설정
+        // 현재 시간이랑 성장 완료 시간 비교
+        if (now.getTime() >= this.growCompleteTime.getTime()) {
+            // 열매 수확기로 설정
+            //console.log("농작물 초기 성장 상태 : 열매(수확기)");
+
+            this.imgKey = this.name + '_04';
+            this.state = 'harvest';
+        }
+        // 성장이 다 끝나지 않은 경우
+        else {
+
+            // 새싹
+            if (now.getTime() < this.grow1Time) {
+                //console.log("농작물 초기 성장 상태 : 새싹");
+
+                this.state = 'sprout';
+
+                //console.log('농작물이 생성되고 난 후 5초 뒤의 시간', now);
+                //console.log('성장 1단계 도달 시간', this.grow1Time);
+
+                // 다음 성장 단계(성장 1단계)까지 남은 시간 계산(밀리초)
+                this.nextGrowRemain = (this.grow1Time - now);
+                //console.log("다음 성장 단계까지 남은 초", this.nextGrowRemain / 1000);
+
+                // 성장 타이머 이벤트 추가
+                this.scene.time.addEvent({
+                    delay: this.nextGrowRemain, // 단위 : ms
+                    callback: this.grow1,
+                    callbackScope: this,
+                    loop: false
+                });
+
+            }
+            else if (now.getTime() < this.grow2Time) { // 성장 1
+                //console.log("농작물 초기 성장 상태 : 성장1");
+
+                this.imgKey = this.name + '_02';
+                this.state = 'grow1';
+
+                // 다음 성장 단계(성장 2단계)에 도달하는 데 남은 시간 계산(밀리초)
+                this.nextGrowRemain = (this.grow2Time - now);
+
+                //console.log('다음 성장 단계까지 남은 초', this.nextGrowRemain / 1000);
+
+                // 다음 성장 단계로 가는 타이머 이벤트 설정
+                this.scene.time.addEvent({
+                    delay: this.nextGrowRemain, // 단위 : ms
+                    callback: this.grow2,
+                    callbackScope: this,
+                    loop: false
+                });
+
+            }
+            else { // 성장 2
+                //console.log("농작물 초기 성장 상태 : 성장2");
+
+                this.imgKey = this.name + '_03';
+                this.state = 'grow2';
+
+                // 다음 성장 단계(수확기)에 도달하는 데 남은 시간 계산(밀리초)
+                this.nextGrowRemain = (this.harvestTime - now);
+
+                //console.log('다음 성장 단계까지 남은 초', this.nextGrowRemain / 1000);
+
+                // 다음 성장 단계로 가는 타이머 이벤트 설정
+                this.scene.time.addEvent({
+                    delay: this.nextGrowRemain, // 단위 : ms
+                    callback: this.growComplete,
+                    callbackScope: this,
+                    loop: false
+                });
+
+            }
+        }
+
+        //console.log("농작물 초기 성장 단계 설정 ", this.state);
+
     }
 
     // 성장기 1
     grow1() {
 
-        //console.log("농작물 성장기 1");
+        //console.log("농작물 성장 1단계 도달");
+        //console.log("다음 성장까지 남은 초", this.nextGrowingTime / 1000);
 
         // 성장기 1에 사용되는 이미지 키는 name + '_02'이다.
         // 예) this.name = 감자면 '감자_02'
-        const grow1ImgKey = this.name + '_02';
+        this.imgKey = this.name + '_02';
         const scene = this.scene;
 
         this.state = 'grow1';
 
-        // 이미지를 초기 위치로 초기화 (0, 4)
-        // 전 성장단계에서 위치 조정이 있는 경우 보정하기 위해
-        this.cropSprite.x = 0;
-        this.cropSprite.y = this.offsetY;
+        this.cropSprite.setTexture(this.imgKey);
+        this.setSpritePosition();
 
-        this.cropSprite.setTexture(grow1ImgKey);
-
-
-
-        // 호박 반 픽셀 왼쪽, 1픽셀 아래(-2, 8)
-        if (this.name === '호박') {
-            //console.log("호박 성장기 1 위치 조정");
-            // 타일의 이루는 픽셀의 크기는 4x4
-            // 가로 길이가 홀수인 이미지는 2픽셀(반 픽셀) 만큼 빼면 밭 타일이랑 중앙에 위치됨.
-            this.cropSprite.x = this.cropSprite.x - this.offsetX / 2;
-            this.cropSprite.y = this.cropSprite.y + this.offsetY;
-        }
+        this.progressBar.setTexture('greenbar02');
 
         scene.time.addEvent({
-            delay: 1000, // 단위 : ms
+            delay: this.nextGrowingTime, // 단위 : ms
             callback: this.grow2,
             callbackScope: this,
             loop: false
         });
     }
-    // 성장기 2
+    // 성장기 2 설정 함수
     grow2() {
 
-        //console.log("농작물 성장기 2");
+        //console.log("농작물 성장 2단계 도달");
+        //console.log("다음 성장까지 남은 초", this.nextGrowingTime / 1000);
+
         // 성장기 1에 사용되는 이미지 키는 name + '_03'이다.        
-        const grow2ImgKey = this.name + '_03';
+        this.imgKey = this.name + '_03';
         const scene = this.scene;
 
         this.state = 'grow2';
 
-        // 이미지를 초기 위치로 초기화
-        // 전 성장단계에서 위치 조정이 있는 경우 보정하기 위해
-        this.cropSprite.x = 0;
-        this.cropSprite.y = 0 + this.offsetY;
+        this.cropSprite.setTexture(this.imgKey);
+        this.setSpritePosition();
 
-        this.cropSprite.setTexture(grow2ImgKey);
-
-        // 감자 1픽셀 아래
-        if (this.name === '감자') {
-            //console.log("감자 성장기 2 위치 조정");
-            this.cropSprite.y = this.cropSprite.y + this.offsetY;
-        }
-        // 호박 1픽셀 왼쪽, 1픽셀 아래
-        else if (this.name === '호박') {
-            //console.log("호박 성장기 2 위치 조정");
-            this.cropSprite.x = this.cropSprite.x - this.offsetX;
-            this.cropSprite.y = this.cropSprite.y + this.offsetY;
-        }
-        // 양배추 1픽셀 아래
-        else if (this.name === '양배추') {
-            //console.log("양배추 성장기 2 위치 조정");
-            this.cropSprite.y = this.cropSprite.y + this.offsetY;
-        }
-
+        this.progressBar.setTexture('greenbar04');
 
         scene.time.addEvent({
-            delay: 1000, // 단위 : ms
+            delay: this.nextGrowingTime, // 단위 : ms
             callback: this.growComplete,
             callbackScope: this,
             loop: false
@@ -178,44 +369,171 @@ export default class Crops extends Phaser.GameObjects.Container {
     // 수확기
     growComplete() {
 
+        //console.log("농작물 수확기 도달");
+        //console.log('성장 완료');
+
         // 성장기 1에 사용되는 이미지 키는 name + '_04'이다.        
-        const growComImgKey = this.name + '_04';
+        this.imgKey = this.name + '_04';
         const scene = this.scene;
 
         this.state = 'harvest';
 
-        // 이미지를 초기 위치로 초기화
-        // 전 성장단계에서 위치 조정이 있는 경우 보정하기 위해
-        this.cropSprite.x = 0;
-        this.cropSprite.y = 0 + this.offsetY;
+        this.cropSprite.setTexture(this.imgKey);
+        this.setSpritePosition();
 
-        // 수확기 이미지 위치 조정
-        // 감자 반픽셀 오른쪽, 1픽셀 아래
-        if (this.name === '감자') {
-            //console.log("감자 수확기 위치 조정");
-            this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
-            this.cropSprite.y = this.cropSprite.y + this.offsetY;
-        }
-        // 호박 1픽셀 아래
-        else if (this.name === '호박') {
-            //console.log("호박 수확기 위치 조정");
-            this.cropSprite.y = this.cropSprite.y + this.offsetY;
-        }
-        // 양배추 2픽셀 아래
-        else if (this.name === '양배추') {
-            //console.log("양배추 수확기 위치 조정");
-            this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
-        }
+        this.progressBar.setTexture('greenbar00').setVisible(false);
 
-
-        this.cropSprite.setTexture(growComImgKey);
-        //console.log("농작물 수확기");
-
+        // 성장이 완료되어서 다음 성장 단계는 없음.
 
     }
 
     // 농작물 수확
-    harvest(){
+    harvest() {
+
         this.destroy();
+    }
+
+    // 농작물 성장 완료까지 남은 시간 계산
+    getRemainTime(now) {
+
+
+        const completeTime = new Date(this.growCompleteTime);
+        // 남은 시간 초로 변환
+        let remainTimeInSec = (completeTime - now) / 1000;
+
+        if (remainTimeInSec <= 0) {
+            remainTimeInSec = 0;
+        }
+
+        // 시간 분 초 분리
+        const hours = Math.floor(remainTimeInSec / 3600);
+        const mins = Math.floor((remainTimeInSec % 3600) / 60);
+        const secs = Math.floor((remainTimeInSec % 60));
+
+        return remainTimeInSec;
+    }
+
+    // 남은 성장 시간 '몇분', '몇초' 형식으로 텍스트 설정하는 함수
+    setProgressContent() {
+
+        this.progressContent = '';
+
+        // Math.floor : 소숫점 없애버리고 정수값만 리턴
+        const mins = Math.floor((this.remainTime % 3600) / 60);
+        const secs = Math.floor(this.remainTime % 60);
+
+        if (mins > 0) {
+            this.progressContent += mins + 'm';
+        }
+
+        // 초단위는 올림처리해서 보여줘야 함.
+        if (secs >= 0) {
+
+            // 남은 시간이 60초 미만이라서 
+            // 몇분 부분에 없을 경우 초를 표시한다.
+            if (this.progressContent === '')
+                this.progressContent += (secs + 1) + 's';
+        }
+
+    }
+
+    //농작물 이름과 상태에 따라 농작물 스프라이트 위치를 밭 타일에 딱 맞게 설정한다.
+    setSpritePosition() {
+
+        // 스프라이트 위치를 초기 위치로 초기화 (0,4)
+        //  전 성장단계에서 위치 조정이 있는 경우 보정
+        this.cropSprite.x = 0;
+        this.cropSprite.y = this.offsetY;
+
+        // 새싹
+        if (this.state === 'sprout') {
+
+            switch (this.name) {
+                // 반픽셀 오른쪽
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    break;
+            }
+
+        }
+        // 성장1
+        else if (this.state === 'grow1') {
+
+            switch (this.name) {
+                case '호박':
+                    // 타일의 이루는 픽셀의 크기는 4x4
+                    // 가로 길이가 홀수인 이미지는 2픽셀(반 픽셀) 만큼 빼면 밭 타일이랑 중앙에 위치됨.
+                    this.cropSprite.x = this.cropSprite.x - this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+
+                    break;
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+
+            }
+
+        }
+        // 성장2
+        else if (this.state === 'grow2') {
+            switch (this.name) {
+
+                // 1픽셀 아래
+                case '감자':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                // 1픽셀 왼쪽, 1픽셀 아래
+                case '호박':
+                    this.cropSprite.x = this.cropSprite.x - this.offsetX;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                // 양배추 1픽셀 아래
+                case '양배추':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+                case '케일':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+            }
+        }
+        // 수확기
+        else if (this.state === 'harvest') {
+            switch (this.name) {
+
+                // 반픽셀 오른쪽, 1픽셀 아래
+                case '감자':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                // 1픽셀 아래
+                case '호박':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                // 2픽셀 아래
+                case '양배추':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+                case '밀':
+                    this.cropSprite.x = this.cropSprite.x + this.offsetX / 2;
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                case '케일':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY * 2;
+                    break;
+                case '무':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+                case '사탕무':
+                    this.cropSprite.y = this.cropSprite.y + this.offsetY;
+                    break;
+            }
+        } else {
+            console.log("정의되지 않은 성장 상태");
+        }
     }
 }

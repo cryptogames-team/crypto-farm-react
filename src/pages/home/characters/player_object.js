@@ -23,6 +23,8 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
     // 수확중인지 여부
     isHarvesting = false;
 
+    // remote 캐릭터인가?
+
     constructor(scene, x, y) {
         // 상속받은 부모 클래스의 생성자
         super(scene, x, y);
@@ -128,15 +130,15 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
             let plantAnim = this.playAnimation('water', this.hairSprite);
             plantAnim.on('animationupdate', (anim, frame) => {
                 if (frame.index === 3) {
-                    scene.addSeed(seedName, plantTile);
-                    //equipSlot.useItem(1);
+                    scene.addCrops(seedName, plantTile);
 
-                    scene.serverUseItem(seedName, 1, equipSlot);
-
+                    // 서버에 아이템 소비 요청하기
+                    const useItemInfo = scene.allItemMap.get(seedName);
+                    scene.networkManager.serverUseItem(useItemInfo, 1, equipSlot);
                 }
             });
             this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
-            
+
         } else {
             // 씨앗 심기가 불가능한 타일이면 대기 상태로 전환
             player.stateMachine.transition('idle');
@@ -228,12 +230,12 @@ class IdleState extends State {
         }
 
         // E 키 누르면 행동 상태로 전환되는데 인자 추가 전달
-        if (scene.harvestKey.isDown){
+        if (scene.harvestKey.isDown) {
             player.stateMachine.transition('action', 'harvest');
             return;
         }
 
-        // 방향키를 누르면 걷는 상태로 전환
+        // 방향키를 누르면 이동 상태로 전환
         if (left.isDown || right.isDown || up.isDown || down.isDown ||
             W.isDown || A.isDown || S.isDown || D.isDown) {
             player.stateMachine.transition('move');
@@ -263,7 +265,7 @@ class MoveState extends State {
         }
 
         // E 키 누르면 행동 상태로 전환되는데 인자 추가 전달
-        if (scene.harvestKey.isDown){
+        if (scene.harvestKey.isDown) {
             player.stateMachine.transition('action', 'harvest');
             return;
         }
@@ -343,7 +345,7 @@ class ActionState extends State {
 
 
 
-        if( action === 'harvest'){
+        if (action === 'harvest') {
             //console.log("수확 실행");
 
             let harvestAnim = player.playAnimation('do', player.hairSprite);
@@ -364,8 +366,6 @@ class ActionState extends State {
             return;
         }
 
-
-
         //console.log("캐릭터가 현재 장착중인 퀵슬롯 아이템 ", equipItem);
 
         // 씬에 퀵슬롯이 있음
@@ -374,32 +374,88 @@ class ActionState extends State {
             return;
         }
 
-
-
         // 일단은 장착한 아이템 이름에 따라 동작 실행
         // 삽일 경우 땅 파는 애니메이션 실행
         if (equipItem.name === '삽') {
 
-            let digAnim = player.playAnimation('dig', player.hairSprite);
-            // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
-            digAnim.on('animationupdate', (anim, frame) => {
-                if (frame.index === 6) {
-                    //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
-                    scene.paintTiles();
-                }
-            });
+            // 경작 가능 영역에 땅을 팔려고 하는지 확인한다.
+            const digTile = scene.getInteractTile();
 
-            // 애니메이션이 종료되면 대기 상태로 전환
-            // 이벤트 리스너에 콜백 함수 등록하려면, 함수를 바로 호출하는 것이 아닌
-            // 함수 참조를 전달해야 한다.
-            // 클래스의 멤버 함수를 등록하는 방법 - 함수 참조와 'bind'
-            player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
+            // 경작 가능한 밭타일이 존재하지 않으면 땅 팔수 있게 변경
+            // 농작물이 있는 밭 타일에 삽질 못함.
+            if (scene.isTileInPlantable(digTile) &&
+                digTile.properties.plantable !== true &&
+                digTile.properties.crops !== true) {
+                //console.log("경작 가능 영역에 땅 팔려고함.");
+                let digAnim = player.playAnimation('dig', player.hairSprite);
+                // 애니메이션의 각 프레임마다 발생하는 이벤트에 리스너 추가
+                digAnim.on('animationupdate', (anim, frame) => {
+                    if (frame.index === 6) {
+                        //console.log("땅 파기 애니메이션 프레임 6에 도달함.");
+                        scene.setFieldTile();
+                    }
+                });
+
+                // 애니메이션이 종료되면 대기 상태로 전환
+                // 이벤트 리스너에 콜백 함수 등록하려면, 함수를 바로 호출하는 것이 아닌
+                // 함수 참조를 전달해야 한다.
+                // 클래스의 멤버 함수를 등록하는 방법 - 함수 참조와 'bind'
+                player.bodySprite.once('animationcomplete', () => player.transitionToIdle(digAnim));
+            } else {
+                //console.log("경작 불가능 영역에 땅 팔려고함.");
+                player.stateMachine.transition('idle');
+            }
 
         }
-        // 도끼일 경우
+        // 도끼일 경우 10 프레임
         else if (equipItem.name === '도끼') {
 
             let axeAnim = player.playAnimation('axe', player.hairSprite);
+            // 나무 패기
+            axeAnim.on('animationupdate', (anim, frame) => {
+                if (frame.index === 6) {
+                    //console.log("도끼질 애니메이션 프레임 6에 도달함.");
+
+                    const rangeX = scene.searchArea.x;
+                    const rangeY = scene.searchArea.y;
+                    const rangeWidth = scene.searchArea.displayWidth;
+                    const rangeHeight = scene.searchArea.displayHeight;
+
+                    // Zone 생성 SerachArea 기반
+                    let axeRange = scene.add.zone(rangeX, rangeY,
+                        rangeWidth, rangeHeight);
+
+                    // zone에 물리 바디 추가해줘야 함.
+                    scene.physics.world.enable(axeRange);
+                    axeRange.body.setAllowGravity(false);
+                    axeRange.body.moves = false;
+
+                    // 오리진도 설정
+                    axeRange.setOrigin(0, 0);
+
+
+                    //console.log("axeRange x,y,width,height", axeRange.x, axeRange.y, axeRange.width, axeRange.height);
+
+                    // 1프레임 후 센서 영역 제거
+                    scene.time.delayedCall(16, () => {
+                        axeRange.destroy();
+                    });
+
+                    // 오버랩 시 콜백 함수가 딱 한번만 실행되게 하기
+                    // once() 사용이 불가능하다. 이벤트 리스너 제거하는 방법 사용
+                    // axeRange를 파괴하는 방법도 있다
+
+                    // 주의 : 컨테이너가 아니라 컨테이너의 스프라이트에 물리 바디를 적용해놓음.
+                    scene.physics.add.overlap(axeRange, scene.trees, (axeRange, tree) => {
+
+                        // 도끼질 당할 떄
+                        tree.chopTree();
+
+                        axeRange.destroy();
+                    });
+                }
+            });
+
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(axeAnim));
         }
         // 곡괭이일 경우
@@ -408,32 +464,33 @@ class ActionState extends State {
             let mineAnim = player.playAnimation('mine', player.hairSprite);
             player.bodySprite.once('animationcomplete', () => player.transitionToIdle(mineAnim));
         }
-        // 감자 씨앗인 경우
         // 나중에 씨앗 아이템을 장착한 경우로 변경하기
         else if (equipItem.name === '감자 씨앗') {
-
             // 씨앗 심기
             // 성공할 경우 씬에 농작물 오브젝트가 추가되고
             // 실패하면 농작물 오브젝트가 추가되지 않고 캐릭터 상태가 대기로 전환됨.
             player.plantSeed(scene, player, '감자 씨앗', equipSlot);
-
         }
-        // 당근 씨앗
         else if (equipItem.name === '당근 씨앗') {
-
             player.plantSeed(scene, player, '당근 씨앗', equipSlot);
         }
-        // 호박 씨앗
         else if (equipItem.name === '호박 씨앗') {
-
             player.plantSeed(scene, player, '호박 씨앗', equipSlot);
-
         }
-        // 양배추 씨앗
         else if (equipItem.name === '양배추 씨앗') {
-
             player.plantSeed(scene, player, '양배추 씨앗', equipSlot);
-
+        }
+        else if (equipItem.name === '사탕무 씨앗') {
+            player.plantSeed(scene, player, '사탕무 씨앗', equipSlot);
+        }
+        else if (equipItem.name === '무 씨앗') {
+            player.plantSeed(scene, player, '무 씨앗', equipSlot);
+        }
+        else if (equipItem.name === '밀 씨앗') {
+            player.plantSeed(scene, player, '밀 씨앗', equipSlot);
+        }
+        else if (equipItem.name === '케일 씨앗') {
+            player.plantSeed(scene, player, '케일 씨앗', equipSlot);
         }
         else {
             player.stateMachine.transition('idle');

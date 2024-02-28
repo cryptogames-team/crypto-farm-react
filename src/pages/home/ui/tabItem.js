@@ -146,9 +146,6 @@ export default class TabItem extends Phaser.GameObjects.Container {
         const edgeSize = 10;
         this.setSize(120, 100);
 
-
-
-
         if (index == 0) {
             this.button_tl = scene.add.image(18, 80, 'tab_9slice_tl')
                 .setOrigin(0, 0)
@@ -227,8 +224,6 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 color: 'white',
                 fontStyle: 'bold'
             })
-
-
 
 
             this.searchItem_name = scene.add.text(frame_search_x_position + 22, frame_search_y_position + 48, '', {
@@ -1746,7 +1741,7 @@ class SelectedSellingItem extends Phaser.GameObjects.Container {
         this.add(this.bottomRight);
 
     }
-    gb
+    
 }
 
 

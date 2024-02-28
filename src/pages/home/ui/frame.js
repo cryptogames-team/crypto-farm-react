@@ -24,13 +24,14 @@ export default class Frame extends Phaser.GameObjects.Container {
 
         super(scene,x, y);
 
-        // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.]]]]]
+        // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
         // UI 객체라서 물리 효과가 필요 없지만 바디로 경계 확인할려고 추가
         //scene.physics.add.existing(this);
 
 
         this.setDepth(100).setScrollFactor(0);
+        this.setSize(width, height);
 
         
         const edgeSize=10;
@@ -99,6 +100,29 @@ export default class Frame extends Phaser.GameObjects.Container {
         this.setDepth(1000);
     }
 
+        // 9분할 박스 UI 크기 변경
+        setUISize(width, height){
+    
+            const edgeSize = this.edgeSize;
+    
+            // top 부분은 height 필요 없음
+            // topCenter, topRight
+            this.topCenter.setDisplaySize(width - (edgeSize * 2), edgeSize);
+            this.topRight.setPosition(width, 0);
+    
+            // center 부분 width, height 
+            // centerLeft, center, centerRight
+            this.centerLeft.setDisplaySize(edgeSize, height - (edgeSize * 2));
+            this.center.setDisplaySize(width - (edgeSize * 2), height - (edgeSize * 2));
+            this.centerRight.setPosition(width - edgeSize, edgeSize);
+            this.centerRight.setDisplaySize(edgeSize, height - (edgeSize * 2));
+    
+            // bottom 부분 width, height
+            this.bottomLeft.setPosition(0, height);
+            this.bottomCenter.setPosition(edgeSize, height)
+            .setDisplaySize(width - (edgeSize * 2), edgeSize);
+            this.bottomRight.setPosition(width, height);
+        }
     
 
 

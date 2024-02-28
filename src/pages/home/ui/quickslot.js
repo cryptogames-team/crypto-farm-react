@@ -89,9 +89,7 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         this.setInteractive(new Phaser.Geom.Rectangle(this.width / 2, this.height / 2,
             this.width, this.height),
             Phaser.Geom.Rectangle.Contains);
-
-
-
+            
         // 개별 퀵슬롯이나 퀵슬롯 아이템 이미지에 가려진다.
         // setTopOnly(false) 트리거를 개별 퀵슬롯이나 퀵슬롯 아이템 이미지에 설정한다.
 
@@ -105,8 +103,6 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             }
         });
 
-        // 서버에서 받아온 소유 아이템들을 퀵슬롯에 추가하여 퀵슬롯 초기화
-        this.initQuick(scene.own_items);
 
         // 아이템 툴팁 생성하기3
         // 컨테이너는 오리진 설정이 불가능
@@ -116,16 +112,15 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
 
     }
 
-
     // own_items 서버에서 비동기로 가져오잖아 
-    // 로드 완료하기전에 initQuick 실행되서 그런듯
     // 서버에서 받아온 소유 아이템들을 퀵슬롯에 추가하기
     initQuick(own_items) {
+
+        //console.log('initQuick 할 때 own_items 확인', own_items);
 
         own_items.forEach((own_item, index) => {
             // 구조 분해 할당 
             const { item, item_count, item_index } = own_item;
-
 
             // 아이템 인덱스 범위가 0~8인지 확인하기
             if (item_index >= this.startIndex && item_index <= this.endIndex) {

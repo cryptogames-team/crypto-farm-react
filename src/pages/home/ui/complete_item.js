@@ -9,7 +9,7 @@ export default class CompleteItem extends Phaser.GameObjects.Container {
     userName="park"
     setInfo(info,type)
     {   
-        console.log(info)
+        //console.log(info)
         this.info=info
         if(info.auction)
         if(type==0)
