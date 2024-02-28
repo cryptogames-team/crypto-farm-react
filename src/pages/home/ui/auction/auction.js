@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import Frame from '../ui/frame';
+import Frame from '../frame/frame';
 import TabItem from "./tabItem";
 
 export default class Auction extends Frame {

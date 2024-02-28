@@ -1,8 +1,8 @@
 import Phaser from "phaser";
 import StoreItemSlot from "./seed_store/store_item_slot";
 import ToolTip from "./tooltip";
-import Frame from "./frame";
-import Frame_LT from "./frame_lt";
+import Frame from "./frame/frame";
+import Frame_LT from "./frame/frame_lt";
 
 
 

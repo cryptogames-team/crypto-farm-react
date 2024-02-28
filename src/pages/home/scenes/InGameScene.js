@@ -4,7 +4,8 @@ import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
-import Auction from '../ui/auction';
+import Auction from '../ui/auction/auction';
+import Chat from '../ui/chat/chatInput';
 import ObjectToolTip from '../ui/object_tooltip';
 import UIVisibleBtn from '../ui/button/UIVisibleBtn';
 import Tree from '../elements/tree';
@@ -15,7 +16,7 @@ import SeedStoreNPC from '../npc/seed_store_npc';
 import SeedStoreUI from '../ui/seed_store/seed_store_ui';
 import FirePitNPC from '../npc/fire_pit_npc';
 import FirePitUI from '../ui/fire_pit/fire_pit_ui';
-import Frame_LT from '../ui/frame_lt';
+import Frame_LT from '../ui/frame/frame_lt';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -151,6 +152,11 @@ export default class InGameScene extends Phaser.Scene {
         super('InGameScene');
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
+
+
+
+        // 테스트 계정의 감자 갯수 증가 시키기
+        //this.serverAddItem(9, 1, 3);
     }
 
     // 씬이 시작될 때 가장 먼저 실행되는 메서드이다.
@@ -214,13 +220,13 @@ export default class InGameScene extends Phaser.Scene {
         // 타일맵 JSON 파일 로드
         this.load.path = 'assets/maps/'
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
-
-        // 게임에 필요한 이미지 전부 로드
+        this.load.tilemapTiledJSON('Market', 'ingame/Market.json');
+        this.load.tilemapTiledJSON('Test', 'ingame/test.json');        // 게임에 필요한 이미지 전부 로드
         assetManager.loadAllImage();
     }
 
     create() {
-
+        
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
@@ -272,12 +278,6 @@ export default class InGameScene extends Phaser.Scene {
 
     
 
-        //console.log("invenX, invenY : ", invenX, invenY);
-
-        this.inventory = new Inventory(this, invenX, invenY,
-            invenWidth, invenHeight);
-
-        this.inventory.disable();
 
 
         // 퀵슬롯 클래스 객체 생성하고 추가
@@ -394,6 +394,11 @@ export default class InGameScene extends Phaser.Scene {
             // 플레이어 캐릭터와 레이어 충돌 적용
             this.physics.add.collider(this.playerObject, layer);
 
+
+
+
+
+
             // 디버그 그래픽 객체 배열 초기화
             if (i === 0) {
                 // 타일맵 레이어 갯수만큼
@@ -419,6 +424,7 @@ export default class InGameScene extends Phaser.Scene {
         // 서버에서 맵 데이터 가져와서 적용
         this.networkManager.serverGetMap(this.characterInfo.asset_id).then(data => {
             // 맵 데이터 초기화
+            console.log(data)
             this.initMapData(data);
             // 맵 데이터 배열 기반으로 게임 맵 초기화
             this.initGameMap();
@@ -432,7 +438,6 @@ export default class InGameScene extends Phaser.Scene {
         this.plantableLayer = this.ingameMap.getObjectLayer('Plantable Layer').objects;
         // 로드 체크
         //console.log(this.plantableLayer);
-
         // 오브젝트 레이어 디버그 그래픽 설정
         const objectGraphics = this.add.graphics({
             fillStyle: { color: 0x0000ff }, lineStyle: { color: 0x0000ff }
@@ -578,7 +583,7 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
         this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize);
     }
-
+    
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
     // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
     // 이 값은 게임이 얼마나 매끄럽게 실행되고 있는지를 나타내는데 사용될 수 있으며,
@@ -630,7 +635,14 @@ export default class InGameScene extends Phaser.Scene {
         if (this.closeBracketKey.isDown) {
             this.auction.enable();
         }
+        //시장맵이동
+        if(this.playerObject.x> 740 && this.playerObject.x <920 &&this.playerObject.y<1)
+        {
+            this.scene.start('MarketScene',this.characterInfo);
+            this.playerObject.y=10
+        }
 
+       
     }
 
     // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
@@ -899,6 +911,7 @@ export default class InGameScene extends Phaser.Scene {
 
     }
 
+
     // 아이템 이름으로 새 아이템이 추가되거나 수량이 증가할 아이템 슬롯 찾음
     findAddItemSlot(itemName) {
 
@@ -1069,6 +1082,8 @@ export default class InGameScene extends Phaser.Scene {
 
     // 서버로부터 받은 맵 데이터를 씬의 mapData 변수로 초기화
     initMapData(data) {
+
+        if(data){
         // data -> mapData에 저장하기
         data.objects.forEach((object, index) => {
             this.mapData.objects.push(object);
@@ -1079,6 +1094,7 @@ export default class InGameScene extends Phaser.Scene {
         data.trees.forEach((tree, index) => {
             this.mapData.trees.push(tree);
         });
+    }
 
         if (this.mapData.trees.length === 0) {
             console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
@@ -1189,5 +1205,4 @@ export default class InGameScene extends Phaser.Scene {
         //console.log("string -> Date mapDate 확인", this.mapData.crops);
         //console.log("string -> Date serverCrops 확인", this.serverCrops);
     }
-
 }

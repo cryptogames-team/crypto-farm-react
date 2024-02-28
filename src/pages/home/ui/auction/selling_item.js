@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import Frame_LT from './frame_lt';
-import Item from "../elements/item";
+import Frame_LT from "../frame/frame_lt";
+import Item from "../../elements/item";
 
 export default class SellingItem extends Phaser.GameObjects.Container {
 
@@ -88,6 +88,7 @@ export default class SellingItem extends Phaser.GameObjects.Container {
                 const url = scene.APIurl + '/auction/' + this.sellingInfo.auction_id + '/' + this.emptySlotIndex
                 
                 console.log("auction_id : " + this.sellingInfo.auction_id)
+                console.log("emptySlotIndex : " + this.emptySlotIndex)
                 //요청 보내기
                 fetch(url, {
                     method: 'DELETE',

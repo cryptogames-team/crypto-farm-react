@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import Frame from "../frame";
-import Frame_LT from "../frame_lt";
 import StoreTabBody from "./store_tab_body";
+import Frame_LT from "../frame/frame_lt";
+import Frame from "../frame/frame";
 
 
 export default class SeedStoreUI extends Frame {

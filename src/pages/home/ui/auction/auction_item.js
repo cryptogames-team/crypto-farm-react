@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import Item from "../elements/item";
+import Item from "../../elements/item";
 
 export default class AuctionItem extends Phaser.GameObjects.Container {
 

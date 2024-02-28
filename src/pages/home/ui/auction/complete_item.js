@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import Frame_LT from './frame_lt';
+import Frame_LT from "../frame/frame_lt";
 
 export default class CompleteItem extends Phaser.GameObjects.Container {
 

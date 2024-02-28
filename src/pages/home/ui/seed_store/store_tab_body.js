@@ -1,8 +1,8 @@
 import Phaser from "phaser";
-import Frame_LT from "../frame_lt";
 import StoreItemSlot from "./store_item_slot";
-import Frame from "../frame";
 import ToolTip from "../tooltip";
+import Frame_LT from "../frame/frame_lt";
+import Frame from "../frame/frame";
 
 
 const pad = 20;

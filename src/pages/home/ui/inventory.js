@@ -1,8 +1,8 @@
 import Phaser from "phaser";
-import Frame from '../ui/frame';
+import Frame from './frame/frame';
 import ItemSlot from "./item_slot";
 import Item from "../elements/item";
-import Frame_LT from "./frame_lt";
+import Frame_LT from "./frame/frame_lt";
 import ToolTip from "./tooltip";
 
 // 패딩

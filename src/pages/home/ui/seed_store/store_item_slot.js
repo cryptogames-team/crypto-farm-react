@@ -1,9 +1,9 @@
 import Phaser from "phaser";
-import Frame from "../frame";
 import Item from "../../elements/item";
 import Frame_W from "../frame_w";
 import SelectBox from "../select_box";
 import { tab } from "@testing-library/user-event/dist/tab";
+import Frame from "../frame/frame";
 
 
 export default class StoreItemSlot extends Frame {

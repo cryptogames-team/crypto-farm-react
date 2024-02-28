@@ -1,8 +1,8 @@
 import Phaser from "phaser";
-import Frame from "../frame";
-import Frame_LT from "../frame_lt";
 import TabBodyUI from "../tab_body_ui";
 import CookingTab from "./cooking_tab";
+import Frame from "../frame/frame";
+import Frame_LT from "../frame/frame_lt";
 
 
 export default class FirePitUI extends Frame {

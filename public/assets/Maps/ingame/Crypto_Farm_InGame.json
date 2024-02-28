@@ -153,6 +153,28 @@
          "y":0
         }, 
         {
+         "draworder":"topdown",
+         "id":19,
+         "name":"GoMarket",
+         "objects":[
+                {
+                 "height":15,
+                 "id":28,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":50,
+                 "x":190,
+                 "y":0
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "data":[0, 1197, 1198, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 1261, 1262, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 1325, 1326, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -183,8 +205,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":19,
- "nextobjectid":26,
+ "nextlayerid":22,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
@@ -199,7 +221,7 @@
              "orientation":"orthogonal",
              "width":32
             },
-         "image":"..\/..\/..\/..\/..\/..\/Users\/jk047\/Downloads\/Crypto_Farm Assets\/Sunnyside_world_ASSET\/Sunnyside_World_ASSET_PACK_V2.1\/Sunnyside_World_ASSET_PACK_V2.1\/Sunnyside_World_Assets\/Tileset\/spr_tileset_sunnysideworld_16px.png",
+         "image":"..\/..\/..\/..\/..\/..\/..\/..\/Sunnyside_World_Assets\/Sunnyside_World_Assets\/Tileset\/spr_tileset_sunnysideworld_16px.png",
          "imageheight":1024,
          "imagewidth":1024,
          "margin":0,
@@ -37219,7 +37241,7 @@
              "orientation":"orthogonal",
              "width":32
             },
-         "image":"..\/..\/..\/..\/..\/..\/Users\/jk047\/Downloads\/Crypto_Farm Assets\/Sunnyside_world_ASSET\/Sunnyside_World_ASSET_PACK_V2.1\/Sunnyside_World_ASSET_PACK_V2.1\/Sunnyside_World_Assets\/Elements\/Animals\/spr_deco_cow_strip4.png",
+         "image":"..\/..\/..\/..\/..\/..\/..\/..\/Sunnyside_World_Assets\/Sunnyside_World_Assets\/Elements\/Animals\/spr_deco_cow_strip4.png",
          "imageheight":32,
          "imagewidth":128,
          "margin":0,
@@ -37238,7 +37260,7 @@
              "orientation":"orthogonal",
              "width":32
             },
-         "image":"..\/..\/..\/..\/..\/..\/Users\/jk047\/Downloads\/Crypto_Farm Assets\/Sunnyside_world_ASSET\/Sunnyside_World_ASSET_PACK_V2.1\/Sunnyside_World_ASSET_PACK_V2.1\/Sunnyside_World_Assets\/Tileset\/spr_tileset_sunnysideworld_16px.png",
+         "image":"..\/..\/..\/..\/..\/..\/..\/..\/Sunnyside_World_Assets\/Sunnyside_World_Assets\/Tileset\/spr_tileset_sunnysideworld_16px.png",
          "imageheight":1024,
          "imagewidth":1024,
          "margin":0,

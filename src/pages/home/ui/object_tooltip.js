@@ -1,4 +1,4 @@
-import Frame_LT from "./frame_lt";
+import Frame_LT from "./frame/frame_lt";
 
 // 농작물 정보 툴팁 클래스
 // 게임 오브젝트 정보 툴팁으로 변경

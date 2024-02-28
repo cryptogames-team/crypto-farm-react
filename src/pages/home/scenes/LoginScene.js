@@ -45,8 +45,7 @@ export default class LoginScene extends Phaser.Scene {
         // 게임 캔버스의 현재 높이
         const canvasHeight = this.sys.game.canvas.height;
         console.log("초기 Canvas Size : %d, %d", canvasWidth, canvasHeight);
-
-
+      
 
         // 로그인 배경의 바닥 png 추가
         // 초기 화면 크기 기억해놓기

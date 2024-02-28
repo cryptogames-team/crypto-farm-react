@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 import TabBodyUI from "../tab_body_ui";
-import Frame from "../frame";
+import Frame from "../frame/frame";
+
+
 
 export default class CookingTab extends TabBodyUI {
 
