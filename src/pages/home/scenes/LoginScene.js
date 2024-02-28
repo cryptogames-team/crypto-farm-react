@@ -47,7 +47,6 @@ export default class LoginScene extends Phaser.Scene {
         console.log("초기 Canvas Size : %d, %d", canvasWidth, canvasHeight);
 
 
-
         // 로그인 배경의 바닥 png 추가
         // 초기 화면 크기 기억해놓기
         const login_background_ground = this.add.image(window.innerWidth, window.innerHeight, 'login_background_ground');

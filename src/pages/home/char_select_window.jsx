@@ -158,9 +158,7 @@ function CharSelectWindow({accountName, onCharSelect}) {
         // API 
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-          // 액세스 토큰 값 보내기
-          //Authorization : JWTAcesstoken
+          'Content-Type': 'application/json',
         },
         // asset id
         // 서버에 없는 asset id 보내면 아무것도 안온다.

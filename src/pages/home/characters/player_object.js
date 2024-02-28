@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import ChatContentBox from '../ui/chat/chatContentBox';
 
 
 
@@ -22,7 +23,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
 
     // 수확중인지 여부
     isHarvesting = false;
-
+    chatContentBox
     constructor(scene, x, y) {
         // 상속받은 부모 클래스의 생성자
         super(scene, x, y);
@@ -84,17 +85,20 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
         }, [scene, this]);
 
 
-
         //캐릭터 이름표 추가
-        this.nameTag = scene.add.text(33,60, scene.characterInfo.user_name, {
+        this.nameTag = scene.add.text(33, 60, scene.characterInfo.user_name, {
             fontFamily: 'Arial',
             fontSize: '18px',
             color: 'white',
             fontStyle: 'bold',
-            stroke: '#000000', 
+            stroke: '#000000',
             strokeThickness: 4
         }).setOrigin(0.5, 0)
         this.add(this.nameTag)
+
+        //채팅말풍선
+        this.chatContentBox=new ChatContentBox(scene)
+        this.add(this.chatContentBox)
     }
 
 
@@ -149,7 +153,7 @@ export default class PlayerObject extends Phaser.GameObjects.Container {
                 }
             });
             this.bodySprite.once('animationcomplete', () => this.transitionToIdle(plantAnim));
-            
+
         } else {
             // 씨앗 심기가 불가능한 타일이면 대기 상태로 전환
             player.stateMachine.transition('idle');
@@ -235,13 +239,14 @@ class IdleState extends State {
 
 
         // 스페이스 바를 누르면 행동 상태로 전환
-        if (space.isDown) {
+        // 경매장에 있을경우 실행 안하는 코드 추가
+        if (space.isDown && scene.scene.key!="MarketScene") {
             player.stateMachine.transition('action');
             return;
         }
 
         // E 키 누르면 행동 상태로 전환되는데 인자 추가 전달
-        if (scene.harvestKey.isDown){
+        if (scene.harvestKey.isDown) {
             player.stateMachine.transition('action', 'harvest');
             return;
         }
@@ -270,13 +275,14 @@ class MoveState extends State {
 
 
         // 스페이스 바 누르면 행동 상태로 전환
-        if (space.isDown) {
+        // 경매장에 있을경우 실행 안하는 코드 추가
+        if (space.isDown && scene.scene.key!="MarketScene") {
             player.stateMachine.transition('action');
             return;
         }
 
         // E 키 누르면 행동 상태로 전환되는데 인자 추가 전달
-        if (scene.harvestKey.isDown){
+        if (scene.harvestKey.isDown) {
             player.stateMachine.transition('action', 'harvest');
             return;
         }
@@ -356,7 +362,7 @@ class ActionState extends State {
 
 
 
-        if( action === 'harvest'){
+        if (action === 'harvest') {
             //console.log("수확 실행");
 
             let harvestAnim = player.playAnimation('do', player.hairSprite);

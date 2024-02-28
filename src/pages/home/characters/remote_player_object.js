@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-
+import ChatContentBox from '../ui/chat/chatContentBox';
 
 
 // 캐릭터 스프라이트 크기 배율
@@ -96,6 +96,11 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
             strokeThickness: 4
         }).setOrigin(0.5, 0)
         this.add(this.nameTag)
+
+
+        //채팅말풍선
+        this.chatContentBox=new ChatContentBox(scene)
+        this.add(this.chatContentBox)
     }
 
 

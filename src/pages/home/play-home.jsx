@@ -41,6 +41,7 @@ function LoginWithCharacter() {
     setCurrentComponent("characterSelect");
   }
 
+  
   // 캐릭터 선택하면 
   // 1. 캐릭터 선택 컴포넌트 닫고
   // 2. 페이저 컴포넌트에 캐릭터 정보 전달
@@ -92,13 +93,29 @@ function LoginWithCharacter() {
 
 }
 
+const handleEvent = () => {
+
+};
+
 // 여기서 로그인 컴포넌트 사라지게 만들어야 함.
 export default function PlayHome() {
+  const sendComplete = (value) => {
+    
+    eventSystem.emit('sendComplete', value);
+  }
   return (
 
     <div id="container">
-      <PhaserGameComponent  />
-{/*       <LoginWithCharacter />  */}
+      <PhaserGameComponent/>
+      <input id="auth_name_for_multi" type="hidden" value=""></input>
+      <input id="datas_for_multi" type="hidden" ></input>
+      <button id="transactions" type="hidden" ></button>
+
+      <input id="result_for_multi" type="hidden"></input>
+      <input id="status_for_multi" type="hidden"></input>
+      <button id="transaction_complete_for_multi" type="hidden" onClick={sendComplete}></button>
+      <LoginWithCharacter></LoginWithCharacter>
+
     </div>
 
 

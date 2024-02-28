@@ -5,10 +5,11 @@ import ItemSlot from '../ui/item_slot';
 import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
-import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction/auction';
 import { io } from 'socket.io-client';
-import Chat from '../ui/chat/chat';
+import Chat from '../ui/chat/chatInput';
+import Market from '../ui/heptaMarket/market';
+
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -29,8 +30,9 @@ let APIUrl = process.env.REACT_APP_API;
 
 export default class MarketScene extends Phaser.Scene {
 
+
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1OTA5NTk0LCJleHAiOjE3MDU5NDU1OTR9.QBuZgStMNbif2taZEqX7qaI00125ffm7HijF4TxdUww"
+    accessToken
     auction;
     socket;
     // 플레이어가 상호작용할 타일의 인덱스
@@ -92,7 +94,7 @@ export default class MarketScene extends Phaser.Scene {
     // 해쉬 테이블에 저장시킴
     // 모든 아이템 정보 <- 해쉬 테이블
     allItems = new Map();
-
+    market
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
     constructor() {
@@ -106,22 +108,28 @@ export default class MarketScene extends Phaser.Scene {
     init(characterInfo) {
 
         // 로그인 씬으로부터 파라미터를 전달 받는다.
-        console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo)
+        console.log("마켓 씬을 시작하며 전달받은 데이터", characterInfo)
         this.characterInfo = characterInfo;
-
+        this.accessToken=this.characterInfo.accessToken
         // 스프라이트 로더 인스턴스 생성       
         this.spriteLoader = new SpriteLoader(this);
 
 
+        /*
         this.characterInfo = {
             user_id: 2,
-            asset_name: '9763734532',
-            user_name: 'park',
+            asset_name: '7',
+            user_name: 'y1',
             exp: 1000,
             level: 1,
-            cft: 1500000
+            cft: 5000000
         }
+        */
         const rand_1_6 = Math.floor(Math.random() * 6) + 1;
+
+
+        //메타버스 테스트를 위한 코드        
+        /*
         switch (rand_1_6) {
             case 1:
                 this.characterInfo.user_name = 'park'
@@ -148,7 +156,7 @@ export default class MarketScene extends Phaser.Scene {
                 this.characterInfo.asset_name = '4563456'
                 break;
         }
-
+        */
     }
 
     // 애셋 로드
@@ -269,7 +277,7 @@ export default class MarketScene extends Phaser.Scene {
         // 해시 맵처럼 동작하는 객체 생성
         this.remotePlayers = [];
         // 키-값 쌍 추가
-        
+
         //캐릭터의 위치가 바뀐다면 0.2초 주기로 서버로 위치값 보냄
         const intervalId = setInterval(() => {
             if ((this.beforePositionX != this.playerObject.x) || (this.beforePositionY != this.playerObject.y)) {
@@ -290,58 +298,70 @@ export default class MarketScene extends Phaser.Scene {
         this.socket.on('disconnect', () => {
             this.socket.emit('exit', user_info);;
         });
-        this.socket.on('move', (data) => {             
+        this.socket.on('move', (data) => {
             if (data.user_name != this.characterInfo.user_name) {
-                for(let i=0;i<this.remotePlayers.length;i++)
-                {
-                    if(this.remotePlayers[i].name==data.user_name)
-                    {
-                        console.log(this.remotePlayers[i].name+" moved to x: "+data.x+"y : "+data.y)
-                        this.remotePlayers[i].move(data.x,data.y)
+                for (let i = 0; i < this.remotePlayers.length; i++) {
+                    if (this.remotePlayers[i].name == data.user_name) {
+                        console.log(this.remotePlayers[i].name + " moved to x: " + data.x + "y : " + data.y)
+                        this.remotePlayers[i].move(data.x, data.y)
                         break;
                     }
-                } 
+                }
             }
         })
         //유저가 들어왔을때
         this.socket.on('joinRoom', (data) => {
             if (data.user_name != this.characterInfo.user_name) {
-                let remotePlayer = new RemotePlayer(this, 1400, 700,data.user_name)
+                let remotePlayer = new RemotePlayer(this, 1230, 1820, data.user_name)
                 this.remotePlayers.push(remotePlayer);
             }
         })
         //방처음 들어왔을때 user리스트 받음 
         this.socket.on('getUsers', (data) => {
-            for(let i=0;i<data.length;i++)
-            {           
-                let remotePlayer = new RemotePlayer(this, data[i].x, data[i].y,data[i].user_name)
-                this.remotePlayers.push(remotePlayer);
+            if(data==!null)
+            {
+                for (let i = 0; i < data.length; i++) {
+                    let remotePlayer = new RemotePlayer(this, data[i].x, data[i].y, data[i].user_name)
+                    this.remotePlayers.push(remotePlayer);
+                }
             }
+            
         })
-
+        //채팅 기록 불러옴 50개까지
+        this.socket.on('getChat', (data) => {
+            this.chatUI.getChat(data)
+        })
         //유저나갔을때 캐릭터 지워줌
         this.socket.on('exitRoom', (data) => {
             console.log('exitRoom')
             console.log(data)
             if (data != this.characterInfo.user_name) {
-                for(let i=0;i<this.remotePlayers.length;i++)
-                {
-                    if(this.remotePlayers[i].name==data)
-                    {
-                        this.removeCharacter=this.remotePlayers[i]                        
+                for (let i = 0; i < this.remotePlayers.length; i++) {
+                    if (this.remotePlayers[i].name == data) {
+                        this.removeCharacter = this.remotePlayers[i]
                         this.remotePlayers.splice(i, 1);
                         this.removeCharacter.destroy()
                         break;
                     }
-                } 
+                }
             }
         })
+        //채팅
         this.socket.on('chat', (data) => {
             var resultArray = data.split(':')
-            var name=resultArray[0].trim()
-            var content=resultArray[1].trim()
-            console.log("name : "+name)
-            console.log("content : "+content)
+            var name = resultArray[0].trim()
+            var content = resultArray[1].trim()
+ 
+            //채팅한 유저의 캐릭터를 찾고 머리위에 말풍선 띄워줌
+            if (data != this.characterInfo.user_name) {
+                for (let i = 0; i < this.remotePlayers.length; i++) {
+                    if (this.remotePlayers[i].name == name) {
+                        this.remotePlayers[i].chatContentBox.NewChat(content)
+                        this.chatUI.NewChat(data)
+                        break;
+                    }
+                }
+            }
         })
 
 
@@ -433,9 +453,20 @@ export default class MarketScene extends Phaser.Scene {
 
         this.auction.setVisible(false);
 
-        // 인벤토리 UI 추가
 
 
+        //마켓 UI 생성
+        //크기
+        const marketWidth = 1000;
+        const marketHeight = 600;
+
+ 
+        const marketX = this.cameras.main.width / 2 - marketWidth / 2;
+        const marketY = this.cameras.main.height / 2 - marketHeight / 2;
+        this.market = new Market(this, marketX, marketY,
+            marketWidth, marketHeight);
+
+        this.market.setVisible(false);
 
 
 
@@ -461,7 +492,7 @@ export default class MarketScene extends Phaser.Scene {
             const layer = this.ingameMap.createLayer(i, sunnysideworld_tileset, 0, 0);
             // 레이어 깊이 설정. 깊이 값은 레이어 간의 시각적 순서를 결정한다.
             // 낮은 깊이를 가진 레이어가 뒤에 배치되고, 높은 깊이를 가진 레이어가 앞에 배치된다.
-            layer.setDepth(i);
+            layer.setDepth(i*0.1);
             // 레이어 스케일 설정
             layer.scale = layerScale;
             // 현재 맵 크기 설정
@@ -479,8 +510,6 @@ export default class MarketScene extends Phaser.Scene {
         const objectGraphics = this.add.graphics({
             fillStyle: { color: 0x0000ff }, lineStyle: { color: 0x0000ff }
         }).setDepth(1000);
-
-
 
 
 
@@ -512,6 +541,8 @@ export default class MarketScene extends Phaser.Scene {
         //]키 경매장 UI오픈
         this.closeBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
 
+        //[키 메소마켓 UI오픈
+        this.openBracketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.OPEN_BRACKET);
 
         // 'C' 키 입력 이벤트 리스너
         toggleDebugKey.on('down', function () {
@@ -542,11 +573,8 @@ export default class MarketScene extends Phaser.Scene {
 
 
 
-        this.chatUI=new Chat(this)
-        this.chatUI.setPosition(this.cameras.main.width/2+50,this.cameras.main.height-50)
-
-         
-        
+        this.chatUI = new Chat(this)
+        this.chatUI.setPosition(this.cameras.main.width / 2 + 50, this.cameras.main.height - 50)
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -579,15 +607,19 @@ export default class MarketScene extends Phaser.Scene {
             this.auction.enable();
         }
 
-        
-        //원래맵이동
-        if(this.playerObject.x> 1150 && this.playerObject.x <1320 &&this.playerObject.y>1830)
-        {
-            this.scene.switch('InGameScene', this.characterInfo);
-            this.playerObject.y=1820
+
+        //[키 눌렀는지 체크 Hep마켓 UI열어줌.
+        if (this.openBracketKey.isDown) {
+            this.market.enable();
         }
 
-        
+        //원래맵이동
+        if (this.playerObject.x > 1150 && this.playerObject.x < 1320 && this.playerObject.y > 1830) {
+            this.scene.switch('InGameScene', this.characterInfo);
+            this.playerObject.y = 1820
+        }
+
+
     }
 
 

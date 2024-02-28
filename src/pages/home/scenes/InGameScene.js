@@ -6,6 +6,7 @@ import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction/auction';
+import Chat from '../ui/chat/chatInput';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -27,7 +28,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJwYXJrIiwiYXNzZXRfaWQiOiI5NzYzNzM0NTMyIiwiaWF0IjoxNzA1OTA5NTk0LCJleHAiOjE3MDU5NDU1OTR9.QBuZgStMNbif2taZEqX7qaI00125ffm7HijF4TxdUww"
+    accessToken
     auction;
     // 플레이어가 상호작용할 타일의 인덱스
     interactTileIndexTxt;
@@ -108,11 +109,12 @@ export default class InGameScene extends Phaser.Scene {
         // 로그인 씬으로부터 파라미터를 전달 받는다.
         console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo)
         this.characterInfo = characterInfo;
-
+        this.accessToken=this.characterInfo.accessToken
         // 스프라이트 로더 인스턴스 생성
         this.spriteLoader = new SpriteLoader(this);
 
         // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
+        /*
         this.characterInfo = {
             user_id: 2,
             asset_name: '9763734532',
@@ -120,17 +122,10 @@ export default class InGameScene extends Phaser.Scene {
             exp: 1000,
             level: 1,
             cft: 1500000
+            
         }
-
-        /*
-        this.characterInfo = {
-            user_id : 3,
-            asset_name : '665556',
-            user_name : 'test2',
-            exp: 2000,
-            level: 2,
-            cft: 1500000
-        }*/
+        */
+        
         this.serverGetUserItem();
         this.serverGetAllItem();
     }
@@ -400,7 +395,7 @@ export default class InGameScene extends Phaser.Scene {
 
     create() {
 
-
+        
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
@@ -720,8 +715,11 @@ export default class InGameScene extends Phaser.Scene {
 
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
         this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize, selectBoxScale, selectBoxDepth);
-    }
 
+
+    
+    }
+    
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
     // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
     // 이 값은 게임이 얼마나 매끄럽게 실행되고 있는지를 나타내는데 사용될 수 있으며,
@@ -790,9 +788,11 @@ export default class InGameScene extends Phaser.Scene {
         //시장맵이동
         if(this.playerObject.x> 740 && this.playerObject.x <920 &&this.playerObject.y<1)
         {
-            this.scene.switch('MarketScene', this.characterInfo);
+            this.scene.start('MarketScene',this.characterInfo);
             this.playerObject.y=10
         }
+
+       
     }
 
 
