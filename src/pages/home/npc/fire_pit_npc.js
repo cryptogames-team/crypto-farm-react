@@ -50,7 +50,7 @@ export default class FirePitNPC extends Phaser.GameObjects.Container {
         this.nameTag.setOrigin(0.5, 0);
 
         // 상호작용 영역 설정
-        this.building.setInteractive();
+        this.setNPCInteractive(true);
 
         // 마우스 오버, 클릭 이벤트 설정
         this.building.on('pointerover', (pointer) => {
@@ -64,6 +64,8 @@ export default class FirePitNPC extends Phaser.GameObjects.Container {
         this.building.on('pointerdown', (pointer) => {
             //console.log("화덕 NPC 클릭됨!");
             this.scene.FirePitUI.enable();
+            this.setNPCInteractive(false);
+            document.body.style.cursor = 'default';
         });
 
         // 상호작용 영역보기
@@ -71,6 +73,15 @@ export default class FirePitNPC extends Phaser.GameObjects.Container {
         this.scene.input.enableDebug(this.building); */
 
         this.add([this.building, this.npcSprite, this.nameTag]);
+    }
+
+    // NPC 상호작용 설정
+    setNPCInteractive(value){
+
+        if(value)
+        this.building.setInteractive();
+        else
+        this.building.disableInteractive();
     }
 
 }

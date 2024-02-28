@@ -98,7 +98,7 @@ export default function PlayHome() {
 
     <div id="container">
       <PhaserGameComponent  />
-{/*       <LoginWithCharacter />  */}
+      <LoginWithCharacter /> 
     </div>
 
 

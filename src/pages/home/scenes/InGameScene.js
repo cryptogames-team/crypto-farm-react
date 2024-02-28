@@ -35,7 +35,7 @@ let APIUrl = process.env.REACT_APP_API;
 export default class InGameScene extends Phaser.Scene {
 
     APIurl = 'http://221.148.25.234:1234'
-    accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MDEyODA2LCJleHAiOjE3MDkwNDg4MDZ9.U4k2nL6xnfvHNmWHkR-HDexdzHRRtezjmP46gfOLPe8"
+    accessToken = "";
     auction;
 
     // 플레이어가 상호작용할 타일의 인덱스
@@ -162,16 +162,16 @@ export default class InGameScene extends Phaser.Scene {
         console.log("인게임 씬을 시작하며 전달받은 데이터", characterInfo);
 
         this.characterInfo = characterInfo;
-        this.assetManager = new AssetManager(this);
-        this.networkManager = new NetworkManager(this);
 
         if (this.characterInfo) {
             console.log('this.characterInfo 존재');
-        } else {
-            console.log('this.characterInfo 존재 안함');
-        }
 
-        // 로그인하지 않고 캐릭터 테스트하기 위해 선언한 변수
+            // 액세스 토큰 로컬 스토리지에서 받아오기
+            this.accessToken = localStorage.getItem('accessToken');
+
+        } else { // 로그인하지 않고 테스트
+            console.log('this.characterInfo 존재 안함');
+
         this.characterInfo = {
             user_id: 1,
             user_name: 'park',
@@ -180,6 +180,12 @@ export default class InGameScene extends Phaser.Scene {
             cft: 1000,
             asset_id: 4563456
         }
+        // 하드코딩된 액세스 토큰 값 넣어주면 된다.
+        this.accessToken = '';
+        }
+
+        this.assetManager = new AssetManager(this);
+        this.networkManager = new NetworkManager(this);
 
         // 모든 아이템 정보 목록 요청
         this.networkManager.serverGetAllItem().then(data => {
@@ -196,8 +202,6 @@ export default class InGameScene extends Phaser.Scene {
             //console.log('allItemList 확인',this.allItemList);
         });
 
-        // assetManager로 스프라이트 시트로드가 잘 되는지 테스트
-        //this.characterInfo.name = 'curly';
     }
 
     // 애셋 로드

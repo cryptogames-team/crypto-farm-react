@@ -35,22 +35,24 @@ function CharSelectItem({registeredCharacter, onCharSelect}) {
                 // Content-Type과 body를 안 맞추면 Bad Request 
                 body: JSON.stringify({ asset_id : registeredCharacter.asset_id,
                 user_name : registeredCharacter.user_name})
-      
-                // JSON 형식으로 보내기
-
               });
       
               // 여기서 서버 응답을 받는다.
               // .json() : 받은 응답을 JSON 형식으로 변환한다.
               const data = await response.json();
 
-              // accessToken JWT 토큰?
-              //console.log(data);
-              selectCharInfo.accessToken = data.accessToken;
+              // accessToken 받아오기
+              console.log(data);
+              // 로컬 스토리지에 저장
+              localStorage.setItem('accessToken', data.accessToken);
+              // 로컬 스토리지에 저장한 액세스 토큰값 확인
+              console.log('로컬 스토리지에 저장한 액세스 토큰 값 ', localStorage.getItem('accessToken'));
 
               onCharSelect(selectCharInfo);
 
         } catch (error) {
+
+            console.log("handleClick Error");
             
         }
 

@@ -73,7 +73,6 @@ export default class FirePitUI extends Frame {
         const tabBodyHeight = this.height - headerPad * 2 - (this.titleTxt.height + this.cookingTab.height);
         this.tabBody = new CookingTab(scene, tabBodyX, tabBodyY, tabBodyWidth, tabBodyHeight, 2, 4);
 
-
         // UI 컨테이너에 추가
         this.add([this.titleTxt, this.exitIcon]);
         this.add([this.tabBody]);
@@ -84,13 +83,15 @@ export default class FirePitUI extends Frame {
     // UI창 활성화
     enable(){
         this.setVisible(true);
-
+        // 요리 탭 아이템 개수 연동과 기본 아이템 선택
         this.tabBody.syncItemCount();
+        this.tabBody.selectDefaultItem();
     }
     // UI창 비활성화
     disable(){
         this.setVisible(false);
+
+        // 화덕 NPC 상호작용 재설정
+        this.scene.firePitNPC.setNPCInteractive(true);
     }
-
-
 }

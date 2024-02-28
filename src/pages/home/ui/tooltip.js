@@ -196,7 +196,7 @@ export default class ToolTip extends Frame_LT {
     setToolTip(item) {
 
         // 반드시 표시되어야 하는 항목 : 아이템 이름, 타입, 헤더 라인, 아이템 설명
-        // 아이템 타입에 따라 표시되어야 하는 항목 : 성장 시간
+        // 아이템 타입에 따라 표시되어야 하는 항목 : 성장 시간, 얻는 경험치 량
 
         //console.log('전달받은 아이템 객체', item);
 
@@ -229,6 +229,8 @@ export default class ToolTip extends Frame_LT {
             type = '요리 재료';
         } else if (item.type === 4) {
             type = '도구';
+        } else if (item.type === 5) {
+            type = '요리';
         }
 
         this.nameTxt.setText(item.name);
@@ -241,14 +243,12 @@ export default class ToolTip extends Frame_LT {
             // 성장 시간 표시하는 텍스트 내용
             let seedTimeTxt = this.setSeedTime(item.seed_Time);
 
-
             // 텍스트 위치 변경 해야됨 왜? 아이템 마다 설명 길이가 다르니까
             const seedTimeX = (this.width - this.edgeSize * 2) / 2;
             const seedTimeY = this.desTxt.y + this.desTxt.height + this.space;
             this.seedTimeTxt.x = seedTimeX;
             this.seedTimeTxt.y = seedTimeY;
 
-            this.timerIcon.setVisible(true);
             this.seedTimeTxt.setText(seedTimeTxt);
 
             // 변경된 성장 시간 텍스트 내용에 따라 타이머 아이콘도 이동한다.
@@ -256,6 +256,22 @@ export default class ToolTip extends Frame_LT {
             const timerY = seedTimeY;
             this.timerIcon.x = timerX;
             this.timerIcon.y = timerY;
+            this.timerIcon.setVisible(true);
+        }
+        else if (type === '요리'){ // 얻는 경험치량 표시
+
+            let exp = item.seed_Time + ' EXP';
+            // 경험치 텍스트 표시
+            let expX = (this.width - this.edgeSize * 2) / 2;
+            let expY = this.desTxt.y + this.desTxt.height + this.space;
+            this.expTxt.x = expX; this.expTxt.y = expY;
+            this.expTxt.setVisible(true);
+            this.expTxt.setText(exp);
+
+            // 경험치 아이콘 표시
+            expX = expX - this.expTxt.width / 2 - this.pad * 2;
+            this.expIcon.x = expX; this.expIcon.y = expY;
+            this.expIcon.setVisible(true);
         }
     }
 

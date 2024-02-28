@@ -74,7 +74,7 @@ export default class CookingTab extends TabBodyUI {
         // 요리 아이템 표시하게 아이템 슬롯 초기화
         this.itemSlots.forEach((itemSlot, index) => {
 
-            // 선택한 요리 아이템 정보
+            // 요리 아이템 정보
             const selectItem = this.cookingList[index];
 
             // 요리 아이템 정보 구조 분해
@@ -102,20 +102,15 @@ export default class CookingTab extends TabBodyUI {
                 this.selectIndex = itemSlot.index;
                 this.itemToolTip.setStoreToolTip(selectItem);
                 this.setCookBtnState(selectItem);
+
+                // 선택한 슬롯의 셀렉트 박스 보이게 표시
+                this.setSelectBoxVisible(this.selectIndex);
             });
 
         });
 
-        const selectItem = this.cookingList[0];
-
-        // 기본 요리 아이템 선택된 상태로 변경
-        this.selectIndex = 0;
-        this.itemToolTip.setStoreToolTip(selectItem);
-        // 요리 버튼 상태 설정
-        this.setCookBtnState(selectItem);
-
-        // 요리 아이템 개수 연동
-        this.syncItemCount();
+        // 기본 요리 아이템 선택된 상태로 설정
+        this.selectDefaultItem();
     }
 
     // 요리 버튼 상태 설정
@@ -225,4 +220,32 @@ export default class CookingTab extends TabBodyUI {
         });
 
     }
+
+    // 기본 요리 아이템(0번 슬롯) 선택된 상태로 설정
+    selectDefaultItem(){
+
+        const selectItem = this.cookingList[0];
+        this.selectIndex = 0;
+        this.itemToolTip.setStoreToolTip(selectItem);
+        // 요리 버튼 상태 설정
+        this.setCookBtnState(selectItem);
+
+        // 요리 아이템 개수 연동
+        this.syncItemCount();
+
+        // 0번 아이템 슬롯 셀렉트 박스 표시 켜기
+        this.setSelectBoxVisible(0);
+    }
+
+    // 선택한 슬롯의 셀렉트 박스 표시 켜기
+    setSelectBoxVisible(selectIndex){
+        // 모든 슬롯의 셀렉트 박스 표시 끄기
+        this.itemSlots.forEach((itemSlot, index) => {
+            itemSlot.selectBox.setVisible(false);
+        });
+        // 셀렉트 박스를 표시를 켜기
+        this.itemSlots[selectIndex].selectBox.setVisible(true);
+    }
+
+    // 아이템 선택 함수 만들기?
 }

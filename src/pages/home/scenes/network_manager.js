@@ -6,10 +6,13 @@ export default class NetworkManager {
     scene;
 
     apiURL = process.env.REACT_APP_API;
-    accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MDEyODA2LCJleHAiOjE3MDkwNDg4MDZ9.U4k2nL6xnfvHNmWHkR-HDexdzHRRtezjmP46gfOLPe8';
+    accessToken = '';
 
     constructor(scene) {
         this.scene = scene;
+        this.accessToken = scene.accessToken;
+
+        console.log('네트워크 매니저 액세스 토큰 값', this.accessToken);
     }
 
     // 네트워크 요청 메서드들
@@ -231,6 +234,8 @@ export default class NetworkManager {
                     'Content-Type': 'application/json',
                 },
             });
+
+
 
             const data = await response.json();
             // 서버로부터 받은 맵 정보
