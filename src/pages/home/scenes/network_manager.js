@@ -12,7 +12,7 @@ export default class NetworkManager {
         this.scene = scene;
         this.accessToken = scene.accessToken;
 
-        console.log('네트워크 매니저 액세스 토큰 값', this.accessToken);
+        //console.log('네트워크 매니저 액세스 토큰 값', this.accessToken);
     }
 
     // 네트워크 요청 메서드들

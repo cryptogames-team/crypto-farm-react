@@ -26,9 +26,9 @@ function PhaserGameComponent() {
 
       // 게임 설정에서 'scene' 속성 구성 : 익명 씬도 사용 가능한가 봄
       // LoginScene 사용
-      scene: [LoginScene, InGameScene],
+      //scene: [LoginScene, InGameScene],
       // InGameScene 테스트
-      //scene: [InGameScene, LoginScene],
+      scene: [InGameScene, LoginScene],
 
       // 게임 설정에서 'scale' 속성 구성
       scale: {
