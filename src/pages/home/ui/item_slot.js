@@ -327,12 +327,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                                 console.log('남은 요리 아이템 수량', item_count);
                             });
 
-                            // 아이템 툴팁 관련 버그 발생
-                            // 요리 아이템 다 사용하면 툴팁 꺼야됨
-                            // 근데 그냥 무지성으로 끄면 안될려나?
-                            // clickSlot === hoverSlot
-                            // 객체 비교하면 메모리 주소 비교한다고 했음.
-
                         }else{
                             console.log('요리 아이템 사용 실패');
                         }

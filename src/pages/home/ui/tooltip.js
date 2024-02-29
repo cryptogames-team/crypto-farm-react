@@ -183,12 +183,30 @@ export default class ToolTip extends Frame_LT {
         this.expIcon = scene.add.image(expX, expY, 'expIcon');
         this.expIcon.setOrigin(0, 0).setDisplaySize(18, 18);
 
+        // 아이템 안내 문구
+        let guideX = this.pad;
+        let guideY = this.height;
+        this.guideTxt = scene.add.text(guideX, guideY, '마우스 우클릭으로 사용 가능합니다.', {
+            fontFamily: 'Arial',
+            fontSize: 15,
+            color: 'black',
+            fontStyle: 'bold',
+            // 텍스트가 일정 길이 이상 길어질 때 자동으로 줄 바꿈
+            wordWrap: {
+                // 줄바꿈할 최대 너비
+                width: this.width - this.edgeSize * 2,
+                // 고급 줄 바꿈 옵션 : 공백이 아닌 문자에서도 줄바꿈을 허용한다.
+                useAdvancedWrap: true
+            }
+        });
+
         // 툴팁 컨테이너에 추가한다.
         this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt,
         this.priceTxt, this.goldIcon, this.seedTimeTxt, this.timerIcon]);
         this.add([this.ingredient1Txt, this.ingredient1Icon]);
         this.add([this.ingredient2Txt, this.ingredient2Icon]);
         this.add([this.expTxt, this.expIcon]);
+        this.add([this.guideTxt]);
     }
 
 
