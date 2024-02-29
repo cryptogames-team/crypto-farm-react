@@ -492,4 +492,37 @@ export default class NetworkManager {
         }
 
     }
+
+    // 서버에 캐릭터 경험치 올려달라고 요청
+    async serverAddExp(exp){
+
+        const requestURL = this.apiURL + 'user/exp/';
+        const requestBody = {
+            "exp": exp
+        };
+
+        console.log('severAddExp() 리퀘스트 바디', requestBody);
+
+        try {
+            const response = await fetch(requestURL, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+
+            console.log('경험치 올리기 요청 결과', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('serverAddExp() Error : ', error);
+            return null;
+        }
+
+    }
 }

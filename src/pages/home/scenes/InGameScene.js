@@ -177,13 +177,13 @@ export default class InGameScene extends Phaser.Scene {
             this.characterInfo = {
                 user_id: 1,
                 user_name: 'park',
-                exp: 10,
+                exp: 0,
                 level: 1,
                 cft: 1000,
                 asset_id: 4563456
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MTA5MTQxLCJleHAiOjE3MDkxNDUxNDF9.fkeJnzZaZXAppkj9FZCURE0q4WQv36UOVyTbgi7AxjM';
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MTgxNzI3LCJleHAiOjE3MDkyMTc3Mjd9.XtUm_QRXW5NBbsRZq3y5nOCyC0_2-ffNMzx7gWi9NY8';
         }
 
         this.assetManager = new AssetManager(this);
@@ -232,6 +232,10 @@ export default class InGameScene extends Phaser.Scene {
         const bottomY = this.cameras.main.height;
 
         const assetManager = this.assetManager;
+
+        // 마우스 우클릭 컨텍스트 메뉴 표시 비활성화
+        //this.input.mouse.disableContextMenu();
+
 
         // 캐릭터 애니메이션 정보 객체 생성
         assetManager.createAnimData();
@@ -537,8 +541,11 @@ export default class InGameScene extends Phaser.Scene {
 
         });
         // M키 눌러 현재 게임 맵 데이터 로그로 확인하기
+        // 경험치 얻기 테스트
         this.mapDataKey.on('down', () => {
             console.log("현재 게임 맵 데이터 ", this.mapData);
+
+            //this.charInfoUI.onEarnExp(100);
         });
         // 게임 시작시 디버그 그래픽 숨기기
         debugGraphics.forEach((debugGraphic) => {
@@ -577,8 +584,6 @@ export default class InGameScene extends Phaser.Scene {
 
         // 캐릭터 정보창 추가
         this.charInfoUI = new CharacterInfo(this, 10, 10, 250, 100, this.characterInfo);
-
-        // 캐릭터 정보창 프로토타입
 
     }
 
