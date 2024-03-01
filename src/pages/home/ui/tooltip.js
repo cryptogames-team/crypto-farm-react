@@ -184,13 +184,14 @@ export default class ToolTip extends Frame_LT {
         this.expIcon.setOrigin(0, 0).setDisplaySize(18, 18);
 
         // 아이템 안내 문구
-        let guideX = this.pad;
-        let guideY = this.height;
-        this.guideTxt = scene.add.text(guideX, guideY, '마우스 우클릭으로 사용 가능합니다.', {
+        let guideX = this.width / 2;
+        let guideY = this.height - this.edgeSize;
+        this.guideTxt = scene.add.text(guideX, guideY, '안내 텍스트', {
             fontFamily: 'Arial',
-            fontSize: 15,
+            fontSize: 18,
             color: 'black',
             fontStyle: 'bold',
+            align: 'center',
             // 텍스트가 일정 길이 이상 길어질 때 자동으로 줄 바꿈
             wordWrap: {
                 // 줄바꿈할 최대 너비
@@ -199,6 +200,7 @@ export default class ToolTip extends Frame_LT {
                 useAdvancedWrap: true
             }
         });
+        this.guideTxt.setOrigin(0.5, 1);
 
         // 툴팁 컨테이너에 추가한다.
         this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt,
@@ -229,6 +231,7 @@ export default class ToolTip extends Frame_LT {
         this.ingredient1Txt.setVisible(false);
         this.ingredient2Txt.setVisible(false);
         this.expTxt.setVisible(false);
+        this.guideTxt.setVisible(false);
 
         // 아이템 가격 텍스트, 골드 아이콘, 요리 재료, 경험치량 안보이게 하기
         this.priceTxt.setVisible(false);
@@ -290,6 +293,10 @@ export default class ToolTip extends Frame_LT {
             expX = expX - this.expTxt.width / 2 - this.pad * 2;
             this.expIcon.x = expX; this.expIcon.y = expY;
             this.expIcon.setVisible(true);
+
+            // 안내 텍스트 표시
+            this.guideTxt.setText('마우스 우클릭으로 먹기');
+            this.guideTxt.setVisible(true);
         }
     }
 
@@ -309,6 +316,7 @@ export default class ToolTip extends Frame_LT {
         this.ingredient1Txt.setText('');
         this.ingredient2Txt.setText('');
         this.expTxt.setText('');
+        this.guideTxt.setText('');
         // 아이콘들 안보이게 설정
         this.timerIcon.setVisible(false);
         this.goldIcon.setVisible(false);
