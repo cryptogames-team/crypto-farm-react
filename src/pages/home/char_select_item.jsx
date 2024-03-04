@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-
-const serverURL = 'http://221.148.25.234:1234/user/';
-
+const serverURL = process.env.REACT_APP_API + 'user/';
 
 // NFT 캐릭터 선택 창에 들어가는 캐릭터 아이템
-
 
 // 서버에 등록된 NFT 캐릭터 정보 객체를 부모 컴포넌트로부터 전달받는다
 // 구조 분해 할당 사용

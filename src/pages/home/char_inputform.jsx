@@ -8,10 +8,10 @@ import './char_inputform.css';
 function CharInputForm({ unregiCharInfo, onClose, onCreateChar, onCreateResult }) {
 
     let userName = '';
-    const serverURL = 'http://221.148.25.234:1234/user/create';
+
+    const serverURL = process.env.REACT_APP_API + 'user/create';
+
     console.log("선택한 미등록 NFT 캐릭터 정보 : ", unregiCharInfo);
-
-
 
     // 캐릭터 생성 결과 상태
     // 아직 생성 안함, 성공, 실패 3가지 값이 들어간다.

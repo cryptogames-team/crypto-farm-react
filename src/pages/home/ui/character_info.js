@@ -181,6 +181,4 @@ export default class CharacterInfo extends Frame {
         return this.characterInfo.level * 20;
     }
 
-    // 레벨업 할 때 처리
-
 }
