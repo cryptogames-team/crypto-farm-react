@@ -12,7 +12,7 @@ export default class NetworkManager {
         this.scene = scene;
         this.accessToken = scene.accessToken;
 
-        console.log('네트워크 매니저 액세스 토큰 값', this.accessToken);
+        //console.log('네트워크 매니저 액세스 토큰 값', this.accessToken);
     }
 
     // 네트워크 요청 메서드들
@@ -488,6 +488,39 @@ export default class NetworkManager {
 
         } catch (error) {
             console.error('serverCook() Error : ', error);
+            return null;
+        }
+
+    }
+
+    // 서버에 캐릭터 경험치 올려달라고 요청
+    async serverAddExp(exp){
+
+        const requestURL = this.apiURL + 'user/exp/';
+        const requestBody = {
+            "exp": exp
+        };
+
+        console.log('severAddExp() 리퀘스트 바디', requestBody);
+
+        try {
+            const response = await fetch(requestURL, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + this.accessToken
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+
+            console.log('경험치 올리기 요청 결과', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('serverAddExp() Error : ', error);
             return null;
         }
 

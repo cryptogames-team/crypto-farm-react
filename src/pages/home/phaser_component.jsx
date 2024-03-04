@@ -24,6 +24,9 @@ function PhaserGameComponent() {
       roundPixels: true,
       // Phaser 게임을 삽입할 DOM 요소의 ID
       parent: 'game-container',
+      disableContextMenu: true,
+
+
 
         // 게임 설정에서 'scene' 속성 구성 : 익명 씬도 사용 가능한가 봄
         // LoginScene 사용

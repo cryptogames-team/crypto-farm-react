@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import PlayerObject from '../characters/player_object'
 import Crops from '../elements/crops';
-import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction/auction';
@@ -17,6 +16,7 @@ import SeedStoreUI from '../ui/seed_store/seed_store_ui';
 import FirePitNPC from '../npc/fire_pit_npc';
 import FirePitUI from '../ui/fire_pit/fire_pit_ui';
 import Frame_LT from '../ui/frame/frame_lt';
+import CharacterInfo from '../ui/character_info';
 
 // 현재 맵 크기
 // 기본 값 : 농장 타일 맵의 원본 크기
@@ -135,16 +135,19 @@ export default class InGameScene extends Phaser.Scene {
     seedStoreUI;
     firePitNPC;
 
+    // 캐릭터 정보창 UI 참조
+    charInfoUI;
+
     // 요리 레시피들
     cookRecipes = [
-        {name: '으깬 감자', ingredients: [{name: '감자', quantity : 2}]},
-        {name: '호박 수프', ingredients: [{name: '호박', quantity : 2}]},
-        {name: '브로쓰', ingredients: [{name: '당근', quantity : 1}, {name: '양배추', quantity : 1}]},
-        {name: '케일 스튜', ingredients: [{name: '케일', quantity : 2}]},
-        {name: '야채 구이', ingredients: [{name: '무', quantity : 1}, {name: '당근', quantity : 1}]},
-        {name: '샐러드', ingredients: [{name: '사탕무', quantity : 1}, {name: '양배추', quantity : 1}]},
-        {name: '채식 버거', ingredients: [{name: '밀', quantity : 1}, {name: '양배추', quantity : 1}]},
-        {name: '샌드위치', ingredients: [{name: '케일', quantity : 1}, {name: '밀', quantity : 1}]},
+        { name: '으깬 감자', ingredients: [{ name: '감자', quantity: 2 }] },
+        { name: '호박 수프', ingredients: [{ name: '호박', quantity: 2 }] },
+        { name: '브로쓰', ingredients: [{ name: '당근', quantity: 1 }, { name: '양배추', quantity: 1 }] },
+        { name: '케일 스튜', ingredients: [{ name: '케일', quantity: 2 }] },
+        { name: '야채 구이', ingredients: [{ name: '무', quantity: 1 }, { name: '당근', quantity: 1 }] },
+        { name: '샐러드', ingredients: [{ name: '사탕무', quantity: 1 }, { name: '양배추', quantity: 1 }] },
+        { name: '채식 버거', ingredients: [{ name: '밀', quantity: 1 }, { name: '양배추', quantity: 1 }] },
+        { name: '샌드위치', ingredients: [{ name: '케일', quantity: 1 }, { name: '밀', quantity: 1 }] },
     ];
 
     // 생성자가 왜 있지? 씬 등록하는 건가?
@@ -169,25 +172,25 @@ export default class InGameScene extends Phaser.Scene {
 
         this.characterInfo = characterInfo;
 
-        if (this.characterInfo) {
-            console.log('this.characterInfo 존재');
+        if (this.characterInfo.user_id) {
+            console.log('로그인 하고 테스트');
 
             // 액세스 토큰 로컬 스토리지에서 받아오기
             this.accessToken = localStorage.getItem('accessToken');
 
         } else { // 로그인하지 않고 테스트
-            console.log('this.characterInfo 존재 안함');
+            console.log('로그인 안하고 테스트');
 
-        this.characterInfo = {
-            user_id: 1,
-            user_name: 'park',
-            exp: 1000,
-            level: 1,
-            cft: 1000,
-            asset_id: 4563456
-        }
-        // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-        this.accessToken = '';
+            this.characterInfo = {
+                user_id: 1,
+                user_name: 'park',
+                exp: 0,
+                level: 1,
+                cft: 1000,
+                asset_id: 4563456
+            }
+            // 하드코딩된 액세스 토큰 값 넣어주면 된다.
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MjY3NjYwLCJleHAiOjE3MDkzMDM2NjB9.BwMlVrR2T7Lx-Uwp-CZIKim61muHKlHpnpiL7dWtlXE';
         }
 
         this.assetManager = new AssetManager(this);
@@ -237,6 +240,10 @@ export default class InGameScene extends Phaser.Scene {
 
         const assetManager = this.assetManager;
 
+        // 마우스 우클릭 컨텍스트 메뉴 표시 비활성화
+        //this.input.mouse.disableContextMenu();
+
+
         // 캐릭터 애니메이션 정보 객체 생성
         assetManager.createAnimData();
         // 씬에서 사용할 캐릭터 애니메이션 생성
@@ -261,6 +268,7 @@ export default class InGameScene extends Phaser.Scene {
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
         const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
+        
 
         //옥션 UI 생성
         //크기
@@ -423,6 +431,12 @@ export default class InGameScene extends Phaser.Scene {
 
         // 서버에서 맵 데이터 가져와서 적용
         this.networkManager.serverGetMap(this.characterInfo.asset_id).then(data => {
+
+            // 처음 접속하면 계정이면 data가 null일 거임
+            // 그럼 기본맵 사용하게 변경한다.
+
+
+
             // 맵 데이터 초기화
             console.log(data)
             this.initMapData(data);
@@ -546,8 +560,11 @@ export default class InGameScene extends Phaser.Scene {
 
         });
         // M키 눌러 현재 게임 맵 데이터 로그로 확인하기
+        // 경험치 얻기 테스트
         this.mapDataKey.on('down', () => {
             console.log("현재 게임 맵 데이터 ", this.mapData);
+
+            //this.charInfoUI.onEarnExp(100);
         });
         // 게임 시작시 디버그 그래픽 숨기기
         debugGraphics.forEach((debugGraphic) => {
@@ -582,6 +599,11 @@ export default class InGameScene extends Phaser.Scene {
 
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
         this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize);
+
+
+        // 캐릭터 정보창 추가
+        this.charInfoUI = new CharacterInfo(this, 10, 10, 250, 100, this.characterInfo);
+
     }
     
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -1083,19 +1105,21 @@ export default class InGameScene extends Phaser.Scene {
     // 서버로부터 받은 맵 데이터를 씬의 mapData 변수로 초기화
     initMapData(data) {
 
-        if(data){
-        // data -> mapData에 저장하기
-        data.objects.forEach((object, index) => {
-            this.mapData.objects.push(object);
-        });
-        data.crops.forEach((crop, index) => {
-            this.mapData.crops.push(crop);
-        });
-        data.trees.forEach((tree, index) => {
-            this.mapData.trees.push(tree);
-        });
-    }
+        // data가 null인지 확인하는 로직 필요함
+        if (data) {
 
+            // data -> mapData에 저장하기
+            data.objects.forEach((object, index) => {
+                this.mapData.objects.push(object);
+            });
+            data.crops.forEach((crop, index) => {
+                this.mapData.crops.push(crop);
+            });
+            data.trees.forEach((tree, index) => {
+                this.mapData.trees.push(tree);
+            });
+
+        }
         if (this.mapData.trees.length === 0) {
             console.log('맵 데이터의 트리 배열이 비어있어 기본 값 초기화');
             // 나무 오브젝트는 맵에 기본으로 생성되어야 함.
