@@ -261,6 +261,7 @@ export default class InGameScene extends Phaser.Scene {
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
         const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
+        
 
         //옥션 UI 생성
         //크기
