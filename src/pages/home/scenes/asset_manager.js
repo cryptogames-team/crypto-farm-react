@@ -273,7 +273,7 @@ export default class AssetManager {
         ];
 
         // 건물 이미지 로드 
-        this.scene.load.path = "assets/Buildings/";
+        this.scene.load.path = "assets/buildings/";
         this.buildingImages = [
             { name: '씨앗상점', path: 'market.png' },
             { name: '화덕', path: 'fire_pit.png'},
@@ -338,7 +338,7 @@ export default class AssetManager {
     loadAllImage() {
 
         // sunnysideworld 타일셋 PNG 파일 로드
-        this.scene.load.path = "assets/maps/";
+        this.scene.load.path = "assets/Maps/";
         this.scene.load.image('sunnysideworld_tiles', 'spr_tileset_sunnysideworld_16px.png');
         this.scene.load.image('cow_tiles', 'spr_deco_cow_strip4.png');
 
@@ -360,7 +360,7 @@ export default class AssetManager {
         this.cropsImages.forEach(imageData => this.loadImage(imageData));
 
         // 건물 관련 이미지 로드
-        this.scene.load.path = "assets/Buildings/";
+        this.scene.load.path = "assets/buildings/";
         this.buildingImages.forEach(imageData => this.loadImage(imageData));
 
         // 음식 관련 이미지 로드

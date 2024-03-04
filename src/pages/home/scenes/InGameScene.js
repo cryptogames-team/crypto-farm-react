@@ -221,7 +221,7 @@ export default class InGameScene extends Phaser.Scene {
         assetManager.loadAllSprites();
 
         // 타일맵 JSON 파일 로드
-        this.load.path = 'assets/maps/'
+        this.load.path = 'assets/Maps/'
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
         this.load.tilemapTiledJSON('Market', 'ingame/Market.json');
         this.load.tilemapTiledJSON('Test', 'ingame/test.json');        // 게임에 필요한 이미지 전부 로드
