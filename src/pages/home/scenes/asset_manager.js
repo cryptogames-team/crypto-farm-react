@@ -319,7 +319,7 @@ export default class AssetManager {
         this.characterSprites.forEach(spriteData => this.loadSprite(spriteData));
 
         // NPC 스프라이트
-        this.scene.load.path = 'assets/NPCs/';
+        this.scene.load.path = 'assets/NPC/';
         this.npcSprites.forEach(spriteData => this.loadSprite(spriteData));
 
         // 나무 스프라이트 시트 로드하기
@@ -364,7 +364,7 @@ export default class AssetManager {
         this.buildingImages.forEach(imageData => this.loadImage(imageData));
 
         // 음식 관련 이미지 로드
-        this.scene.load.path = "assets/food/";
+        this.scene.load.path = "assets/Food/";
         this.foodImages.forEach(imageData => this.loadImage(imageData));
     }
 

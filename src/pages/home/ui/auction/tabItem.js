@@ -1486,11 +1486,11 @@ export default class TabItem extends Phaser.GameObjects.Container {
                     }
                     var url
                     if (this.completeType == 0) {
-                        url = 'http://221.148.25.234:1234/auction/transaction-all/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/transaction-all/' + this.nowCompletePage
                     } else if (this.completeType == 1) {
-                        url = 'http://221.148.25.234:1234/auction/sell-complete/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/sell-complete/' + this.nowCompletePage
                     } else {
-                        url = 'http://221.148.25.234:1234/auction/purchase/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/purchase/' + this.nowCompletePage
                     }
 
 
@@ -1544,11 +1544,11 @@ export default class TabItem extends Phaser.GameObjects.Container {
                     }
                     var url
                     if (this.completeType == 0) {
-                        url = 'http://221.148.25.234:1234/auction/transaction-all/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/transaction-all/' + this.nowCompletePage
                     } else if (this.completeType == 1) {
-                        url = 'http://221.148.25.234:1234/auction/sell-complete/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/sell-complete/' + this.nowCompletePage
                     } else {
-                        url = 'http://221.148.25.234:1234/auction/purchase/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/purchase/' + this.nowCompletePage
                     }
 
 

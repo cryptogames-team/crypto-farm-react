@@ -30,12 +30,10 @@ const layerScale = 4;
 // 실제 타일 크기에 맞게 설정해야 한다.
 const tileSize = 16 * layerScale;
 
-let APIUrl = process.env.REACT_APP_API;
-
 
 export default class InGameScene extends Phaser.Scene {
 
-    APIurl = 'http://221.148.25.234:1234'
+    APIurl = process.env.REACT_APP_API;
     accessToken = "";
     auction;
 
@@ -156,7 +154,7 @@ export default class InGameScene extends Phaser.Scene {
 
         //console.log("블록체인 노드 주소", process.env.REACT_APP_NODE);
 
-
+        //console.log("바뀐 서버 API 주소", this.APIurl);
 
         // 테스트 계정의 감자 갯수 증가 시키기
         //this.serverAddItem(9, 1, 3);
