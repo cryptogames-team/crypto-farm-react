@@ -6,9 +6,10 @@ import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import Auction from '../ui/auction/auction';
-import { io } from 'socket.io-client';
+import {io} from 'socket.io-client'
 import Chat from '../ui/chat/chatInput';
 import Market from '../ui/heptaMarket/market';
+
 
 
 // 현재 맵 크기

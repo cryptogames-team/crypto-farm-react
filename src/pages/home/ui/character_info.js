@@ -1,6 +1,5 @@
 import Phaser from "phaser";
-import Frame from "./frame";
-
+import Frame from "./frame/frame";
 
 const pad = 15;
 const space = 5;
