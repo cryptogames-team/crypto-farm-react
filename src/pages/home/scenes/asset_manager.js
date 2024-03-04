@@ -237,6 +237,7 @@ export default class AssetManager {
 
             // 아이콘 로드
             { name: "expIcon", path: 'expIcon.png' },
+            { name: "lockIcon", path: 'lock_icon.png'},
         ];
         // nine-slice 로드 - 외부 박스
         this.nineSliceBoxImages = [

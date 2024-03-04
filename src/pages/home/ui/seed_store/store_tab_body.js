@@ -211,21 +211,43 @@ export default class StoreTabBody extends Frame_LT {
 
         // UI 생성할 때
         // 기본 아이템(감자 씨앗, 감자) 선택되있는 상태로 만들기
-        const selectItem = this.purchaseList[0];
+        this.selectIndex = 0;
+        const selectItem = this.purchaseList[this.selectIndex];
+        const selectSlot = this.itemSlots[this.selectIndex];
 
         this.itemToolTips.setStoreToolTip(selectItem);
-        this.itemSlots[0].selectBox.setVisible(true);
-        this.selectIndex = 0;
+        selectSlot.selectBox.setVisible(true);
+        
+
+        // 캐릭터 레벨 확인하고 슬롯 상태 설정
+        let level = this.scene.characterInfo.level;
+
+        // 아이템 슬롯 상태 설정
+        this.itemSlots.forEach((itemSlot, index) => {
+            // 캐릭터 현재 레벨
+            let level = this.scene.characterInfo.level;
+            // 아이템 정보
+            let itemInfo = this.purchaseList[index];
+
+            if ( level >= itemInfo.use_level){
+                itemSlot.setSlotLockState(false);
+            }else{
+                itemSlot.setSlotLockState(true);
+            }
+
+        });
+
 
         // 낱개 거래 버튼 상태 설정
-        this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1);
+        this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1, false);
         // 10개 거래 버튼 상태 설정
         this.setTradeBtnState(this.multiTradeBtn, this.multiTxt, selectItem, 10);
     }
 
     // 거래 버튼 상태 설정
     // 현재 탭의 상태에 따라 구매/판매 기능을 하게 상태 변경
-    setTradeBtnState(tradeBtn, tradeTxt, selectItem, item_count) {
+    // 추가 : 구매 탭 버튼에서 캐릭터 레벨이 아이템 제한 레벨보다 낮으면 표시 안보이게 설정
+    setTradeBtnState(tradeBtn, tradeTxt, selectItem, item_count, visible = true) {
 
         // 모든 이벤트 리스너 제거
         tradeBtn.removeAllListeners();
@@ -233,6 +255,15 @@ export default class StoreTabBody extends Frame_LT {
         // 구매 탭이면 구매 기능
         if (this.type === 0) {
             console.log('거래 버튼 기능을 아이템 구매로 설정');
+
+
+            if(visible){
+                tradeBtn.setVisible(true);
+                tradeTxt.setVisible(true);
+            }else{
+                tradeBtn.setVisible(false);
+                tradeTxt.setVisible(false); 
+            }
 
             // 구매할 아이템의 총 가격
             let item_price = selectItem.item_price * item_count;

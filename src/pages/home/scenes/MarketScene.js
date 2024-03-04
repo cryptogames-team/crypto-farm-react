@@ -251,12 +251,6 @@ export default class MarketScene extends Phaser.Scene {
         this.load.path = "assets/Maps/";
         this.load.image('sunnysideworld_tiles', 'spr_tileset_sunnysideworld_16px.png');
         this.load.image('cow_tiles', 'spr_deco_cow_strip4.png');
-
-
-
-
-
-
     }
 
     create() {
