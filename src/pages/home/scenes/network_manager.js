@@ -306,10 +306,11 @@ export default class NetworkManager {
             // 변동된 소지금 표시
             tabBody.storeUI.setCFTTxt();
 
-            // 낱개 거래 버튼 상태 설정
-            tabBody.setTradeBtnState(tabBody.singleTradeBtn, tabBody.singleTxt, buyItemInfo, 1);
-            // 10개 거래 버튼 상태 설정
-            tabBody.setTradeBtnState(tabBody.multiTradeBtn, tabBody.multiTxt, buyItemInfo, 10);
+
+
+            // 전체 거래 버튼들 상태 설정
+            tabBody.setAllTradeBtnState(buyItemInfo, true);
+
 
         } catch (error) {
             console.error('serverBuyItem() Error : ', error);
@@ -379,10 +380,9 @@ export default class NetworkManager {
                 // 변동된 소지금 표시
                 tabBody.storeUI.setCFTTxt();
 
-                // 낱개 거래 버튼 상태 설정
-                tabBody.setTradeBtnState(tabBody.singleTradeBtn, tabBody.singleTxt, sellItemInfo, 1);
-                // 10개 거래 버튼 상태 설정
-                tabBody.setTradeBtnState(tabBody.multiTradeBtn, tabBody.multiTxt, sellItemInfo, 10);
+                // 전체 거래 버튼들 상태 설정
+                tabBody.setAllTradeBtnState(sellItemInfo, true);
+
 
             }
 
@@ -395,7 +395,7 @@ export default class NetworkManager {
 
     // 서버에 요리 제작 요청
     // 성공하면 요리 아이템 추가, 기존 요리 아이템 수량 증가
-    async serverCook(cookingItemInfo, item_index, cookingItemSlot){
+    async serverCook(cookingItemInfo, item_index, cookingItemSlot) {
 
         const { item_id, item_type, item_name,
             item_des, seed_time, use_level, item_price, ingredients } = cookingItemInfo;
@@ -412,11 +412,11 @@ export default class NetworkManager {
         let ingr2_id = 0;
 
         // 요리 재료 1종류 필요할 때
-        if( needIngrType === 1){
+        if (needIngrType === 1) {
             ingr1_id = this.scene.allItemMap.get(ingredients[0].name).item_id;
             ingr2_id = ingr1_id;
         }
-        else if( needIngrType === 2){ // 2종류 필요할 때
+        else if (needIngrType === 2) { // 2종류 필요할 때
             ingr1_id = this.scene.allItemMap.get(ingredients[0].name).item_id;
             ingr2_id = this.scene.allItemMap.get(ingredients[1].name).item_id;
         }
@@ -447,11 +447,11 @@ export default class NetworkManager {
             if (data === 'success') {
 
                 // 기존 요리 아이템 수량 증가
-                if (cookingItemSlot.item !== null){
+                if (cookingItemSlot.item !== null) {
                     cookingItemSlot.item.count += 1;
                     cookingItemSlot.setSlotItem(cookingItemSlot.item);
-                }else{ // 새 요리 아이템 추가 
-                    cookingItemSlot.setSlotItem(new Item(cookingItemInfo,1));
+                } else { // 새 요리 아이템 추가 
+                    cookingItemSlot.setSlotItem(new Item(cookingItemInfo, 1));
                 }
 
                 // 화덕 UI 아이템 슬롯의 개수 표시 업데이트
@@ -467,7 +467,7 @@ export default class NetworkManager {
 
                     const ownItemSlot = this.scene.findAddItemSlot(item_name);
                     // 유저가 인벤토리이나 퀵슬롯에 요리 아이템을 소유하고 있을 경우 아이템 개수를 연동함.
-                    if(ownItemSlot.item) {
+                    if (ownItemSlot.item) {
                         itemSlot.setItemCount(ownItemSlot.item.count);
                     }
                 });
@@ -494,7 +494,7 @@ export default class NetworkManager {
     }
 
     // 서버에 캐릭터 경험치 올려달라고 요청
-    async serverAddExp(exp){
+    async serverAddExp(exp) {
 
         const requestURL = this.apiURL + 'user/exp/';
         const requestBody = {

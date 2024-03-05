@@ -28,6 +28,9 @@ export default class ToolTip extends Frame_LT {
     expTxt;
     expIcon;
 
+    // 레벨 제한
+    levelLimitTxt;
+
     // 컨테이너 패딩
     pad = 15;
     // 텍스트나 라인간 간격
@@ -202,6 +205,18 @@ export default class ToolTip extends Frame_LT {
         });
         this.guideTxt.setOrigin(0.5, 1);
 
+        // 레벨 제한 문구
+        let levelX = (this.width - this.edgeSize * 2) / 2;
+        let levelY = guideY + this.guideTxt.height + this.space;
+        this.levelLimitTxt = scene.add.text(levelX, levelY, '레벨 제한 텍스트', {
+            fontFamily: 'Arial',
+            fontSize: 15,
+            color: 'red',
+            fontStyle: 'bold',
+            align: 'center',
+        });
+        this.levelLimitTxt.setOrigin(0.5, 0);
+
         // 툴팁 컨테이너에 추가한다.
         this.add([this.nameTxt, this.typeTxt, this.headerLine, this.desTxt,
         this.priceTxt, this.goldIcon, this.seedTimeTxt, this.timerIcon]);
@@ -209,6 +224,7 @@ export default class ToolTip extends Frame_LT {
         this.add([this.ingredient2Txt, this.ingredient2Icon]);
         this.add([this.expTxt, this.expIcon]);
         this.add([this.guideTxt]);
+        this.add(this.levelLimitTxt)
     }
 
 
@@ -232,6 +248,7 @@ export default class ToolTip extends Frame_LT {
         this.ingredient2Txt.setVisible(false);
         this.expTxt.setVisible(false);
         this.guideTxt.setVisible(false);
+        this.levelLimitTxt.setVisible(false);
 
         // 아이템 가격 텍스트, 골드 아이콘, 요리 재료, 경험치량 안보이게 하기
         this.priceTxt.setVisible(false);
@@ -279,7 +296,7 @@ export default class ToolTip extends Frame_LT {
             this.timerIcon.y = timerY;
             this.timerIcon.setVisible(true);
         }
-        else if (type === '요리'){ // 얻는 경험치량 표시
+        else if (type === '요리') { // 얻는 경험치량 표시
 
             let exp = item.seed_Time + ' EXP';
             // 경험치 텍스트 표시
@@ -317,6 +334,7 @@ export default class ToolTip extends Frame_LT {
         this.ingredient2Txt.setText('');
         this.expTxt.setText('');
         this.guideTxt.setText('');
+        this.levelLimitTxt.setText('');
         // 아이콘들 안보이게 설정
         this.timerIcon.setVisible(false);
         this.goldIcon.setVisible(false);
@@ -381,6 +399,23 @@ export default class ToolTip extends Frame_LT {
             this.timerIcon.x = timerX;
             this.timerIcon.y = timerY;
             this.timerIcon.setVisible(true);
+
+            // 캐릭터 레벨 체크
+            let level = this.scene.characterInfo.level;
+
+            // 캐릭터 레벨이 부족한 경우에만 레벨 제한 텍스트와 아이콘 표시
+            if (level < use_level) {
+                // 레벨 제한 텍스트
+                let levelX = (this.width - this.edgeSize * 2) / 2;
+                let levelY = this.seedTimeTxt.y + this.seedTimeTxt.height + this.space;
+                this.levelLimitTxt.x = levelX; this.levelLimitTxt.y = levelY;
+                this.levelLimitTxt.setText(`${use_level} 레벨 이상`);
+
+                // 레벨 아이콘(경험치 아이콘 사용)
+                levelX = levelX - this.levelLimitTxt.width / 2 - this.pad * 2;
+                this.expIcon.x = levelX; this.expIcon.y = levelY;
+                this.expIcon.setVisible(true);
+            }
         }
 
         if (type === '요리') {

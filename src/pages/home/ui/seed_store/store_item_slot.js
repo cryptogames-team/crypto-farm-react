@@ -29,6 +29,9 @@ export default class StoreItemSlot extends Frame {
 
     index;
 
+    // 0 : open, 1 : lock
+    state = 0;
+
     constructor(scene, x, y, width, height, index , tabBody = null) {
 
         super(scene, x, y, width, height);
@@ -125,11 +128,12 @@ export default class StoreItemSlot extends Frame {
             // 알파값 조정
             this.itemImg.setAlpha(0.5);
             this.center.setAlpha(0.5);
-
+            this.state = 1;
         }else{
             this.lockIcon.setVisible(false);
             this.itemImg.setAlpha(1);
             this.center.setAlpha(1);
+            this.state = 0;
         }
     }
 }

@@ -202,7 +202,7 @@ export default class CookingTab extends TabBodyUI {
         this.scene.networkManager.serverCook(cookingItem, item_index, cookingItemSlot);
     }
 
-    // 소유한 요리 아이템 개수 연동
+    // 소유한 요리 아이템 개수를 UI 슬롯에 표시
     // 유저 소유 아이템 정보가 이거 실행하는 시점보다 늦어서 0개로 뜨는듯?
     syncItemCount() {
 
@@ -218,6 +218,8 @@ export default class CookingTab extends TabBodyUI {
             // 유저가 인벤토리이나 퀵슬롯에 요리 아이템을 소유하고 있을 경우 아이템 개수를 연동함.
             if (ownItemSlot.item) {
                 itemSlot.setItemCount(ownItemSlot.item.count);
+            }else{
+                itemSlot.setItemCount(0);
             }
         });
 

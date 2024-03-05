@@ -188,7 +188,7 @@ export default class InGameScene extends Phaser.Scene {
                 asset_id: 4563456
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MjY3NjYwLCJleHAiOjE3MDkzMDM2NjB9.BwMlVrR2T7Lx-Uwp-CZIKim61muHKlHpnpiL7dWtlXE';
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5NjMxNjc5LCJleHAiOjE3MDk2Njc2Nzl9.GHniTZRdSF62J5VtEsbhxiqPdlkn_tzkOlqByXwrVeQ';
         }
 
         this.assetManager = new AssetManager(this);
@@ -222,7 +222,8 @@ export default class InGameScene extends Phaser.Scene {
         this.load.path = 'assets/Maps/'
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
         this.load.tilemapTiledJSON('Market', 'ingame/Market.json');
-        this.load.tilemapTiledJSON('Test', 'ingame/test.json');        // 게임에 필요한 이미지 전부 로드
+        this.load.tilemapTiledJSON('Test', 'ingame/test.json');       
+        // 게임에 필요한 이미지 전부 로드
         assetManager.loadAllImage();
     }
 
@@ -401,10 +402,6 @@ export default class InGameScene extends Phaser.Scene {
             this.physics.add.collider(this.playerObject, layer);
 
 
-
-
-
-
             // 디버그 그래픽 객체 배열 초기화
             if (i === 0) {
                 // 타일맵 레이어 갯수만큼
@@ -432,9 +429,6 @@ export default class InGameScene extends Phaser.Scene {
 
             // 처음 접속하면 계정이면 data가 null일 거임
             // 그럼 기본맵 사용하게 변경한다.
-
-
-
             // 맵 데이터 초기화
             console.log(data)
             this.initMapData(data);
