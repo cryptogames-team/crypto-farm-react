@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import Item from "../../elements/item";
 import Frame_W from "../frame_w";
 import SelectBox from "../select_box";
-import { tab } from "@testing-library/user-event/dist/tab";
 import Frame from "../frame/frame";
+
 
 
 export default class StoreItemSlot extends Frame {
@@ -40,7 +40,7 @@ export default class StoreItemSlot extends Frame {
         this.tabBody = tabBody;
         this.setSize(width, height);
         
-        // 아이템 이미지 하드코딩해서 추가
+        // 아이템 이미지 추가
         const itemImgX = this.width / 2;
         const itemImgY = this.height / 2;
         this.itemImg = scene.add.image(itemImgX, itemImgY, '');

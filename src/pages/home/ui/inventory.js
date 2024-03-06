@@ -5,8 +5,10 @@ import Item from "../elements/item";
 import Frame_LT from "./frame/frame_lt";
 import ToolTip from "./tooltip";
 
-// 패딩
-const pad = 19;
+// UI 패딩
+let pad = 0;
+// UI 요소간 간격
+let space = 10;
 
 export default class Inventory extends Frame {
 
@@ -15,9 +17,9 @@ export default class Inventory extends Frame {
     // 경계선
     headerLine;
     // UI 제목
-    headerText;
+    titleText;
     // UI 아이콘
-    headerIcon;
+    invenIcon;
 
     // 아이템 슬롯 행, 열 개수
     gridRow = 3;
@@ -44,8 +46,6 @@ export default class Inventory extends Frame {
     // 호버, 시작, 끝 인덱스를 객체 타입으로 구조 변경
     // 어디의 몇번 인덱스라고 알려주면 됨.
 
-
-
     // 디버그 영역 그리는 그래픽스 객체
     graphics;
 
@@ -65,90 +65,69 @@ export default class Inventory extends Frame {
         this.setDepth(1000).setScrollFactor(0);
         this.setSize(width, height);
 
-        this.headerLine = scene.add.image(7, 75, '9slice_tc')
-            .setOrigin(0, 0)
-            .setDisplaySize(width + 3 - (this.edgeSize * 2), this.edgeSize).setDepth(500);
+        pad = this.edgeSize + 10;
 
-        const imgSize = 40;
-
-        this.headerIcon = scene.add.image(pad, pad, 'inven_icon')
+        const imgSize = 30;
+        // 인벤토리 아이콘
+        let iconX = pad;
+        let iconY = pad;
+        this.invenIcon = scene.add.image(iconX, iconY, 'inven_icon')
             .setOrigin(0, 0).setDisplaySize(imgSize, imgSize);
 
-        // UI 제목
-        // font 속성 쓰니 글씨가 짤린다 -> fontSize로 변경
-        this.headerText = scene.add.text(pad + imgSize + 10, pad, "인벤토리", {
+        // 인벤토리 UI 제목
+        let titleX = pad + imgSize + space;
+        let titleY = pad;
+        this.titleText = scene.add.text(titleX, titleY, "인벤토리", {
             fontFamily: 'Arial',
-            fontSize: 40,
+            fontSize: 30,
             color: 'black',
             fontStyle: 'bold'
         });
 
         //나가기 X버튼
-        this.exitIcon = scene.add.image(width - pad, pad, "exit_icon");
+        let exitX = this.width - pad;
+        let exitY = pad;
+        this.exitIcon = scene.add.image(exitX, exitY, "exit_icon");
         this.exitIcon.setOrigin(1, 0).setDisplaySize(imgSize, imgSize)
-            .setScrollFactor(0).setInteractive().setDepth(1001);
-        this.exitIcon.on('pointerup', (event) => this.disable());
+            .setScrollFactor(0).setInteractive();
+        this.exitIcon.on('pointerup', () => this.disable());
 
+        // 헤더 구분선 추가
+        let lineX = this.edgeSize;
+        let lineY = this.titleText.y + this.titleText.height + space;
+        this.headerLine = scene.add.image(lineX, lineY, '9slice_tc')
+            .setOrigin(0, 0)
+            .setDisplaySize(width - (this.edgeSize * 2), this.edgeSize);
 
-        this.add([this.headerLine, this.headerText, this.headerIcon, this.exitIcon]);
-
-
-        // 인벤토리에 상호작용 영역 설정하기
-        this.setInteractive(new Phaser.Geom.Rectangle(this.width / 2, this.height / 2,
-            this.width, this.height),
-            Phaser.Geom.Rectangle.Contains);
-
-
-        // 겹치는 오브젝트 전체에게 이벤트 전송
-        this.on('pointerover', (pointer) => {
-            scene.input.setTopOnly(false);
-            console.log("겹치는 오브젝트들 상호작용 가능함.");
-        });
-
-        // 퀵슬롯 컨테이너에서 마우스 해제하면 겹치는 대화형 오브젝트 중 가장 상위한테만 
-        // 이벤트 전송
-        this.on('pointerout', (pointer) => {
-
-            if (!scene.isDragging) {
-                scene.input.setTopOnly(true);
-                console.log("겹치는 오브젝트들 상호작용 불가능함.");
-            }
-        });
-
+        this.add([this.invenIcon, this.titleText, this.exitIcon, this.headerLine]);
 
         // 아이템 슬롯 추가
-        const slotBGPad = 5;
+        // 슬롯 뒷쪽 배경 패딩
+        // 슬롯 패딩
+        const slotPad = 10;
         // 슬롯의 크기
-        const slotSize = 100;
+        const slotSize = 75;
         // 아이템 슬롯 격자 배치의 시작 위치
-        const slotStartX = 40;
-        const slotStartY = 125;
+        const slotStartX = this.edgeSize + slotPad;
+        const slotStartY = this.headerLine.y + this.headerLine.displayHeight + space;
         // 슬롯간 간격
-        const slotSpacing = 0;
+        const slotSpace = 10;
 
-
-        // 2중 반복문을 사용하여 여러 줄 추가
-        // 행을 먼저 추가하고 열을 추가한다
-
+        // 2중 반복문을 사용하여 슬롯을 격자 모양으로 배치
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridCol; col++) {
 
-                // 인벤토리 종횡비 2:1
-
                 // 시작 위치 + 슬롯 길이 + 슬롯 간격
-                let slotX = slotStartX + slotSize * col + slotSpacing * col;
-                let slotY = slotStartY + slotSize * row + slotSpacing / 2 * row;
+                let slotX = slotStartX + (slotSize + slotSpace) * col;
+                let slotY = slotStartY + (slotSize + slotSpace) * row;
 
                 // 추가되는 아이템 슬롯의 인덱스 구하기
                 // 1차원 배열의 요소들을 격자 형태로 나열해놨으니 그거 염두해서 인덱스 구해야 됨.
                 // 하나 행마다 아이템 슬롯이 몇개 있는지 확인
                 let slotIndex = this.gridCol * row + col;
 
-                const itemSlot = new ItemSlot(scene, slotX, slotY, slotSize, slotSize, slotBGPad);
-
-
+                const itemSlot = new ItemSlot(scene, slotX, slotY, slotSize, slotSize);
                 itemSlot.index = slotIndex;
-
 
                 // 디버그 그래픽 보기 위해서 뎁스 설정
                 //itemSlot.setDepth(1001).setScrollFactor(0);
@@ -166,18 +145,48 @@ export default class Inventory extends Frame {
         }
 
         // 아이템 툴팁 생성하기
-        this.toolTip = new ToolTip(scene, 0 ,0, 250, 250);
+        this.toolTip = new ToolTip(scene, 0, 0, 225, 250);
         this.toolTip.setVisible(false);
         this.add(this.toolTip);
 
-        
+        // 인벤토리 크기 재설정
+        // 길이 : 아이템 슬롯 전체 길이만큼 설정
+        // 높이 : 헤더 높이 + 아이템 슬롯 전체 높이 만큼 설정
+        width = slotStartX + (slotSize + slotSpace) * this.gridCol + space;
+        height = slotStartY + (slotSize + slotSpace) * this.gridRow + space;
+        super.setUISize(width, height);
+        this.setSize(width, height);
+        // 인벤토리 위치 재설정
+        this.x = this.scene.cameras.main.width / 2 - this.width / 2;
+        this.y = this.scene.cameras.main.height / 2 - this.height / 2;
 
-        // 하드 코딩으로 아이템 추가하기
-        // 아이템 슬롯에 새 아이템이 추가될 때 마다 상호작용 설정한다.
-        /* this.itemSlots[0].setSlotItem(new Item('Crops', 'potato', '감자', 'potato_05'));
-        this.itemSlots[10].setSlotItem(new Item('Crops', 'carrot', '당근', 'carrot_05'));
-        this.itemSlots[14].setSlotItem(new Item('Crops', 'cabbage', '양배추', 'cabbage_05')); */
+        // 나가기 아이콘 위치 재설정
+        this.exitIcon.x = this.width - pad;
+        // 헤더 구분선 길이 재설정
+        this.headerLine.displayWidth = this.width - (this.edgeSize * 2);
 
+
+        // 인벤토리에 상호작용 영역 설정하기
+        this.setInteractive(new Phaser.Geom.Rectangle(this.width / 2, this.height / 2,
+            this.width, this.height),
+            Phaser.Geom.Rectangle.Contains);
+        // 인벤토리 상호작용 영역 디버그로 보기
+        //scene.input.enableDebug(this);
+
+        // 겹치는 오브젝트 전체에게 이벤트 전송
+        this.on('pointerover', (pointer) => {
+            scene.input.setTopOnly(false);
+            console.log("겹치는 오브젝트들 상호작용 가능함.");
+        });
+
+        // 퀵슬롯 컨테이너에서 마우스 해제하면 겹치는 대화형 오브젝트 중 가장 상위한테만 
+        // 이벤트 전송
+        this.on('pointerout', (pointer) => {
+            if (!scene.isDragging) {
+                scene.input.setTopOnly(true);
+                console.log("겹치는 오브젝트들 상호작용 불가능함.");
+            }
+        });
     }
 
     // own_items : 서버에서 비동기로 받아오는 아이템 목록 배열. 
@@ -218,12 +227,9 @@ export default class Inventory extends Frame {
 
         // 중복 아이템이 있는지 찾고 없으면 빈 슬롯을 찾는다.
 
-
-
         // 빈 아이템 슬롯의 인덱스
         // 인벤토리에 빈 공간이 있는지 체크
         let emptyIndex = this.findEmptySlot();
-
 
         // 인벤토리에 빈 공간 없으면 추가 안함.
         if (emptyIndex === null) {
@@ -285,7 +291,7 @@ export default class Inventory extends Frame {
 
     // 중복 아이템이 있는 아이템 슬롯 찾기
     // 지금은 인덱스 반환 중
-    findDupSlot(itemName){
+    findDupSlot(itemName) {
 
         // 중복 아이템이 있는 슬롯
         let dupSlot = null;
@@ -316,21 +322,15 @@ export default class Inventory extends Frame {
         });
 
         return dupSlot;
-
     }
 
 
     enable() {
         this.setVisible(true);
-        // setTopOnly : 여러 대화형 오브젝트가 겹쳐져 있는 경우 입력 이벤트를 어떻게 처리할 지 결정한다.
-        // true : 가장 상위의 오브젝트에 대해서만 입력 이벤트를 처리함.
-        // false : 겹쳐 있는 모든 대화형 오브젝트가 이벤트를 받을 수 있음.
-        //this.scene.input.setTopOnly(false);
     }
     disable() {
         //console.log("인벤 닫음");
         this.setVisible(false);
-        //this.scene.input.setTopOnly(true);
     }
 
     // 드래그 할 때 슬롯 자식에서 해제된 이미지를 다시 자식으로 되돌린다.

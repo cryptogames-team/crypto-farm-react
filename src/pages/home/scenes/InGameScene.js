@@ -311,7 +311,7 @@ export default class InGameScene extends Phaser.Scene {
         const invenY = this.cameras.main.height / 2 - invenHeight / 2;
         //console.log("invenX, invenY : ", invenX, invenY);
         this.inventory = new Inventory(this, invenX, invenY, invenWidth, invenHeight);
-        this.inventory.disable();
+        //this.inventory.disable();
 
         // 서버에 로그인 한 유저의 아이템 목록 요청
         // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
@@ -659,26 +659,17 @@ export default class InGameScene extends Phaser.Scene {
        
     }
 
-    // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
+    // 퀵슬롯을 선택하고
+    // 선택한 퀵슬롯의 셀렉트 박스 표시
     equipQuickSlot(equipNumber) {
 
-        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려지는거 아닌가?
-        // 선 두께가 1 초과하면 두께 절반만큼 더하거나 빼야되나?
-        // 이걸 어떻게 설명하지
-
-        // 선 굵기가 굵어지면 top-left 기준점에서 어느 방향으로 굵어지는가
-        // 밖으로 굵어지나? 아니면 안밖으로 굵어지나
-
-        const lineWidth = 5;
-
-        const x = this.quickSlotUI.x + 100 * equipNumber + lineWidth / 2;
-        const y = this.quickSlotUI.y + lineWidth / 2;
 
         this.equipNumber = equipNumber;
-        this.equipMarker.clear();
-        this.equipMarker.lineStyle(lineWidth, 0xFF0000, 1);
-        this.equipMarker.setDepth(100).setScrollFactor(0);
-        this.equipMarker.strokeRect(x, y, 100 - lineWidth, 100 - lineWidth);
+        const quickSlots = this.quickSlotUI.quickSlots;
+        quickSlots.forEach((quickSlot, index) => {
+            quickSlot.selectBox.setVisible(false);
+        });
+        quickSlots[equipNumber].selectBox.setVisible(true);
     }
 
     // 캐릭터가 땅을 판 타일의 타일 레이어 1를 밭 타일로 변경한다.
