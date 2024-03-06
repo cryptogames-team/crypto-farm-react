@@ -398,7 +398,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
                       data: {
                         from: localStorage.getItem('account_name'),
                         to: this.selectedSellingitemInfo.user.user_name,
-                        quantity: this.quantatyText.text+".0000 HEP",
+                        quantity: this.tokenAmount+".0000 HEP",
                         memo: "send",
                       },
                     },
@@ -450,6 +450,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
     }
 
     BuyGoldRequest() {
+        console.log("BuyGoldRequest")
         const url = this.scene.APIurl + '/cft'
         const postData = {
             "cft_auction_id": this.selectedSellingitemInfo.cft_auction_id,

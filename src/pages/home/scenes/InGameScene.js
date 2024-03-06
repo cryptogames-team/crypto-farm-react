@@ -177,15 +177,8 @@ export default class InGameScene extends Phaser.Scene {
 
         } else { // 로그인하지 않고 테스트
             console.log('this.characterInfo 존재 안함');
-
-        this.characterInfo = {
-            user_id: 1,
-            user_name: 'park',
-            exp: 1000,
-            level: 1,
-            cft: 1000,
-            asset_id: 4563456
-        }
+        
+        
         // 하드코딩된 액세스 토큰 값 넣어주면 된다.
         this.accessToken = '';
         }
@@ -212,6 +205,17 @@ export default class InGameScene extends Phaser.Scene {
 
     // 애셋 로드
     preload() {
+        /*
+        this.characterInfo = {
+            user_id: 1,
+            user_name: 'abc',
+            exp: 1000,
+            level: 1,
+            cft: 1000,
+            asset_id: 4563456,
+            name: 'curly'
+        }
+        */
         const assetManager = this.assetManager;
 
         // 게임에 필요한 스프라이트 전부 로드
@@ -226,6 +230,7 @@ export default class InGameScene extends Phaser.Scene {
     }
 
     create() {
+        
         
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;

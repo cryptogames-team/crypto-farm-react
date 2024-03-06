@@ -24,11 +24,11 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
     isHarvesting = false;
     name
 
-    constructor(scene, x, y,name) {
+    constructor(scene, x, y, name, style) {
         // 상속받은 부모 클래스의 생성자
         super(scene, x, y);
 
-        this.name=name
+        this.name = name
         // 씬의 디스플레이 목록에 추가하여 시각적으로 나타내게 한다.
         scene.add.existing(this);
         // 씬의 물리 시스템에 추가하여 물리적 상호작용을 가능하게 한다.
@@ -44,6 +44,25 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
         this.setDepth(10);
         this.playerDirection = "right";
 
+    
+        if (style === 'long hair') {
+
+        } 
+        else if (style === 'curly') {
+            console.log("curly in")
+            scene.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/curlyhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
+            scene.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/curlyhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
+            scene.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/longhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
+           
+        }
+        // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
+        else if (style === 'bow' || style === undefined) {
+            console.log("bow in")
+            scene.load.spritesheet('player_idle_hair', 'assets/Character/IDLE/bowlhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
+            scene.load.spritesheet('walk_hair', 'assets/Character/IDLE/bowlhair_walk_strip8.png',{ frameWidth: 96, frameHeight: 64 })       
+        }
+        
+
         // 캐릭터 스프라이트 추가
         // 컨테이너에 스프라이트를 추가할 때, 스프라이트 위치는 컨테이너 내에서 상대적 위치를 나타냄.
         // 컨테이너 내부의 스프라이트가 바디를 넘어가지 않게 상대 위치를 조정해야 한다.
@@ -51,14 +70,13 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
         this.bodySprite.setScale(spriteScale);
         this.handSprite = scene.add.sprite(bodyX / 2, bodyY / 2, 'player_idle_hand');
         this.handSprite.setScale(spriteScale);
-
-
         // 스프라이트를 컨테이너 자식에 추가하기 
         // body, hair, hand 순으로 추가해야 한다.
         this.add(this.bodySprite);
         // 캐릭터 name이 base인 경우 빡빡이 캐릭터라서 헤어 스프라이트가 필요 없음.
-        if (scene.characterInfo.name !== 'base') {
-            this.hairSprite = scene.add.sprite(bodyX / 2, bodyY / 2, 'player_idle_hair');
+        if (style !== "base") {
+            
+            this.hairSprite = scene.add.sprite(bodyX / 2, bodyY / 2, 'player_idle_hair_remote');
             this.hairSprite.setScale(spriteScale);
             this.add(this.hairSprite);
         }
@@ -70,36 +88,36 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
         this.stateMachine = new StateMachine('idle', {
             idle: new IdleState(),
             move: new MoveState(),
-        }, [scene, this]);
+        }, [scene, this,style]);
         this.stateMachine.transition('idle')
 
 
         //캐릭터 이름표 추가
-        this.nameTag = scene.add.text(33,60, this.name, {
+        this.nameTag = scene.add.text(33, 60, this.name, {
             fontFamily: 'Arial',
             fontSize: '18px',
             color: 'white',
             fontStyle: 'bold',
-            stroke: '#000000', 
+            stroke: '#000000',
             strokeThickness: 4
         }).setOrigin(0.5, 0)
         this.add(this.nameTag)
 
 
         //캐릭터 이름표 추가
-        this.nameTag = scene.add.text(33,60, this.name, {
+        this.nameTag = scene.add.text(33, 60, this.name, {
             fontFamily: 'Arial',
             fontSize: '18px',
             color: 'white',
             fontStyle: 'bold',
-            stroke: '#000000', 
+            stroke: '#000000',
             strokeThickness: 4
         }).setOrigin(0.5, 0)
         this.add(this.nameTag)
 
 
         //채팅말풍선
-        this.chatContentBox=new ChatContentBox(scene)
+        this.chatContentBox = new ChatContentBox(scene)
         this.add(this.chatContentBox)
     }
 
@@ -121,10 +139,11 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
     // 캐릭터 애니메이션 재생 함수
     // state : 재생할 애니메이션을 나타내는 상태
     // hairSprite : 빡빡이 캐릭터인지 확인한다. 빡빡이면 hairSprite가 없기 때문에
-    playAnimation(state, hairSprite) {
+    playAnimation(state, hairSprite,style) {
 
         if (hairSprite) {
-            this.hairSprite.anims.play(state + '_hair', true);
+            this.hairSprite.anims.play(state + '_hair_'+style, true);
+            
         }
         this.bodySprite.anims.play(state + '_body', true);
         // return 이 있는 이유 특정 애니메이션에 이벤트 리스너 달아야해서
@@ -140,28 +159,24 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
         anim.removeAllListeners();
     }
 
-    move(x,y)
-    {
-        if(x>=this.x)
-        {
-            
+    move(x, y) {
+        if (x >= this.x) {
+
             this.flipSprites(false)
-        }else
-        {
+        } else {
             this.flipSprites(true)
         }
-        const moveXInterpolation=(x-this.x)/10
-        const moveYInterpolation=(y-this.y)/10
-        for(let i=0;i<10;i++)
-        {           
-            setTimeout(()=>{
-                this.x+=moveXInterpolation
-                this.y+=moveYInterpolation
-            }, 20*(i+1))
+        const moveXInterpolation = (x - this.x) / 10
+        const moveYInterpolation = (y - this.y) / 10
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                this.x += moveXInterpolation
+                this.y += moveYInterpolation
+            }, 20 * (i + 1))
         }
 
         this.stateMachine.transition('move');
-        
+
     }
 
 }
@@ -218,13 +233,13 @@ class State {
 
 // 대기 상태 - 캐릭터의 기본 상태
 class IdleState extends State {
-    enter(scene, player) {
+    enter(scene, player,style) {
         // player는 컨테이너 클래스이다.
 
         // 대기 상태면 속도 0
         player.body.setVelocity(0);
         // 대기 애니메이션 재생
-        player.playAnimation('idle', player.hairSprite);
+        player.playAnimation('idle', player.hairSprite,style);
         console.log("IdleState entered!")
     }
 
@@ -250,8 +265,7 @@ class IdleState extends State {
 class MoveState extends State {
 
 
-    enter()
-    {
+    enter() {
         console.log("MoveState entered!")
     }
 
@@ -264,9 +278,8 @@ class MoveState extends State {
 
         // 현재 속도에 따라 걷기, 달리기 애니메이션 재생
         //const playerVelocity = player.body.velocity;
-        console.log("MoveState execute!")
         player.playAnimation('walk', player.hairSprite);
-        
+
         //player.playAnimation('walk', player.body);
     }
 }

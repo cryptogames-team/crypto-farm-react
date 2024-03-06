@@ -110,6 +110,8 @@ export default class MarketScene extends Phaser.Scene {
         // 로그인 씬으로부터 파라미터를 전달 받는다.
         console.log("마켓 씬을 시작하며 전달받은 데이터", characterInfo)
         this.characterInfo = characterInfo;
+        console.log("characterInfo")
+        console.log(characterInfo)
         this.accessToken=localStorage.getItem('accessToken')
         // 스프라이트 로더 인스턴스 생성       
         this.spriteLoader = new SpriteLoader(this);
@@ -125,11 +127,12 @@ export default class MarketScene extends Phaser.Scene {
             cft: 5000000
         }
         */
+       /*
         const rand_1_6 = Math.floor(Math.random() * 6) + 1;
 
 
         //메타버스 테스트를 위한 코드        
-        /*
+        
         switch (rand_1_6) {
             case 1:
                 this.characterInfo.user_name = 'park'
@@ -157,91 +160,30 @@ export default class MarketScene extends Phaser.Scene {
                 break;
         }
         */
+        
     }
 
     // 애셋 로드
     preload() {
 
-
-        // 헤어 애셋 경로 객체
-        const hairPath = {
-            idle: "",
-            walk: "",
-            run: "",
-            dig: "",
-            axe: "",
-            water: "",
-            mine: ""
-        };
-
-        // base는 빡빡이라서 헤어 스프라이트가 필요 없음
-        if (this.characterInfo.name === 'long hair') {
-            hairPath.idle = 'IDLE/longhair_idle_strip9.png';
-            hairPath.walk = 'WALKING/longhair_walk_strip8.png';
-            hairPath.run = 'RUN/longhair_run_strip8.png';
-            hairPath.dig = 'DIG/longhair_dig_strip13.png';
-            hairPath.axe = 'AXE/longhair_axe_strip10.png';
-            hairPath.water = 'WATERING/longhair_watering_strip5.png';
-            hairPath.mine = 'MINING/longhair_mining_strip10.png';
-            hairPath.do = 'DOING/longhair_doing_strip8.png';
-        } else if (this.characterInfo.name === 'curly') {
-            hairPath.idle = 'IDLE/curlyhair_idle_strip9.png';
-            hairPath.walk = 'WALKING/curlyhair_walk_strip8.png';
-            hairPath.run = 'RUN/curlyhair_run_strip8.png';
-            hairPath.dig = 'DIG/curlyhair_dig_strip13.png';
-            hairPath.axe = 'AXE/curlyhair_axe_strip10.png';
-            hairPath.water = 'WATERING/curlyhair_watering_strip5.png';
-            hairPath.mine = 'MINING/curlyhair_mining_strip10.png';
-            hairPath.do = 'DOING/curlyhair_doing_strip8.png';
-        }
-        // 로그인 안하고 인 게임 기능 구현할 때 바가지 머리 캐릭터 사용
-        else if (this.characterInfo.name === 'bow' || this.characterInfo.name === undefined) {
-            hairPath.idle = 'IDLE/bowlhair_idle_strip9.png';
-            hairPath.walk = 'WALKING/bowlhair_walk_strip8.png';
-            hairPath.run = 'RUN/bowlhair_run_strip8.png';
-            hairPath.dig = 'DIG/bowlhair_dig_strip13.png';
-            hairPath.axe = 'AXE/bowlhair_axe_strip10.png';
-            hairPath.water = 'WATERING/bowlhair_watering_strip5.png';
-            hairPath.mine = 'MINING/bowlhair_mining_strip10.png';
-            hairPath.do = 'DOING/bowlhair_doing_strip8.png';
-        }
-
+        this.load.spritesheet('long hair', 'assets/Character/IDLE/longhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
+        this.load.spritesheet('curly', 'assets/Character/IDLE/curlyhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
+        this.load.spritesheet('bow', 'assets/Character/IDLE/bowlhair_idle_strip9.png',{ frameWidth: 96, frameHeight: 64 })
 
         // 스프라이트 시트의 frameWidth 96, frameHeigth 64
         const characterSprites = [
             // 대기 스프라이트 시트
-            { name: 'player_idle_hair', path: hairPath.idle },
+            { name: 'player_idle_hair_long hair', path: 'IDLE/longhair_idle_strip9.png'},
+            { name: 'player_idle_hair_bow', path: 'IDLE/bowlhair_idle_strip9.png'},
+            { name: 'player_idle_hair_curly', path: 'IDLE/curlyhair_idle_strip9.png'},
             { name: 'player_idle_body', path: 'IDLE/base_idle_strip9.png' },
             { name: 'player_idle_hand', path: 'IDLE/tools_idle_strip9.png' },
             // 걷는 스프라이트 시트
-            { name: 'player_walk_hair', path: hairPath.walk },
+            { name: 'player_walk_hair_long hair', path: 'WALKING/longhair_idle_strip9.png' },
+            { name: 'player_walk_hair_bow', path:'WALKING/bowlhair_walk_strip8.png'},
+            { name: 'player_walk_hair_curly', path:'WALKING/curlyhair_walk_strip8.png'},
             { name: 'player_walk_body', path: 'WALKING/base_walk_strip8.png' },
             { name: 'player_walk_hand', path: 'WALKING/tools_walk_strip8.png' },
-            // 달리는 스프라이트 시트
-            { name: 'player_run_hair', path: hairPath.run },
-            { name: 'player_run_body', path: 'RUN/base_run_strip8.png' },
-            { name: 'player_run_hand', path: 'RUN/tools_run_strip8.png' },
-            // 땅파는 스프라이트 시트
-            { name: 'player_dig_hair', path: hairPath.dig },
-            { name: 'player_dig_body', path: 'DIG/base_dig_strip13.png' },
-            { name: 'player_dig_hand', path: 'DIG/tools_dig_strip13.png' },
-            // 도끼질 스프라이트 시트
-            { name: 'player_axe_hair', path: hairPath.axe },
-            { name: 'player_axe_body', path: 'AXE/base_axe_strip10.png' },
-            { name: 'player_axe_hand', path: 'AXE/tools_axe_strip10.png' },
-            // 물주는 스프라이트 시트
-            { name: 'player_water_hair', path: hairPath.water },
-            { name: 'player_water_body', path: 'WATERING/base_watering_strip5.png' },
-            { name: 'player_water_hand', path: 'WATERING/tools_watering_strip5.png' },
-            // 채굴 스프라이트 시트
-            { name: 'player_mine_hair', path: hairPath.mine },
-            { name: 'player_mine_body', path: 'MINING/base_mining_strip10.png' },
-            { name: 'player_mine_hand', path: 'MINING/tools_mining_strip10.png' },
-            // 행동 스프라이트 시트
-            { name: 'player_do_hair', path: hairPath.do },
-            { name: 'player_do_body', path: 'DOING/base_doing_strip8.png' },
-            { name: 'player_do_hand', path: 'DOING/tools_doing_strip8.png' },
-
         ];
 
         // 상대 경로 설정
@@ -272,7 +214,9 @@ export default class MarketScene extends Phaser.Scene {
             user_name: this.characterInfo.user_name,
             asset_name: this.characterInfo.asset_name,
             x: 0,
-            y: 0
+            y: 0,
+            name: this.characterInfo.name,
+            is_left: false
         }
         // 해시 맵처럼 동작하는 객체 생성
         this.remotePlayers = [];
@@ -311,17 +255,20 @@ export default class MarketScene extends Phaser.Scene {
         })
         //유저가 들어왔을때
         this.socket.on('joinRoom', (data) => {
+            console.log('joinRoom')
+            console.log(data)
             if (data.user_name != this.characterInfo.user_name) {
-                let remotePlayer = new RemotePlayer(this, 1230, 1820, data.user_name)
+                let remotePlayer = new RemotePlayer(this, 1230, 1820, data.user_name, data.name)
                 this.remotePlayers.push(remotePlayer);
             }
         })
         //방처음 들어왔을때 user리스트 받음 
         this.socket.on('getUsers', (data) => {
-            if(data==!null)
+            if(data!==null)
             {
+                console.log("data.length : "+data.length)
                 for (let i = 0; i < data.length; i++) {
-                    let remotePlayer = new RemotePlayer(this, data[i].x, data[i].y, data[i].user_name)
+                    let remotePlayer = new RemotePlayer(this, data[i].x, data[i].y, data[i].user_name, data[i].name)
                     this.remotePlayers.push(remotePlayer);
                 }
             }
@@ -375,43 +322,7 @@ export default class MarketScene extends Phaser.Scene {
 
 
         // 캐릭터 애니메이션 생성에 필요한 정보를 담은 객체 배열 
-        const animations = [
-            // 대기 애니메이션 9 프레임
-            { key: 'idle_hair', frames: this.anims.generateFrameNumbers('player_idle_hair', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
-            { key: 'idle_body', frames: this.anims.generateFrameNumbers('player_idle_body', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
-            { key: 'idle_hand', frames: this.anims.generateFrameNumbers('player_idle_hand', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
-            // 걷는 애니메이션 8 프레임
-            { key: 'walk_hair', frames: this.anims.generateFrameNumbers('player_walk_hair', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'walk_body', frames: this.anims.generateFrameNumbers('player_walk_body', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'walk_hand', frames: this.anims.generateFrameNumbers('player_walk_hand', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            // 달리는 애니메이션 8 프레임
-            { key: 'run_hair', frames: this.anims.generateFrameNumbers('player_run_hair', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'run_body', frames: this.anims.generateFrameNumbers('player_run_body', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            { key: 'run_hand', frames: this.anims.generateFrameNumbers('player_run_hand', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
-            // 땅파는 애니메이션 13 프레임
-            { key: 'dig_hair', frames: this.anims.generateFrameNumbers('player_dig_hair', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
-            { key: 'dig_body', frames: this.anims.generateFrameNumbers('player_dig_body', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
-            { key: 'dig_hand', frames: this.anims.generateFrameNumbers('player_dig_hand', { start: 0, end: 12 }), frameRate: 13, repeat: 0 },
-            // 도끼질 애니메이션 10 프레임
-            { key: 'axe_hair', frames: this.anims.generateFrameNumbers('player_axe_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'axe_body', frames: this.anims.generateFrameNumbers('player_axe_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'axe_hand', frames: this.anims.generateFrameNumbers('player_axe_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            // 물주는 애니메이션 5 프레임
-            { key: 'water_hair', frames: this.anims.generateFrameNumbers('player_water_hair', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
-            { key: 'water_body', frames: this.anims.generateFrameNumbers('player_water_body', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
-            { key: 'water_hand', frames: this.anims.generateFrameNumbers('player_water_hand', { start: 0, end: 4 }), frameRate: 5, repeat: 0 },
-            // 채굴 애니메이션 10 프레임
-            { key: 'mine_hair', frames: this.anims.generateFrameNumbers('player_mine_hair', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'mine_body', frames: this.anims.generateFrameNumbers('player_mine_body', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            { key: 'mine_hand', frames: this.anims.generateFrameNumbers('player_mine_hand', { start: 0, end: 9 }), frameRate: 10, repeat: 0 },
-            // 행동 애니메이션 8 프레임
-            { key: 'do_hair', frames: this.anims.generateFrameNumbers('player_do_hair', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
-            { key: 'do_body', frames: this.anims.generateFrameNumbers('player_do_body', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
-            { key: 'do_hand', frames: this.anims.generateFrameNumbers('player_do_hand', { start: 0, end: 7 }), frameRate: 8, repeat: 0 },
-        ];
-
-
-
+        
 
 
         // 플레이어 캐릭터 오브젝트 씬에 생성

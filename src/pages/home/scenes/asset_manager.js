@@ -69,6 +69,11 @@ export default class AssetManager {
         // 스프라이트 시트의 frameWidth 96, frameHeigth 64
         this.characterSprites = [
             // 대기 스프라이트 시트
+            { name: 'player_idle_hair_long hair', path: 'IDLE/longhair_idle_strip9.png'},
+            { name: 'player_idle_hair_bow', path: 'IDLE/bowlhair_idle_strip9.png'},
+            { name: 'player_idle_hair_curly', path: 'IDLE/curlyhair_idle_strip9.png'},
+
+
             { name: 'player_idle_hair', path: this.hairPath.idle },
             { name: 'player_idle_body', path: 'IDLE/base_idle_strip9.png' },
             { name: 'player_idle_hand', path: 'IDLE/tools_idle_strip9.png' },
@@ -414,6 +419,14 @@ export default class AssetManager {
             { key: 'tree_shake', frames: this.scene.anims.generateFrameNumbers('tree', { start: 0, end: 6 }), frameRate: 12, repeat: 0 },
             // 나무 벌목당했을 때 애니메이션 13프레임 1.5배 배속
             { key: 'tree_chop', frames: this.scene.anims.generateFrameNumbers('chopped', { start: 0, end: 12 }), frameRate: 16, repeat: 0 },
+
+
+            { key: 'idle_hair_long hair', frames: this.scene.anims.generateFrameNumbers('player_idle_hair_long hair', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
+            { key: 'idle_hair_curly', frames: this.scene.anims.generateFrameNumbers('player_idle_hair_curly', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
+            { key: 'idle_hair_bow', frames: this.scene.anims.generateFrameNumbers('player_idle_hair_bow', { start: 0, end: 8 }), frameRate: 9, repeat: -1 },
+            { key: 'walk_hair_long hair', frames: this.scene.anims.generateFrameNumbers('player_walk_hair_long hair', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
+            { key: 'walk_hair_curly', frames: this.scene.anims.generateFrameNumbers('player_walk_hair_curly', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
+            { key: 'walk_hair_bow', frames: this.scene.anims.generateFrameNumbers('player_walk_hair_bow', { start: 0, end: 7 }), frameRate: 8, repeat: -1 },
         ];
     }
 
