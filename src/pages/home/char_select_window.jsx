@@ -16,7 +16,12 @@ let nodeURL = process.env.REACT_APP_NODE;
 // EOS 블록체인 네트워크와의 통신을 담당한다.
 const rpc = new JsonRpc(nodeURL);
 
-const serverURL = 'http://221.148.25.234:1234/user/all';
+
+// .env 파일에 있는 변수 사용
+
+const serverURL = process.env.REACT_APP_API + 'user/all';
+
+
 
 // async : 비동기 처리
 // 함수형 컴포넌트는 async로 실행 불가능함.
@@ -151,6 +156,7 @@ function CharSelectWindow({accountName, onCharSelect}) {
     });
 
     console.log("계정의 NFT asset id 배열", asset_ids);
+
 
     try {
       const response = await fetch(serverURL, {

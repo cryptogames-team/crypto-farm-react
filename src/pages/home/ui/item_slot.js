@@ -273,6 +273,69 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             //console.log("겹치는 오브젝트들 상호작용 가능함.");
         });
 
+        // 마우스 우클릭 이벤트 추가
+        this.itemImg.on('pointerdown', (pointer) => {
+
+            if(pointer.rightButtonDown()){
+                //console.log('아이템 이미지 우클릭 됨');
+
+                // 클릭한 슬롯 아이템의 타입 확인
+                const clickSlot = scene.hoverSlot;
+                const clickItem = scene.hoverSlot.item;
+                //console.log('마우스 우클릭한 슬롯의 아이템', clickItem);
+
+                // 요리 아이템
+                if(clickItem.type === 5){
+                    console.log('요리 아이템 소비 시도');
+                    // 얻는 경험치 량
+                    let exp = clickItem.seed_Time;
+
+                    const networkManager = this.scene.networkManager;
+
+                    // 서버에 경험치 올려달라고 요청하기
+                    networkManager.serverAddExp(exp).then(data => {
+                        if(data){
+                            // 캐릭터 UI창 경험치 관련 UI 요소들 재설정
+                            this.scene.charInfoUI.onEarnExp(exp);
+
+
+                            // 사용할 요리 아이템 정보
+                            const useItemInfo = this.scene.allItemMap.get(clickItem.name);
+                            //console.log('사용할 요리 아이템 정보', useItemInfo);
+
+                            // 서버에 아이템 수량 감소 요청
+                            networkManager.serverUseItem(useItemInfo, 1, clickSlot).then(data => {
+
+                                let item_count = 0;
+
+                                // 아직 clickItem 참조가 남아있음
+                                if(clickItem.count > 0){
+                                    item_count = clickItem.count;
+
+                                }else{
+
+                                    // 요리 아이템 전부 소모하면 아이템 툴팁 끄기
+                                    if(clickSlot === scene.hoverSlot){
+                                        console.log('클릭한 슬롯과 마우스 오버중인 슬롯이 같음');
+
+                                        scene.inventory.toolTip.setVisible(false);
+                                        scene.quickSlotUI.toolTip.setVisible(false);
+                                    }
+
+                                }
+
+                                console.log('남은 요리 아이템 수량', item_count);
+                            });
+
+                        }else{
+                            console.log('요리 아이템 사용 실패');
+                        }
+                    });
+
+                } 
+            }
+        });
+
         // 슬롯 이미지 드래그 시작
         this.itemImg.on("dragstart", (pointer) => {
             // 마우스 올려둔 슬롯이 드래그 시작 슬롯이 됨

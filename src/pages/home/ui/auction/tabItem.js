@@ -51,7 +51,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
     }
 
     setMyItems() {
-        const url = this.scene.APIurl+'/item/own-item/' + this.scene.characterInfo.user_id
+        const url = this.scene.APIurl+'item/own-item/' + this.scene.characterInfo.user_id
 
         //요청 보내기
         fetch(url, {
@@ -85,7 +85,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
     }
 
     setMySellingItems() {
-        const url = this.scene.APIurl+'/auction/sell/1'
+        const url = this.scene.APIurl+'auction/sell/1'
 
         //요청 보내기
         fetch(url, {
@@ -333,7 +333,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .on('pointerup', () => {
 
 
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + '&item_name=1&item_price=0&page=1'
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + '&item_name=1&item_price=0&page=1'
 
                     //요청 보내기
                     fetch(url, {
@@ -430,7 +430,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .on('pointerup', () => {
 
 
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + '&item_name=1&item_price=0&page=1'
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + '&item_name=1&item_price=0&page=1'
                     //보내기
                     fetch(url, {
                         method: 'GET',
@@ -469,7 +469,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setInteractive()
                 .setDisplaySize(10, 10)
                 .on('pointerup', () => {
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + '&item_name=0&page=1'
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + '&item_name=0&page=1'
                     //요청 보내기
                     fetch(url, {
                         method: 'GET',
@@ -512,7 +512,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setDisplaySize(10, -10)
                 .setInteractive()
                 .on('pointerup', () => {
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + '&item_price=1&page=1'
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + '&item_price=1&page=1'
                     //요청 보내기
                     fetch(url, {
                         method: 'GET',
@@ -551,7 +551,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setInteractive()
                 .setDisplaySize(10, 10)
                 .on('pointerup', () => {
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + '&item_price=0&page=1'
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + '&item_price=0&page=1'
                     //요청 보내기
                     fetch(url, {
                         method: 'GET',
@@ -598,7 +598,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                         this.nowPage--
                     }
 
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + this.order + '&page=' + this.nowPage
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + this.order + '&page=' + this.nowPage
                     //요청 보내기
                     fetch(url, {
                         method: 'GET',
@@ -647,7 +647,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                     if (this.nowPage > this.page_count) {
                         this.nowPage = 1
                     }
-                    const url = scene.APIurl+'/auction?search_keyword=' + this.searchItem_name.text + this.order + '&page=' + this.nowPage
+                    const url = scene.APIurl+'auction?search_keyword=' + this.searchItem_name.text + this.order + '&page=' + this.nowPage
                     //요청 보내기
                     fetch(url, {
                         method: 'GET',
@@ -682,7 +682,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             this.category_totalPrice_text = scene.add.text(frame_result_x_position + 770, frame_result_y_position + 55, "총 가격", categoryTextType)
 
-            const url = scene.APIurl+'/auction?item_name=1&item_price=0&page=1'
+            const url = scene.APIurl+'auction?item_name=1&item_price=0&page=1'
             //요청 보내기
             fetch(url, {
                 method: 'GET',
@@ -1003,7 +1003,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setInteractive(shape, Phaser.Geom.Rectangle.Contains)
                 .on('pointerup', () => {
 
-                    const url = scene.APIurl+'/auction'
+                    const url = scene.APIurl+'auction'
                     const postData = {
                         "item_id": this.myItems[this.selected_myItem].itemInfo.item_id,
                         "item_count": parseInt(this.sellingCountInput_text.text),
@@ -1187,7 +1187,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setInteractive(shape, Phaser.Geom.Rectangle.Contains)
                 .on('pointerup', () => {
                     this.nowCompletePage = 1
-                    const url = scene.APIurl+'/auction/transaction-all/' + this.nowCompletePage
+                    const url = scene.APIurl+'auction/transaction-all/' + this.nowCompletePage
 
                     //요청 보내기
                     fetch(url, {
@@ -1263,7 +1263,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setInteractive(shape, Phaser.Geom.Rectangle.Contains)
                 .on('pointerup', () => {
                     this.nowCompletePage = 1
-                    const url = scene.APIurl+'/auction/sell-complete/' + this.nowCompletePage
+                    const url = scene.APIurl+'auction/sell-complete/' + this.nowCompletePage
 
                     //요청 보내기
                     fetch(url, {
@@ -1335,7 +1335,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 .setInteractive(shape, Phaser.Geom.Rectangle.Contains)
                 .on('pointerup', () => {
                     this.nowCompletePage = 1
-                    const url = scene.APIurl+'/auction/purchase/' + this.nowCompletePage
+                    const url = scene.APIurl+'auction/purchase/' + this.nowCompletePage
 
                     //요청 보내기
                     fetch(url, {
@@ -1486,11 +1486,11 @@ export default class TabItem extends Phaser.GameObjects.Container {
                     }
                     var url
                     if (this.completeType == 0) {
-                        url = 'http://221.148.25.234:1234/auction/transaction-all/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/transaction-all/' + this.nowCompletePage
                     } else if (this.completeType == 1) {
-                        url = 'http://221.148.25.234:1234/auction/sell-complete/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/sell-complete/' + this.nowCompletePage
                     } else {
-                        url = 'http://221.148.25.234:1234/auction/purchase/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/purchase/' + this.nowCompletePage
                     }
 
 
@@ -1544,11 +1544,11 @@ export default class TabItem extends Phaser.GameObjects.Container {
                     }
                     var url
                     if (this.completeType == 0) {
-                        url = 'http://221.148.25.234:1234/auction/transaction-all/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/transaction-all/' + this.nowCompletePage
                     } else if (this.completeType == 1) {
-                        url = 'http://221.148.25.234:1234/auction/sell-complete/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/sell-complete/' + this.nowCompletePage
                     } else {
-                        url = 'http://221.148.25.234:1234/auction/purchase/' + this.nowCompletePage
+                        url = process.env.REACT_APP_API + 'auction/purchase/' + this.nowCompletePage
                     }
 
 
@@ -1585,7 +1585,7 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             this.completeFrame.add([this.complete_before_page, this.completePageText, this.complete_next_page])
             this.nowCompletePage = 1
-            const url = scene.APIurl+'/auction/transaction-all/' + this.nowCompletePage
+            const url = scene.APIurl+'auction/transaction-all/' + this.nowCompletePage
 
             //처음에 전체버튼 한번누른걸로
             fetch(url, {

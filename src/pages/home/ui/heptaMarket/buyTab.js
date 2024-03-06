@@ -450,8 +450,12 @@ export default class BuyTab extends Phaser.GameObjects.Container {
     }
 
     BuyGoldRequest() {
+<<<<<<< HEAD
         console.log("BuyGoldRequest")
         const url = this.scene.APIurl + '/cft'
+=======
+        const url = this.scene.APIurl + 'cft'
+>>>>>>> 0b211919e9d5c6521f461e590fd6fe7bfecb9d2b
         const postData = {
             "cft_auction_id": this.selectedSellingitemInfo.cft_auction_id,
             "cft": parseInt(this.quantatyText.text),
@@ -488,7 +492,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
 
 
     getCFTLists() {
-        const url = this.scene.APIurl + '/cft?page=1&cft_price=1'
+        const url = this.scene.APIurl + 'cft?page=1&cft_price=1'
         //요청 보내기
         fetch(url, {
             method: 'GET',
@@ -535,7 +539,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
     }
 
     order(condition) {
-        const url = this.scene.APIurl + '/cft?page=1' + condition
+        const url = this.scene.APIurl + 'cft?page=1' + condition
 
         //요청 보내기
         fetch(url, {
@@ -596,7 +600,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
 
 
 
-        const url = this.scene.APIurl + '/cft?page=' + this.nowPage + this.condition
+        const url = this.scene.APIurl + 'cft?page=' + this.nowPage + this.condition
         //요청 보내기
         fetch(url, {
             method: 'GET',
@@ -632,7 +636,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
 
     renew()
     {
-        const url = this.scene.APIurl + '/cft?page=' + this.nowPage + this.condition
+        const url = this.scene.APIurl + 'cft?page=' + this.nowPage + this.condition
         //요청 보내기
         fetch(url, {
             method: 'GET',

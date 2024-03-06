@@ -31,9 +31,9 @@ export default class LoginScene extends Phaser.Scene {
 
         // 새 로그인 화면 배경에 사용할 
         // 바닥, 목장, 언덕 png 로드
-        this.load.image('login_background_ground', 'assets/maps/New_Crypto_Farm_Login_Ground.png');
-        this.load.image('login_background_pasture', 'assets/maps/Crypto_Farm_Login_Pasture.png');
-        this.load.image('login_background_hill', 'assets/maps/Crypto_Farm_Login_Hill.png');
+        this.load.image('login_background_ground', 'assets/Maps/New_Crypto_Farm_Login_Ground.png');
+        this.load.image('login_background_pasture', 'assets/Maps/Crypto_Farm_Login_Pasture.png');
+        this.load.image('login_background_hill', 'assets/Maps/Crypto_Farm_Login_Hill.png');
 
     }
     // 게임 객체 및 로직 초기화

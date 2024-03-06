@@ -6,9 +6,10 @@ import Crops from '../elements/crops';
 import Item from '../elements/item';
 import Inventory from '../ui/inventory';
 import Auction from '../ui/auction/auction';
-import { io } from 'socket.io-client';
+import {io} from 'socket.io-client'
 import Chat from '../ui/chat/chatInput';
 import Market from '../ui/heptaMarket/market';
+
 
 
 // 현재 맵 크기
@@ -23,15 +24,10 @@ const layerScale = 4;
 // 실제 타일 크기에 맞게 설정해야 한다.
 const tileSize = 16 * layerScale;
 
-
-
-let APIUrl = process.env.REACT_APP_API;
-
-
 export default class MarketScene extends Phaser.Scene {
 
 
-    APIurl = 'http://221.148.25.234:1234'
+    APIurl = process.env.REACT_APP_API;
     accessToken
     auction;
     socket;
@@ -194,7 +190,7 @@ export default class MarketScene extends Phaser.Scene {
 
         // sunnysideworld 타일셋 PNG 파일 로드
         // 상대 경로 설정
-        this.load.path = "assets/maps/";
+        this.load.path = "assets/Maps/";
         this.load.image('sunnysideworld_tiles', 'spr_tileset_sunnysideworld_16px.png');
         this.load.image('cow_tiles', 'spr_deco_cow_strip4.png');
 
@@ -209,7 +205,7 @@ export default class MarketScene extends Phaser.Scene {
         this.beforePositionX = 0
         this.beforePositionY = 0
         this.playerObject = new PlayerObject(this, 1250, 1750);
-        this.socket = io('http://221.148.25.234:1234/metaverse');
+        this.socket = io(process.env.REACT_APP_API + 'metaverse');
         var user_info = {
             user_name: this.characterInfo.user_name,
             asset_name: this.characterInfo.asset_name,
