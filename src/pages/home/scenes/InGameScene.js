@@ -222,13 +222,13 @@ export default class InGameScene extends Phaser.Scene {
         this.load.path = 'assets/Maps/'
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
         this.load.tilemapTiledJSON('Market', 'ingame/Market.json');
-        this.load.tilemapTiledJSON('Test', 'ingame/test.json');       
+        this.load.tilemapTiledJSON('Test', 'ingame/test.json');
         // 게임에 필요한 이미지 전부 로드
         assetManager.loadAllImage();
     }
 
     create() {
-        
+
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
@@ -267,7 +267,7 @@ export default class InGameScene extends Phaser.Scene {
         const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
         const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
 
-        
+
 
         //옥션 UI 생성
         //크기
@@ -283,7 +283,7 @@ export default class InGameScene extends Phaser.Scene {
 
         // 인벤토리 UI 추가
 
-    
+
 
 
 
@@ -596,8 +596,9 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터 정보창 추가
         this.charInfoUI = new CharacterInfo(this, 10, 10, 250, 100, this.characterInfo);
 
+
     }
-    
+
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
     // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
     // 이 값은 게임이 얼마나 매끄럽게 실행되고 있는지를 나타내는데 사용될 수 있으며,
@@ -605,6 +606,9 @@ export default class InGameScene extends Phaser.Scene {
     update(time, delta) {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
+
+        // 플레이어 오브젝트 위치 점으로 찍어보기
+        this.graphics2 = this.add.graphics()
 
         //console.log(this.crops);
         this.crops.forEach((crops, index) => {
@@ -628,14 +632,10 @@ export default class InGameScene extends Phaser.Scene {
                     // 상호작용할 타일의 프로퍼티 표시
                     this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable); */
 
-
-        // 타일의 월드좌표로 상호작용 타일의 월드 상의 위치 저장
-        // tileToWorldX()랑 Tile.pixelX랑 차이가 있네
-        // ingameMap 원래 크기보다 4배 커져있는데
-        // Tile.pixel 위치는 원래 크기에서 위치 값을 구해주네
-        const frontTileX = interactTile.pixelX * layerScale;
-        const frontTileY = interactTile.pixelY * layerScale;
-
+        // 타일의 월드좌표 값으로로 상호작용 타일의 월드 상의 위치 설정
+        // ingameMap이 원래 크기보다 4배 커져있어서 레이어 스케일 만큼 곱해야 됨.
+        let frontTileX = interactTile.pixelX * layerScale;
+        let frontTileY = interactTile.pixelY * layerScale;
 
         // 상호작용 할 타일 표시 UI 마커 위치 업데이트
         this.interTileMarker.x = frontTileX;
@@ -650,19 +650,17 @@ export default class InGameScene extends Phaser.Scene {
             this.auction.enable();
         }
         //시장맵이동
-        if(this.playerObject.x> 740 && this.playerObject.x <920 &&this.playerObject.y<1)
-        {
-            this.scene.start('MarketScene',this.characterInfo);
-            this.playerObject.y=10
+        if (this.playerObject.x > 740 && this.playerObject.x < 920 && this.playerObject.y < 1) {
+            this.scene.start('MarketScene', this.characterInfo);
+            this.playerObject.y = 10
         }
 
-       
+
     }
 
     // 퀵슬롯을 선택하고
     // 선택한 퀵슬롯의 셀렉트 박스 표시
     equipQuickSlot(equipNumber) {
-
 
         this.equipNumber = equipNumber;
         const quickSlots = this.quickSlotUI.quickSlots;
@@ -1032,7 +1030,7 @@ export default class InGameScene extends Phaser.Scene {
             y: this.playerObject.y
         }
         // 플레이어 현재 중앙 위치
-        // // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨
         const playerCenterLoc = {
             x: playerLoc.x + (this.playerObject.body.width / 2),
             y: playerLoc.y + (this.playerObject.body.height / 2)
@@ -1053,12 +1051,21 @@ export default class InGameScene extends Phaser.Scene {
 
         // 월드 상의 특정 위치(픽셀 단위)를 기반으로 해당 위치에 해당하는 타일맵의 타일 좌표를 계산한다.
         // 캐릭터가 상호작용할 타일의 위치 구하기
-        //const interactTileX = this.ingameMap.worldToTileX(pointX);
-        //const interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
         this.interactTileX = this.ingameMap.worldToTileX(pointX);
         this.interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
 
-        return this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
+        let interactTile = this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
+
+        //타일맵 바깥의 위치에서 상호작용할 타일을 구하는 경우 현재 캐릭터의 위치의 타일로 상호작용 하도록 설정한다
+        if (interactTile === null) {
+            console.log('상호작용할 타일을 구할 수 없어서 현재 캐릭터 위치로 상호작용 타일 구하기');
+            this.interactTileX = this.ingameMap.worldToTileX(playerCenterLoc.x);
+            this.interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
+            interactTile = this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
+            console.log(interactTile);
+        }
+
+        return interactTile;
     }
 
     // 사각형 영역안에 특정 위치의 점이 포함되는지 확인

@@ -24,6 +24,8 @@ export default class ItemSlot extends Frame_LT {
     itemTitle;
     // 아이템 이미지
     itemImg;
+    // 상호작용 투명 이미지
+    bgImg;
 
     // 아이템 수량 관련 변수들
     countBox;
@@ -68,6 +70,8 @@ export default class ItemSlot extends Frame_LT {
 
         //console.log("아이템 슬롯의 길이와 높이 : " , width, height);
 
+        this.bgImg = scene.add.sprite(width / 2, height / 2, null);
+        this.bgImg.setDisplaySize(this.width - 14, this.height - 14).setAlpha(0.00001);
 
         // 아이템 객체를 받아서 아이템 슬롯으로 사용 시
         if (item) {
@@ -76,7 +80,7 @@ export default class ItemSlot extends Frame_LT {
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);
-            this.itemImg.setDisplaySize(width / 2 - 10, height / 2 - 10);
+            //this.itemImg.setDisplaySize(width / 2 - 10, height / 2 - 10);
         }
         // 빈 아이템 슬롯으로 사용 시
         else {
@@ -86,7 +90,8 @@ export default class ItemSlot extends Frame_LT {
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, null);
-            this.itemImg.setDisplaySize(width / 2, height / 2).setVisible(false);
+            //this.itemImg.setDisplaySize(width / 2, height / 2).setVisible(false);
+            this.itemImg.setVisible(false);
         }
 
         let txtConfig = {
@@ -120,7 +125,7 @@ export default class ItemSlot extends Frame_LT {
         this.selectBox.setScale(2);
         this.selectBox.setVisible(false);
 
-        this.add([this.itemImg, this.selectBox, this.countBox, this.countTxt]);
+        this.add([this.bgImg,this.itemImg, this.selectBox, this.countBox, this.countTxt]);
 
         // 퀵슬롯 UI로 사용시
         if (this.slotNumber !== null) {
@@ -156,7 +161,7 @@ export default class ItemSlot extends Frame_LT {
         // 마우스 오버하면 딱 한번만 호출됨
         this.on('pointerover', (pointer) => {
 
-            //console.log("아이템 슬롯 포인터 오버");
+            console.log("아이템 슬롯 포인터 오버");
             //this.hoverIndex = this.index;
 
             scene.hoverSlot = this;
@@ -275,6 +280,133 @@ export default class ItemSlot extends Frame_LT {
 
         });
 
+
+        // 상호작용 배경 이미지 이벤트 추가
+        // 포인터 오버
+        this.bgImg.on('pointerover', (pointer) => {
+            scene.input.setTopOnly(false);
+            console.log("겹치는 오브젝트들 상호작용 가능함.");
+        });
+
+        this.bgImg.on('pointerdown', (pointer) => {
+            console.log('배경 이미지 클릭됨');
+        });
+
+        // 드래그 스타트
+        this.bgImg.on("dragstart", () => {
+            // 마우스 올려둔 슬롯이 드래그 시작 슬롯이 됨
+            scene.startSlot = scene.hoverSlot;
+
+            let slotInfo = {
+                type: scene.startSlot.type,
+                index: scene.startSlot.index
+            };
+
+            //console.log("이미지 드래그 시작 슬롯 정보 : ", slotInfo);
+
+            // 일시적으로 컨테이너 자식에서 해제하고 depth 설정하기 
+            this.remove(this.itemImg, false);
+            this.itemImg.setDepth(2000);
+
+            // 아이템 드래그할 때 시작 슬롯의 텍스트 안보이게 하기
+            this.countTxt.setVisible(false);
+
+            // 원본 마우스 위치
+            let camera = this.scene.cameras.main;
+            let pointer = this.scene.input.activePointer;
+
+            // 아이템 이미지가 이제 월드 위치를 사용함.
+            this.itemImg.x = pointer.x + camera.scrollX;
+            this.itemImg.y = pointer.y + camera.scrollY;
+
+            // 툴팁 끄기
+            const toolTip = scene.inventory.toolTip;
+            toolTip.setVisible(false);
+
+            scene.quickSlotUI.toolTip.setVisible(false);
+            scene.quickSlotUI.add(scene.quickSlotUI.toolTip);
+            scene.quickSlotUI.toolTip.x = 0;
+            scene.quickSlotUI.toolTip.y = 0;
+
+            scene.isDragging = true;
+        });
+
+        // 슬롯 이미지 드래그
+        this.bgImg.on('drag', () => {
+
+            // 원본 마우스 위치
+            let camera = this.scene.cameras.main;
+            let pointer = this.scene.input.activePointer;
+
+            // 아이템 이미지가 이제 월드 위치를 사용함.
+            this.itemImg.x = pointer.x + camera.scrollX;
+            this.itemImg.y = pointer.y + camera.scrollY;
+        });
+        // 슬롯 이미지 드래그 엔드
+        this.bgImg.on('dragend', (pointer) => {
+
+            // 더 이상 멤버 슬롯 인덱스는 사용하지 않는다.
+
+            // 드랍한 슬롯의 정보
+            scene.endSlot = scene.hoverSlot;
+
+            // 아이템 슬롯안에 드랍했는지 확인
+            // 아이템 슬롯 바깥으로 마우스 포인터가 나가면 scene.endSlot === null
+            if (scene.endSlot !== null) {
+
+                let slotInfo = {
+                    type: scene.endSlot.type,
+                    index: scene.endSlot.index
+                };
+                //console.log("드랍한 슬롯의 정보", slotInfo);
+
+                // 마우스 포인터가 위치한 슬롯의 아이템이 존재하는지 체크
+                let isItemExist = false;
+                scene.hoverSlot.item ? isItemExist = true : isItemExist = false;
+
+                if (isItemExist) {
+                    //console.log("드랍한 슬롯에 아이템이 존재함.");
+
+                    // 드랍한 슬롯이 드래그 시작한 슬롯과 같지 않으면 아이템을 교체한다.
+                    // 이 경우에는 동일한 객체 참조 여부를 검사해야되는건가?
+                    if (scene.endSlot !== scene.startSlot) {
+                        //console.log("시작 슬롯과 드랍 슬롯이 동일하지 않아서 아이템 교체");
+
+                        // start -> end 이동 요청
+                        this.sendMoveItem(scene.startSlot, scene.endSlot);
+                        // end -> start 이동 요청
+                        this.sendMoveItem(scene.endSlot, scene.startSlot);
+                        // 아이템 교체
+                        this.swapItem(scene.startSlot, scene.endSlot);
+                    }
+                    else {
+                        //console.log("시작 슬롯과 드랍 슬롯이 동일함.");
+                    }
+                }
+                else {
+
+                    // 씬에게 아이템 이동 요청 서버에 보내달라고 한다.
+                    this.sendMoveItem(scene.startSlot, scene.endSlot);
+
+                    // 이동 요청 결과 안 기다리고 걍 옮겨
+                    // 빈 슬롯으로 아이템 옮기기
+                    this.moveItem(scene.startSlot, scene.endSlot);
+
+                    // 툴팁 내용 재설정
+                    scene.inventory.toolTip.setToolTip(scene.hoverSlot.item);
+                    scene.quickSlotUI.toolTip.setToolTip(scene.hoverSlot.item);
+
+                }
+
+            }
+            // 어떤 경우에도 아이템 이미지가 원래 있던 슬롯으로 복귀 해야한다.
+            this.returnImg();
+
+            // 텍스트 다시 보이게 하기
+            this.countTxt.setVisible(true);
+            scene.isDragging = false;
+        });
+
         // 아이템 슬롯 이미지 이벤트 추가
         // 슬롯 이미지 포인터 오버
         this.itemImg.on('pointerover', (pointer) => {
@@ -355,8 +487,6 @@ export default class ItemSlot extends Frame_LT {
             };
 
             //console.log("이미지 드래그 시작 슬롯 정보 : ", slotInfo);
-            //console.log("드래그 시작한 슬롯의 아이템 정보 : ", scene.startSlot.item);
-            console.log('드래그 시작한 슬롯 아이템 이미지 크기', scene.startSlot.itemImg.width, scene.startSlot.itemImg.height )
 
             // 일시적으로 컨테이너 자식에서 해제하고 depth 설정하기 
             this.remove(this.itemImg, false);
@@ -485,12 +615,15 @@ export default class ItemSlot extends Frame_LT {
     setSlotItem(item) {
         this.item = item;
 
+        //console.log('설정될 아이템 정보',this.item);
+
         this.itemImg.setTexture(item.name);
         /* // 텍스처의 원본 크기로 이미지 크기 조정하기
         this.itemImg.width = this.itemImg.frame.width;
         this.itemImg.height = this.itemImg.frame.height; */
         
-        this.itemImg.setVisible(true).setDisplaySize(this.width / 2 - 10, this.height / 2 - 10);
+        this.itemImg.setVisible(true)
+        this.itemImg.setDisplaySize(this.width / 2 - 7, this.height / 2 - 7 );
 
         // 아이템 타입이 4이면 수량 텍스트 표시 안함.
         if (item.type === 4)
@@ -500,32 +633,56 @@ export default class ItemSlot extends Frame_LT {
             this.countBox.setVisible(true);
         }
 
-
-        // 아이템 이미지가 표시되니까 드래그 이벤트 설정
-
         // 아이템 이미지의 width, height
-        //console.log('아이템 이미지의 width, height', this.itemImg.width, this.itemImg.height);
+        console.log('아이템 이미지의 width, height', this.itemImg.width, this.itemImg.height);
+        // 아이템 이미지의 스케일
+        console.log('아이템 이미지의 스케일', this.itemImg.scaleX, this.itemImg.scaleY);
+
+
+
+        // 투명 배경 이미지 상호작용 영역 설정
+        this.bgImg.setInteractive();
+        this.scene.input.setDraggable(this.bgImg);
+        this.bgImg.setScrollFactor(0);
+
+        // 아이템 이미지 상호작용 영역 보기
+        this.bgImg.setDepth(1500);
+        this.scene.input.enableDebug(this.bgImg);
+
+        /* let hitArea = new Phaser.Geom.Rectangle
+        (-this.itemImg.width / 2,
+        -this.itemImg.height / 2,
+        this.itemImg.width * 2,
+        this.itemImg.height * 2); */
+
+        let imgScaleX = this.itemImg.scaleX;
+        let imgScaleY = this.itemImg.scaleY;
+
+        /* let hitArea = new Phaser.Geom.Rectangle
+        (this.itemImg.width / 2 / imgScaleX , -10 / imgScaleY, 20 / imgScaleX, 20 / imgScaleY); */
+
 
         // 새 텍스처로 교체하면 상호작용 영역 크기가 달라진다.
         // 아이템 이미지 상호작용 영역 설정
-        this.itemImg.setInteractive(new Phaser.Geom.Rectangle
-            (-this.itemImg.width / 2,
-            -this.itemImg.height / 2,
-             this.itemImg.width * 2,
-              this.itemImg.height * 2),
-            Phaser.Geom.Rectangle.Contains);
+
+        this.itemImg.setInteractive();
+        //this.itemImg.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
+
+        
+        // 상호작용 영역용 이미지 따로 만들기
+
+
+        // 텍스처 바꾸면 hitArea 크기가 왜 달라지는거지?
 
         // hitArea가 주어지지 않을 경우 텍스처 프레임을 기반으로 직사각형으로 생성한다라...
-        // 텍스처 프레임이 뭐지?
         //this.itemImg.setInteractive();
 
         // 아이템 이미지 드래그 가능하게 설정
-        this.scene.input.setDraggable(this.itemImg);
+        /* this.scene.input.setDraggable(this.itemImg);
         this.itemImg.setScrollFactor(0);
 
-
         // 아이템 이미지 상호작용 영역 보기
-        /* this.itemImg.setDepth(1500);
+        this.itemImg.setDepth(1500);
         this.scene.input.enableDebug(this.itemImg); */
     }
 
@@ -569,7 +726,7 @@ export default class ItemSlot extends Frame_LT {
         this.countTxt.setText(null);
         this.countBox.setVisible(false);
 
-        this.itemImg.removeInteractive();
+        this.bgImg.removeInteractive();
     }
 
     // 드래그 시작 슬롯과 드래그 종료 슬롯에 있는 아이템 서로 교체
@@ -581,20 +738,19 @@ export default class ItemSlot extends Frame_LT {
 
         let hoverItem = JSON.parse(JSON.stringify(endSlot.item));
 
-        console.log("드랍 슬롯의 원본 아이템 : ", hoverItem);
-        console.log("시작 슬롯의 아이템 : ", startSlot.item);
+        //console.log("드랍 슬롯의 원본 아이템 : ", hoverItem);
+        //console.log("시작 슬롯의 아이템 : ", startSlot.item);
 
-        // 드랍 슬롯의 아이템을 드래그 시작 슬롯의 아이템으로 교체
-        /* endSlot.item = Object.assign({}, startSlot.item);
-        endSlot.itemImg.setTexture(endSlot.item.name)
-            .setDisplaySize(endSlot.width / 2, endSlot.height / 2);
-        // 아이템 타입이 도구가 아닐 때만 수량 표시하기
-        //if(endSlot.item.type !== 4)
-        endSlot.countTxt.setText(endSlot.item.count); */
 
+        // 바로 실행안됨.
+        //endSlot.itemImg.removeInteractive();
+        //endSlot.itemImg.setTexture(null);
         endSlot.setSlotItem(startSlot.item);
 
-        console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
+        //console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
+
+        //console.log("교체 후의 드랍 슬롯 아이템 이미지 크기 : ", endSlot.itemImg.width, endSlot.itemImg.height);
+        //console.log("교체 후의 드랍 슬롯 아이템 이미지 스케일 : ", endSlot.itemImg.scaleX, endSlot.itemImg.scaleY);
 
         // HitArea 변경으로 원본 텍스처가 달라져 크기가 변경되도
         // 이미지의 상호작용 영역 크기를 아이템 슬롯에 맞춤.
@@ -603,16 +759,13 @@ export default class ItemSlot extends Frame_LT {
         // 드래그 시작 슬롯의 아이템을 드랍 슬롯의 아이템으로 교체하기
         // 드랍 슬롯 아이템 객체의 복사본이 필요하다.
         // Js에서 클래스 객체를 대입하면 객체에 대한 참조가 전달된다.
-        /* startSlot.item = hoverItem;
-        startSlot.itemImg.setTexture(startSlot.item.name)
-            .setDisplaySize(startSlot.width / 2, startSlot.height / 2);
 
-        // 아이템 타입이 도구가 아닐 때만 수량 표시하기
-        // if(startSlot.item.type !== 4)
-        startSlot.countTxt.setText(startSlot.item.count); */
-
+        //startSlot.removeItem();
         startSlot.setSlotItem(hoverItem);
         //startSlot.setImgHitArea();
+
+        //console.log("교체 후의 시작 슬롯 아이템 이미지 크기 : ", startSlot.itemImg.width, startSlot.itemImg.height);
+        //console.log("교체 후의 시작 슬롯 아이템 이미지 스케일 : ", startSlot.itemImg.scaleX, startSlot.itemImg.scaleY);
     }
 
     // 빈 아이템 슬롯으로 아이템 옮기기
