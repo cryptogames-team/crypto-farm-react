@@ -175,7 +175,7 @@ export default class MarketScene extends Phaser.Scene {
             { name: 'player_idle_body', path: 'IDLE/base_idle_strip9.png' },
             { name: 'player_idle_hand', path: 'IDLE/tools_idle_strip9.png' },
             // 걷는 스프라이트 시트
-            { name: 'player_walk_hair_long hair', path: 'WALKING/longhair_idle_strip9.png' },
+            { name: 'player_walk_hair_long hair', path: 'WALKING/longhair_walk_strip8.png' },
             { name: 'player_walk_hair_bow', path:'WALKING/bowlhair_walk_strip8.png'},
             { name: 'player_walk_hair_curly', path:'WALKING/curlyhair_walk_strip8.png'},
             { name: 'player_walk_body', path: 'WALKING/base_walk_strip8.png' },
@@ -524,6 +524,9 @@ export default class MarketScene extends Phaser.Scene {
         if (this.playerObject.x > 1150 && this.playerObject.x < 1320 && this.playerObject.y > 1830) {
             this.scene.switch('InGameScene', this.characterInfo);
             this.playerObject.y = 1820
+
+            this.socket.emit('exit', this.characterInfo.user_name);
+            
         }
 
 

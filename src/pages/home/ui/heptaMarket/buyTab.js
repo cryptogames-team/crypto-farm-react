@@ -450,12 +450,7 @@ export default class BuyTab extends Phaser.GameObjects.Container {
     }
 
     BuyGoldRequest() {
-<<<<<<< HEAD
-        console.log("BuyGoldRequest")
-        const url = this.scene.APIurl + '/cft'
-=======
         const url = this.scene.APIurl + 'cft'
->>>>>>> 0b211919e9d5c6521f461e590fd6fe7bfecb9d2b
         const postData = {
             "cft_auction_id": this.selectedSellingitemInfo.cft_auction_id,
             "cft": parseInt(this.quantatyText.text),

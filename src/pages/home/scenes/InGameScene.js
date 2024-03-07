@@ -177,13 +177,6 @@ export default class InGameScene extends Phaser.Scene {
             this.accessToken = localStorage.getItem('accessToken');
 
         } else { // 로그인하지 않고 테스트
-<<<<<<< HEAD
-            console.log('this.characterInfo 존재 안함');
-        
-        
-        // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-        this.accessToken = '';
-=======
             console.log('로그인 안하고 테스트');
 
             this.characterInfo = {
@@ -196,7 +189,6 @@ export default class InGameScene extends Phaser.Scene {
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
             this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MjY3NjYwLCJleHAiOjE3MDkzMDM2NjB9.BwMlVrR2T7Lx-Uwp-CZIKim61muHKlHpnpiL7dWtlXE';
->>>>>>> 0b211919e9d5c6521f461e590fd6fe7bfecb9d2b
         }
 
         this.assetManager = new AssetManager(this);
