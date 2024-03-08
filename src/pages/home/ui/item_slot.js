@@ -80,7 +80,6 @@ export default class ItemSlot extends Frame_LT {
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);
-            //this.itemImg.setDisplaySize(width / 2 - 10, height / 2 - 10);
         }
         // 빈 아이템 슬롯으로 사용 시
         else {
@@ -90,7 +89,6 @@ export default class ItemSlot extends Frame_LT {
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, null);
-            //this.itemImg.setDisplaySize(width / 2, height / 2).setVisible(false);
             this.itemImg.setVisible(false);
         }
 
