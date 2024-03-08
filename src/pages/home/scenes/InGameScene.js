@@ -188,7 +188,7 @@ export default class InGameScene extends Phaser.Scene {
                 asset_id: 4563456
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5NjMxNjc5LCJleHAiOjE3MDk2Njc2Nzl9.GHniTZRdSF62J5VtEsbhxiqPdlkn_tzkOlqByXwrVeQ';
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5ODc1NzY3LCJleHAiOjE3MDk5MTE3Njd9.gsEedPz_yrXanDE778PPcYrybIeXom9uCw5k9mc4p-Y';
         }
 
         this.assetManager = new AssetManager(this);

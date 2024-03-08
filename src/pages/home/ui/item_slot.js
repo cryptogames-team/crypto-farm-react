@@ -125,7 +125,7 @@ export default class ItemSlot extends Frame_LT {
         this.selectBox.setScale(2);
         this.selectBox.setVisible(false);
 
-        this.add([this.bgImg,this.itemImg, this.selectBox, this.countBox, this.countTxt]);
+        this.add([this.bgImg, this.itemImg, this.selectBox, this.countBox, this.countTxt]);
 
         // 퀵슬롯 UI로 사용시
         if (this.slotNumber !== null) {
@@ -288,8 +288,65 @@ export default class ItemSlot extends Frame_LT {
             console.log("겹치는 오브젝트들 상호작용 가능함.");
         });
 
+        // 포인터 다운 - 마우스 우클릭 처리
         this.bgImg.on('pointerdown', (pointer) => {
-            console.log('배경 이미지 클릭됨');
+            //console.log('배경 이미지 클릭됨');
+            if (pointer.rightButtonDown()) {
+                //console.log('아이템 이미지 우클릭 됨');
+
+                // 클릭한 슬롯 아이템의 타입 확인
+                const clickSlot = scene.hoverSlot;
+                const clickItem = scene.hoverSlot.item;
+                //console.log('마우스 우클릭한 슬롯의 아이템', clickItem);
+
+                // 요리 아이템
+                if (clickItem.type === 5) {
+                    console.log('요리 아이템 소비 시도');
+                    // 얻는 경험치 량
+                    let exp = clickItem.seed_Time;
+
+                    const networkManager = this.scene.networkManager;
+
+                    // 서버에 경험치 올려달라고 요청하기
+                    networkManager.serverAddExp(exp).then(data => {
+                        if (data) {
+                            // 캐릭터 UI창 경험치 관련 UI 요소들 재설정
+                            this.scene.charInfoUI.onEarnExp(exp);
+
+                            // 사용할 요리 아이템 정보
+                            const useItemInfo = this.scene.allItemMap.get(clickItem.name);
+                            //console.log('사용할 요리 아이템 정보', useItemInfo);
+
+                            // 서버에 아이템 수량 감소 요청
+                            networkManager.serverUseItem(useItemInfo, 1, clickSlot).then(data => {
+
+                                let item_count = 0;
+
+                                // 아직 clickItem 참조가 남아있음
+                                if (clickItem.count > 0) {
+                                    item_count = clickItem.count;
+
+                                } else {
+
+                                    // 요리 아이템 전부 소모하면 아이템 툴팁 끄기
+                                    if (clickSlot === scene.hoverSlot) {
+                                        //console.log('클릭한 슬롯과 마우스 오버중인 슬롯이 같음');
+                                        scene.inventory.toolTip.setVisible(false);
+                                        scene.quickSlotUI.toolTip.setVisible(false);
+                                    }
+
+                                }
+
+                                console.log('남은 요리 아이템 수량', item_count);
+                            });
+
+                        } else {
+                            console.log('요리 아이템 사용 실패');
+                        }
+                    });
+
+                }
+            }
         });
 
         // 드래그 스타트
@@ -407,185 +464,7 @@ export default class ItemSlot extends Frame_LT {
             scene.isDragging = false;
         });
 
-        // 아이템 슬롯 이미지 이벤트 추가
-        // 슬롯 이미지 포인터 오버
-        this.itemImg.on('pointerover', (pointer) => {
-            scene.input.setTopOnly(false);
-            //console.log("겹치는 오브젝트들 상호작용 가능함.");
-        });
-
-        // 마우스 우클릭 이벤트 추가
-        this.itemImg.on('pointerdown', (pointer) => {
-
-            if(pointer.rightButtonDown()){
-                //console.log('아이템 이미지 우클릭 됨');
-
-                // 클릭한 슬롯 아이템의 타입 확인
-                const clickSlot = scene.hoverSlot;
-                const clickItem = scene.hoverSlot.item;
-                //console.log('마우스 우클릭한 슬롯의 아이템', clickItem);
-
-                // 요리 아이템
-                if(clickItem.type === 5){
-                    console.log('요리 아이템 소비 시도');
-                    // 얻는 경험치 량
-                    let exp = clickItem.seed_Time;
-
-                    const networkManager = this.scene.networkManager;
-
-                    // 서버에 경험치 올려달라고 요청하기
-                    networkManager.serverAddExp(exp).then(data => {
-                        if(data){
-                            // 캐릭터 UI창 경험치 관련 UI 요소들 재설정
-                            this.scene.charInfoUI.onEarnExp(exp);
-
-                            // 사용할 요리 아이템 정보
-                            const useItemInfo = this.scene.allItemMap.get(clickItem.name);
-                            //console.log('사용할 요리 아이템 정보', useItemInfo);
-
-                            // 서버에 아이템 수량 감소 요청
-                            networkManager.serverUseItem(useItemInfo, 1, clickSlot).then(data => {
-
-                                let item_count = 0;
-
-                                // 아직 clickItem 참조가 남아있음
-                                if(clickItem.count > 0){
-                                    item_count = clickItem.count;
-
-                                }else{
-
-                                    // 요리 아이템 전부 소모하면 아이템 툴팁 끄기
-                                    if(clickSlot === scene.hoverSlot){
-                                        console.log('클릭한 슬롯과 마우스 오버중인 슬롯이 같음');
-
-                                        scene.inventory.toolTip.setVisible(false);
-                                        scene.quickSlotUI.toolTip.setVisible(false);
-                                    }
-
-                                }
-
-                                console.log('남은 요리 아이템 수량', item_count);
-                            });
-
-                        }else{
-                            console.log('요리 아이템 사용 실패');
-                        }
-                    });
-
-                } 
-            }
-        });
-
-        // 슬롯 이미지 드래그 시작
-        this.itemImg.on("dragstart", (pointer) => {
-            // 마우스 올려둔 슬롯이 드래그 시작 슬롯이 됨
-            scene.startSlot = scene.hoverSlot;
-
-            let slotInfo = {
-                type: scene.startSlot.type,
-                index: scene.startSlot.index
-            };
-
-            //console.log("이미지 드래그 시작 슬롯 정보 : ", slotInfo);
-
-            // 일시적으로 컨테이너 자식에서 해제하고 depth 설정하기 
-            this.remove(this.itemImg, false);
-            this.setDepth(2000);
-
-            // 아이템 드래그할 때 시작 슬롯의 텍스트 안보이게 하기
-            this.countTxt.setVisible(false);
-
-            // 아이템 이미지가 이제 월드 위치를 사용함.
-            this.itemImg.x = pointer.x;
-            this.itemImg.y = pointer.y;
-
-            // 툴팁 끄기
-            const toolTip = scene.inventory.toolTip;
-            toolTip.setVisible(false);
-
-            scene.quickSlotUI.toolTip.setVisible(false);
-            scene.quickSlotUI.add(scene.quickSlotUI.toolTip);
-            scene.quickSlotUI.toolTip.x = 0;
-            scene.quickSlotUI.toolTip.y = 0;
-
-            scene.isDragging = true;
-        });
-
-        // 슬롯 이미지 드래그
-        this.itemImg.on('drag', (pointer, dragX, dragY) => {
-
-            // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
-            this.itemImg.x = pointer.x;
-            this.itemImg.y = pointer.y;
-        });
-
-        // 슬롯 이미지 드래그 종료
-        this.itemImg.on('dragend', (pointer) => {
-
-            // 더 이상 멤버 슬롯 인덱스는 사용하지 않는다.
-
-            // 드랍한 슬롯의 정보
-            scene.endSlot = scene.hoverSlot;
-
-            // 아이템 슬롯안에 드랍했는지 확인
-            // 아이템 슬롯 바깥으로 마우스 포인터가 나가면 scene.endSlot === null
-            if (scene.endSlot !== null) {
-
-                let slotInfo = {
-                    type: scene.endSlot.type,
-                    index: scene.endSlot.index
-                };
-                //console.log("드랍한 슬롯의 정보", slotInfo);
-
-                // 마우스 포인터가 위치한 슬롯의 아이템이 존재하는지 체크
-                let isItemExist = false;
-                scene.hoverSlot.item ? isItemExist = true : isItemExist = false;
-
-                if (isItemExist) {
-                    //console.log("드랍한 슬롯에 아이템이 존재함.");
-
-                    // 드랍한 슬롯이 드래그 시작한 슬롯과 같지 않으면 아이템을 교체한다.
-                    // 이 경우에는 동일한 객체 참조 여부를 검사해야되는건가?
-                    if (scene.endSlot !== scene.startSlot) {
-                        //console.log("시작 슬롯과 드랍 슬롯이 동일하지 않아서 아이템 교체");
-
-                        // start -> end 이동 요청
-                        this.sendMoveItem(scene.startSlot, scene.endSlot);
-                        // end -> start 이동 요청
-                        this.sendMoveItem(scene.endSlot, scene.startSlot);
-                        // 아이템 교체
-                        this.swapItem(scene.startSlot, scene.endSlot);
-                    }
-                    else {
-                        //console.log("시작 슬롯과 드랍 슬롯이 동일함.");
-                    }
-                }
-                else {
-
-                    // 씬에게 아이템 이동 요청 서버에 보내달라고 한다.
-                    this.sendMoveItem(scene.startSlot, scene.endSlot);
-
-                    // 이동 요청 결과 안 기다리고 걍 옮겨
-                    // 빈 슬롯으로 아이템 옮기기
-                    this.moveItem(scene.startSlot, scene.endSlot);
-
-                    // 툴팁 내용 재설정
-                    scene.inventory.toolTip.setToolTip(scene.hoverSlot.item);
-                    scene.quickSlotUI.toolTip.setToolTip(scene.hoverSlot.item);
-
-                }
-
-            }
-            // 어떤 경우에도 아이템 이미지가 원래 있던 슬롯으로 복귀 해야한다.
-            this.returnImg();
-
-            // 텍스트 다시 보이게 하기
-            this.countTxt.setVisible(true);
-            scene.isDragging = false;
-        });
-
     }
-
 
     // 네트워크 매니저에게 아이템 이동 요청을 서버에게 보내달라고 전달한다. 
     sendMoveItem(startSlot, endSlot) {
@@ -618,72 +497,27 @@ export default class ItemSlot extends Frame_LT {
         //console.log('설정될 아이템 정보',this.item);
 
         this.itemImg.setTexture(item.name);
-        /* // 텍스처의 원본 크기로 이미지 크기 조정하기
-        this.itemImg.width = this.itemImg.frame.width;
-        this.itemImg.height = this.itemImg.frame.height; */
-        
         this.itemImg.setVisible(true)
-        this.itemImg.setDisplaySize(this.width / 2 - 7, this.height / 2 - 7 );
+        this.itemImg.setDisplaySize(this.width / 2 - 7, this.height / 2 - 7);
 
         // 아이템 타입이 4이면 수량 텍스트 표시 안함.
-        if (item.type === 4)
+        if (item.type === 4){
             this.countTxt.setText(undefined);
-        else{
+            this.countBox.setVisible(false);
+        }
+        else {
             this.countTxt.setText(item.count);
             this.countBox.setVisible(true);
         }
-
-        // 아이템 이미지의 width, height
-        console.log('아이템 이미지의 width, height', this.itemImg.width, this.itemImg.height);
-        // 아이템 이미지의 스케일
-        console.log('아이템 이미지의 스케일', this.itemImg.scaleX, this.itemImg.scaleY);
-
-
 
         // 투명 배경 이미지 상호작용 영역 설정
         this.bgImg.setInteractive();
         this.scene.input.setDraggable(this.bgImg);
         this.bgImg.setScrollFactor(0);
 
-        // 아이템 이미지 상호작용 영역 보기
-        this.bgImg.setDepth(1500);
-        this.scene.input.enableDebug(this.bgImg);
-
-        /* let hitArea = new Phaser.Geom.Rectangle
-        (-this.itemImg.width / 2,
-        -this.itemImg.height / 2,
-        this.itemImg.width * 2,
-        this.itemImg.height * 2); */
-
-        let imgScaleX = this.itemImg.scaleX;
-        let imgScaleY = this.itemImg.scaleY;
-
-        /* let hitArea = new Phaser.Geom.Rectangle
-        (this.itemImg.width / 2 / imgScaleX , -10 / imgScaleY, 20 / imgScaleX, 20 / imgScaleY); */
-
-
-        // 새 텍스처로 교체하면 상호작용 영역 크기가 달라진다.
-        // 아이템 이미지 상호작용 영역 설정
-
-        this.itemImg.setInteractive();
-        //this.itemImg.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
-
-        
-        // 상호작용 영역용 이미지 따로 만들기
-
-
-        // 텍스처 바꾸면 hitArea 크기가 왜 달라지는거지?
-
-        // hitArea가 주어지지 않을 경우 텍스처 프레임을 기반으로 직사각형으로 생성한다라...
-        //this.itemImg.setInteractive();
-
-        // 아이템 이미지 드래그 가능하게 설정
-        /* this.scene.input.setDraggable(this.itemImg);
-        this.itemImg.setScrollFactor(0);
-
-        // 아이템 이미지 상호작용 영역 보기
-        this.itemImg.setDepth(1500);
-        this.scene.input.enableDebug(this.itemImg); */
+        // 상호작용 영역 이미지 디버그로 보기
+        /* this.bgImg.setDepth(1500);
+        this.scene.input.enableDebug(this.bgImg); */
     }
 
     // 아이템 소비해서 수량 감소시키는 함수
@@ -741,31 +575,14 @@ export default class ItemSlot extends Frame_LT {
         //console.log("드랍 슬롯의 원본 아이템 : ", hoverItem);
         //console.log("시작 슬롯의 아이템 : ", startSlot.item);
 
-
-        // 바로 실행안됨.
-        //endSlot.itemImg.removeInteractive();
-        //endSlot.itemImg.setTexture(null);
+        // 드랍 슬롯의 아이템을 드래그 시작 슬롯의 아이템으로 교체
         endSlot.setSlotItem(startSlot.item);
-
         //console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
-
-        //console.log("교체 후의 드랍 슬롯 아이템 이미지 크기 : ", endSlot.itemImg.width, endSlot.itemImg.height);
-        //console.log("교체 후의 드랍 슬롯 아이템 이미지 스케일 : ", endSlot.itemImg.scaleX, endSlot.itemImg.scaleY);
-
-        // HitArea 변경으로 원본 텍스처가 달라져 크기가 변경되도
-        // 이미지의 상호작용 영역 크기를 아이템 슬롯에 맞춤.
-        //endSlot.setImgHitArea();
 
         // 드래그 시작 슬롯의 아이템을 드랍 슬롯의 아이템으로 교체하기
         // 드랍 슬롯 아이템 객체의 복사본이 필요하다.
         // Js에서 클래스 객체를 대입하면 객체에 대한 참조가 전달된다.
-
-        //startSlot.removeItem();
         startSlot.setSlotItem(hoverItem);
-        //startSlot.setImgHitArea();
-
-        //console.log("교체 후의 시작 슬롯 아이템 이미지 크기 : ", startSlot.itemImg.width, startSlot.itemImg.height);
-        //console.log("교체 후의 시작 슬롯 아이템 이미지 스케일 : ", startSlot.itemImg.scaleX, startSlot.itemImg.scaleY);
     }
 
     // 빈 아이템 슬롯으로 아이템 옮기기
@@ -773,24 +590,6 @@ export default class ItemSlot extends Frame_LT {
 
         endSlot.setSlotItem(startSlot.item);
         startSlot.removeItem();
-    }
-
-    // 아이템 이미지의 상호작용 영역을 슬롯 크기에 맞춘다.
-    // 아이템 이미지 텍스처가 변경되었을 때 호출해야됨.
-    setImgHitArea() {
-
-        //console.log("setImgHitArea() 호출됨.");
-
-        // 아이템 이미지의 크기와 길이
-        let imgWidth = this.itemImg.width;
-        let imgHeight = this.itemImg.height;
-
-        // 아이템 이미지의 displaySize가 아이템 슬롯의 절반이니
-        // 슬롯 크기에 맞출려면 시작점을 아이템 이미지 절반 크기만큼 빼고
-        // 영역의 길이, 높이를 이미지 크기 2배만큼 줘야 슬롯 크기에 맞는다.
-        this.itemImg.input.hitArea.setTo(-imgWidth / 2, -imgHeight / 2,
-            imgWidth * 2, imgHeight * 2);
-
     }
 
     // 자식에서 해제한 이미지를 자식으로 다시 추가한다.
