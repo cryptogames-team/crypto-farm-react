@@ -19,7 +19,7 @@ export default class StoreItemSlot extends Frame {
     // 수량 관련 변수들
     countBox;
     countTxt;
-    count;
+    count = 0;
 
     // 자물쇠 아이콘
     lockIcon;

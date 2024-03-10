@@ -46,16 +46,6 @@ export default class StoreTabBody extends Frame_LT {
 
         super(scene, x, y, width, height, 0);
 
-        // 서버에서 전체 아이템 리스트 받고
-        // 거기서 구매 가능 아이템, 판매 가능 아이템 리스트로 나누기
-        // 구매 가능한 아이템 리스트 초기화
-        this.purchaseList = scene.allItemList.filter(item => item.item_type === 0);
-        //console.log('구매 가능 아이템 리스트 초기화', this.newPurchaseList);
-
-        // 판매 가능한 아이템(농작물) 리스트 초기화
-        this.saleList = scene.allItemList.filter(item => item.item_type === 1);
-        //console.log('판매 가능 아이템 리스트 초기화', this.saleList);
-
         this.type = type;
         this.storeUI = storeUI;
 
@@ -88,23 +78,8 @@ export default class StoreTabBody extends Frame_LT {
 
                 // 전체 인덱스
                 let index = row * this.gridCol + col;
-
-                // 각 슬롯에 들어갈 아이템의 이름
-                const { item_id, item_type, item_name,
-                    item_des, seed_time, use_level, item_price } = this.purchaseList[index];
-
-                const ownItemSlot = scene.findAddItemSlot(item_name);
-                //console.log('소유 아이템 슬롯', ownItemSlot);
-
+                // 아이템 슬롯 생성
                 const itemSlot = new StoreItemSlot(scene, slotX, slotY, slotSize, slotSize, index);
-                itemSlot.setItemImg(item_name);
-
-                // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
-                if (ownItemSlot.item) {
-                    itemSlot.setItemCount(ownItemSlot.item.count);
-                } else { // 없으면 0개로 표시
-                    itemSlot.setItemCount(0);
-                }
 
                 // 슬롯 클릭
                 itemSlot.on('pointerdown', (pointer) => {
@@ -199,7 +174,6 @@ export default class StoreTabBody extends Frame_LT {
         this.singleTxt.setOrigin(0.5, 0.5);
 
         this.add([this.singleTradeBtn, this.singleTxt]);
-
     }
 
     // 거래 버튼 상태 설정
@@ -453,5 +427,17 @@ export default class StoreTabBody extends Frame_LT {
             itemSlot.setItemCount(ownItemSlot.item.count);
         else
             itemSlot.setItemCount(0);
+    }
+
+    // 서버에서 전체 아이템 리스트를 받으면
+    // 거기서 구매, 판매 아이템 리스트로 뽑고 초기화
+    initItemList(){
+        // 구매 가능한 아이템 리스트 초기화
+        this.purchaseList = this.scene.allItemList.filter(item => item.item_type === 0);
+        //console.log('구매 가능 아이템 리스트 초기화', this.newPurchaseList);
+
+        // 판매 가능한 아이템(농작물) 리스트 초기화
+        this.saleList = this.scene.allItemList.filter(item => item.item_type === 1);
+        //console.log('판매 가능 아이템 리스트 초기화', this.saleList);
     }
 }

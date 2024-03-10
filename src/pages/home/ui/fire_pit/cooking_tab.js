@@ -29,15 +29,6 @@ export default class CookingTab extends TabBodyUI {
         // 카테고리 텍스트 내용 변경
         this.categoryTxt.setText('기본 요리');
 
-        this.cookingList = scene.allItemList.filter(item => item.item_type === 5);
-
-        // 요리 레시피 정보 추가
-        this.cookingList.forEach((cookItem, index) => {
-            cookItem.ingredients = scene.cookRecipes[index].ingredients;
-        });
-
-        console.log('요리 리스트 초기화', this.cookingList);
-
         const txtStyle = {
             fontFamily: 'Arial',
             fontSize: 18,
@@ -73,46 +64,15 @@ export default class CookingTab extends TabBodyUI {
 
         this.add([this.cookingBtn, this.cookingTxt]);
 
-        // 요리 아이템 표시하게 아이템 슬롯 초기화
+        // 아이템 슬롯들에 클릭 리스너 추가
         this.itemSlots.forEach((itemSlot, index) => {
-
-            // 요리 아이템 정보
-            const selectItem = this.cookingList[index];
-
-            // 요리 아이템 정보 구조 분해
-            const { item_id, item_type, item_name,
-                item_des, seed_time, use_level, item_price, ingredients } = selectItem;
-
-            // 요리 아이템 소유 중인지 확인
-            const ownItemSlot = scene.findAddItemSlot(item_name);
-
-            // 요리 아이템 개수 설정
-            if (ownItemSlot.item) {
-                itemSlot.setItemCount(ownItemSlot.item.count);
-            } else { // 없으면 0개로 표시
-                itemSlot.setItemCount(0);
-            }
-
-            // 요리 아이템 이미지 설정
-            itemSlot.setItemImg(item_name);
-            itemSlot.itemImg.setScale(3.5);
 
             // 아이템 슬롯 클릭 리스너 설정
             itemSlot.on('pointerdown', (pointer) => {
-                //console.log('요리 아이템 슬롯 클릭됨!');
-
-                this.selectIndex = itemSlot.index;
-                this.itemToolTip.setStoreToolTip(selectItem);
-                this.setCookBtnState(selectItem);
-
-                // 선택한 슬롯의 셀렉트 박스 보이게 표시
-                this.setSelectBoxVisible(this.selectIndex);
+                this.selectItemSlot(itemSlot.index);
             });
 
         });
-
-        // 기본 요리 아이템 선택된 상태로 설정
-        this.selectDefaultItem();
     }
 
     // 요리 버튼 상태 설정
@@ -218,31 +178,30 @@ export default class CookingTab extends TabBodyUI {
             // 유저가 인벤토리이나 퀵슬롯에 요리 아이템을 소유하고 있을 경우 아이템 개수를 연동함.
             if (ownItemSlot.item) {
                 itemSlot.setItemCount(ownItemSlot.item.count);
-            }else{
+            } else {
                 itemSlot.setItemCount(0);
             }
         });
 
     }
 
-    // 기본 요리 아이템(0번 슬롯) 선택된 상태로 설정
-    selectDefaultItem(){
+    // 특정 아이템 슬롯 선택
+    selectItemSlot(selectIndex) {
 
-        const selectItem = this.cookingList[0];
-        this.selectIndex = 0;
+        this.selectIndex = selectIndex;
+        const selectItem = this.cookingList[selectIndex];
+        // 선택한 요리 아이템 정보 표시하게 툴팁 설정
         this.itemToolTip.setStoreToolTip(selectItem);
         // 요리 버튼 상태 설정
         this.setCookBtnState(selectItem);
-
         // 요리 아이템 개수 연동
         this.syncItemCount();
-
-        // 0번 아이템 슬롯 셀렉트 박스 표시 켜기
-        this.setSelectBoxVisible(0);
+        // 선택한 아이템 슬롯 셀렉트 박스 표시
+        this.setSelectBoxVisible(selectIndex);
     }
 
     // 선택한 슬롯의 셀렉트 박스 표시 켜기
-    setSelectBoxVisible(selectIndex){
+    setSelectBoxVisible(selectIndex) {
         // 모든 슬롯의 셀렉트 박스 표시 끄기
         this.itemSlots.forEach((itemSlot, index) => {
             itemSlot.selectBox.setVisible(false);
@@ -251,5 +210,48 @@ export default class CookingTab extends TabBodyUI {
         this.itemSlots[selectIndex].selectBox.setVisible(true);
     }
 
-    // 아이템 선택 함수 만들기?
+    // 요리 아이템 표시하게 전체 아이템 슬롯들 초기화
+    initItemSlots() {
+
+        this.itemSlots.forEach((itemSlot, index) => {
+        // 요리 아이템 정보
+        const selectItem = this.cookingList[index];
+
+        // 요리 아이템 정보 구조 분해
+        const { item_id, item_type, item_name,
+            item_des, seed_time, use_level, item_price, ingredients } = selectItem;
+
+        // 요리 아이템 소유 중인지 확인
+        const ownItemSlot = this.scene.findAddItemSlot(item_name);
+
+        // 요리 아이템 개수 설정
+        if (ownItemSlot.item) {
+            itemSlot.setItemCount(ownItemSlot.item.count);
+        } else { // 없으면 0개로 표시
+            itemSlot.setItemCount(0);
+        }
+
+        // 요리 아이템 이미지 설정
+        itemSlot.setItemImg(item_name);
+        itemSlot.itemImg.setScale(3.5);
+        });
+    }
+
+    // UI에서 사용할 요리 아이템 리스트 초기화
+    // 게임의 전체 아이템 리스트에서 요리 아이템만 뽑아냄.
+    initItemList() {
+        this.cookingList = this.scene.allItemList.filter(item => item.item_type === 5);
+        // 요리 레시피 정보 추가
+        this.cookingList.forEach((cookItem, index) => {
+            cookItem.ingredients = this.scene.cookRecipes[index].ingredients;
+        });
+        //console.log('요리 리스트 초기화', this.cookingList);
+    }
+    // UI 탭 초기화
+    initTab() {
+        this.initItemList();
+        this.initItemSlots();
+        // 기본 요리 아이템 선택
+        this.selectItemSlot(0);
+    }
 }

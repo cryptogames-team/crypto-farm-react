@@ -456,7 +456,7 @@ export default class NetworkManager {
 
                 // 화덕 UI 아이템 슬롯의 개수 표시 업데이트
                 // 화덕 UI의 cookingTab 참조
-                const cookingTab = this.scene.FirePitUI.tabBody;
+                const cookingTab = this.scene.firePitUI.tabBody;
 
                 cookingTab.itemSlots.forEach((itemSlot, index) => {
                     // 요리 아이템 이미지 새로 설정
