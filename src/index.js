@@ -14,7 +14,7 @@ import { landLoader } from './loader/land-loader';
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <PlayHome />,
     children: [
       {
         path: "play",

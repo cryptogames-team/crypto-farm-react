@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // 데이터를 헵타곤 메인 네트워크에서 불러오기 위해 import
 import { JsonRpc } from 'eosjs';
 
 // import custom function component
 import CharSelectItem from './char_select_item';
 import CharCreateModal from './char_create_modal';
+import CharBuyModal from './char_buy_modal';
 
 // import image
 import addIcon from '../../assets/add_character.png'
+import { BsCartCheck } from "react-icons/bs";
+import { TbSelect } from "react-icons/tb";
 
 
 let nodeURL = process.env.REACT_APP_NODE;
@@ -25,7 +28,7 @@ const serverURL = process.env.REACT_APP_API + 'user/all';
 
 // async : 비동기 처리
 // 함수형 컴포넌트는 async로 실행 불가능함.
-function CharSelectWindow({accountName, onCharSelect}) {
+function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
 
   // 캐릭터 정보가 있는 NFT 배열 이름
   const [regChars, setRegChars] = useState([]);
@@ -34,6 +37,10 @@ function CharSelectWindow({accountName, onCharSelect}) {
 
   // 모달창 노출 여부 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+
+  // transaction 관련 html 요소들
+  
 
 
   const handleCharSelect = onCharSelect;
@@ -75,6 +82,16 @@ function CharSelectWindow({accountName, onCharSelect}) {
   // 해당 변수로 함수를 참조한다. 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const openBuyModal = () => {
+    setIsBuyModalOpen(true);
+    // setTrxPage('buyCharacterNFT');
+  } 
+  const closeBuyModal = () => {
+    setIsBuyModalOpen(false);
+    // setTrxPage('');
+  }
+
 
 
   // 계정에 있는 NFT 정보를 모조리 가져온다.
@@ -313,6 +330,12 @@ function CharSelectWindow({accountName, onCharSelect}) {
           onClose={closeModal}
           onCreateChar={{handleCreateChar, rmCreateChar}} />}
 
+        {isBuyModalOpen && <CharBuyModal
+          onClose={closeBuyModal}
+          callbackMintNFT={callbackMintNFT}
+          />}
+
+
         <div className="character_select_border3">
           <div className="character_select_border4">
 
@@ -323,10 +346,11 @@ function CharSelectWindow({accountName, onCharSelect}) {
               />
             ))}
 
-            <img src={addIcon}
-              onClick={openModal}
-              className='add_character_button'></img>
-
+            <div className='add_character_btn_group gap-2 px-4 pb-3'>
+              <button className='border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openModal}><TbSelect size={30}/><span className='pl-2'>SELECT</span></button>
+              <button className='ml-3 border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openBuyModal}><BsCartCheck size={30} /><span className='pl-2'>SHOP</span></button>
+            </div>
+            
           </div>
         </div>
       </div>
