@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Paytone+One&display=swap');
-@import url('https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css');
 @import url(//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css);
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
 
@@ -19,11 +18,7 @@
     background: rgba(0, 0, 0, 0.8) !important;;
   }
 
-.paytone-one-regular {
-    font-family: "Paytone One", sans-serif;
-    font-weight: 400;
-    font-style: normal;
-  }
+
 
 #container {
     position: relative;
@@ -44,19 +39,25 @@
 }
 
 
+body{
+    font-family: 'DNFBitBitv2', sans-serif;
+}
 
-* { font-family: 'Spoqa Han Sans Neo', sans-serif; }
+/* * { font-family: 'Spoqa Han Sans Neo', sans-serif; } */
 
-    @font-face {
-        font-family: "main";
-        src : url("/public/assets/Fonts/NanumGothic.ttf") format('truetype');
-      }
+
       @font-face {
         font-family: "skybory";
         src : url('../../../public/assets/Fonts/SKYBORI.ttf') format('truetype');
       }
 
-
+      @font-face {
+        font-family: "DNFBitBitv2";
+        src : url('/public/assets/Fonts/DNFBitBitv2.woff') format('woff');
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
 
 /*로그인 폼 오버레이 스타일*/
 .login_wrapper {
@@ -81,10 +82,8 @@
 
     z-index: 10;
     image-rendering: pixelated;
-
     width: 300px;
     height: 300px;
-
 }
 
 h2 {
@@ -180,7 +179,6 @@ h2 {
     border: none;
     font-size: 16px;
     text-shadow: 1px 1px 1px black;
-    font-family: 'Paytone One', sans-serif;
     color: white;
     display: flex;
     align-items: center;
@@ -203,7 +201,6 @@ h2 {
     width: 100%;
     /* 부모 컨테이너의 폭에 맞춤 */
 
-    font-family: 'Paytone One', sans-serif;
     color: white;
     font-size: 20px;
     text-shadow: 1px 1px 1px black;
@@ -222,18 +219,10 @@ h2 {
 }
  */
 
-#character_select_container {
+ /* 캐릭터 선택*/
+.character_select_container {
     width: 1000px;
-    height: 500px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.character_select_border1 {
-    width: 1000px;
-    height: 500px;
+    height: 600px;
 
     /*절대 위치 설정*/
     position: absolute;
@@ -244,6 +233,24 @@ h2 {
     /*정중앙 정렬을 위한 변환*/
     transform: translate(-50%, -50%);
     z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#select_text {
+
+    color: white;
+    font-size: 30px;
+    text-shadow: 1px 1px 1px black;
+    margin-block-start: 5px;
+    margin-block-end: 5px;
+}
+
+.character_select_border1 {
+    width: 1000px;
+    height: 500px;
 
     border: 2.4px solid #181425;
     background-color: #EEA468;
@@ -272,35 +279,35 @@ h2 {
     justify-content: center;
 }
 
-/*자식 NFT 캐릭터를 격자 형태로 보여주기*/
+
 .character_select_border4 {
-    /* 스크롤 기능 추가 만약 아이템이 넘친다면 */
+
     width: 98.7%;
     height: 97%;
     background-color: #C28669;
+    display: flex;
+    flex-direction: column;
+}
+/*자식 NFT 캐릭터를 격자 형태로 보여주기*/
+.character_select_border5 {
+    flex: 1 1 0%;
     display: grid;
     /* repeat() : 여러 개의 행이 모두 같은 넓이 일때 사용한다. */
     /* 1fr : fr이란 유연한 크기를 갖는 단위이다  */
     grid-template-columns: repeat(4, auto);
     /*   align-items: center; */
-    justify-content: flex-start;
+    justify-content: center;
     column-gap: 5%;
+    row-gap: 30px;
     position: relative;
     overflow: auto;
     /*padding과 border가 요소의 지정된 너비 및 높이 내부에 포함된다. */
     box-sizing: border-box;
 
-    /*gap을 설정해서 일정 간격 떨어지게 해야 되나?*/
+    padding-top: 10px;
+    padding-bottom: 10px;
 
-    /*padding 적용해보기 - 크기가 늘어난다.*/
-    /* 원래 크기 957.583 x 437.510*/
-
-    padding-right: 100px;
-    padding-left: 100px;
 }
-
-
-
 
 /*position : fixed로 스크롤 바 위치 상관없이 버튼 위치 고정시키기*/
 .add_character_button {
@@ -332,10 +339,9 @@ h2 {
 .add_character_btn_group {
     right: 0px;
     bottom: 0px;
-    position: fixed;
+
     display: flex;
-    margin-bottom: 40px;
-    margin-right: 25px;
+
 }
 
 .add_img {
@@ -364,8 +370,7 @@ h2 {
     height: 150px;
     border: 2px solid #181425;
     background-color: #EAD4AA;
-    margin-top: 10px;
-    margin-bottom: 10px;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -394,9 +399,8 @@ h2 {
     margin-block-start: 0px;
     margin-block-end: 0px;
 
-    font-family: 'Paytone One', sans-serif;
     color: white;
-    font-size: medium;
+    font-size: small;
     text-shadow: 1px 1px 1px black;
 }
 
@@ -463,9 +467,6 @@ h2 {
 
 
 /*nft 캐릭터 생성 컴포넌트 스타일*/
-
-
-
 .nft_create_image {
 
     margin-top: 10px;
@@ -523,11 +524,8 @@ h2 {
     margin-top: 10px;
     margin-bottom: 10px;
     display: flex;
-/*     align-self: flex-start; */
-/*     justify-self: center; */
-/*     align-items: center; */
     justify-content: space-between;
-/*     gap: 10px; */
+
 }
 
 
@@ -535,28 +533,41 @@ h2 {
 .button_container {
     width: 98%;
     display: flex;
-    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    
     text-shadow: 0.5px 0.4px 0.5px black; 
     color: white;
     font-size: 10px;
-    height: 30%;
+
 }
 .back_btn_container1 {
     cursor: pointer;
     text-align: center;
-    width: 50%;
-    height: 20px;
+    width: 100px;
+    height: 45px;
     border: 2px solid #181425;
     background-color: #EAD4AA;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 5px;
 }
 .back_btn_container2 {
-    width: 99%;
-    height: 18px;
-    background-color: #E7A873;
+    cursor: pointer;
+    text-align: center;
+    width: 150px;
+    height: 40px;
+
+    font-size: large;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem; 
+    border-radius: 0.75rem; 
+    border-width: 4px; 
+    line-height: 1.75rem; 
+    border-color: #000000;
+    color: #000000;
 }
 .create_btn_container1{
     cursor: pointer;
@@ -577,18 +588,20 @@ h2 {
 }
 
 .user_name_text{
-    font-size: 19px;
+    font-size: medium;
     color: white;
-    text-shadow: 0.5px 0.4px 0.5px black; 
-    margin-right: 7px;
+    text-shadow: 0.5px 0.4px 0.5px black;
 }
 
+.result_text{
+    font-size: x-large;
+    color: white;
+    text-shadow: 0.5px 0.4px 0.5px black; 
+}
 
 
 /*캐릭터 정보 입력 버튼 스타일*/
 .character_input_button {
-
-
     width: 50%;
     background-color: #EEA468;
     color: white; /* 흰색 텍스트 */

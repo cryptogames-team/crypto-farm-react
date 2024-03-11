@@ -67,35 +67,35 @@ function CharBuyModal({ onClose, callbackMintNFT}) {
         <div className='w-full h-full flex flex-col'>
           <div className='flex py-5 px-3 justify-center'>
             <div className='flex-1 text-center text-3xl'>
-              Buy CryptoFarm's Characters!
+              크립토팜의 캐릭터를 구매하세요!
             </div>
             <img src={closeImage}
               onClick={onClose}
               className='w-[40px] h-[40px]'></img>
           </div>
           
-          <div className='text-lg pr-4 self-end'>Your Balance : {balance}</div>
+          <div className='text-lg pr-4 self-end'>보유 코인 : {balance}</div>
 
           <div className='mt-5 flex-1'>
             <div className='flex justify-center gap-x-10'>
               <button onClick={() => { handleClickCharacter(62, 7) }}>
                 <img src={c1} className={`w-[150px] ${selectedChar == 62 ? "border-red-500 border-4" : "border-0"}`}></img>
-                <div className='mt-2 text-lg'>Bald boy</div>
+                <div className='mt-2 text-lg'>빡빡이</div>
                 <div className='text-lg'>7 HEP</div>
               </button>
               <button onClick={() => { handleClickCharacter(63, 11) }}>
                 <img src={c2} className={`w-[150px] ${selectedChar == 63 ? "border-red-500 border-4" : "border-0"}`}></img>
-                <div className='mt-2 text-lg'>Ponytail girl</div>
+                <div className='mt-2 text-lg'>포니테일</div>
                 <div className='text-lg'>11 HEP</div>
               </button>
               <button onClick={() => { handleClickCharacter(64, 13) }}>
                 <img src={c3} className={`w-[150px] ${selectedChar == 64 ? "border-red-500 border-4" : "border-0"}`}></img>
-                <div className='mt-2 text-lg'>Dreadlocks boy</div>
+                <div className='mt-2 text-lg'>드레드락</div>
                 <div className='text-lg'>13 HEP</div>
               </button>
               <button onClick={() => { handleClickCharacter(65, 17) }}>
                 <img src={c4} className={`w-[150px] ${selectedChar == 65 ? "border-red-500 border-4" : "border-0"}`}></img>
-                <div className='mt-2 text-lg'>Bow boy</div>
+                <div className='mt-2 text-lg'>바가지 헤어</div>
                 <div className='text-lg'>17 HEP</div>
               </button>
             </div>
@@ -108,7 +108,7 @@ function CharBuyModal({ onClose, callbackMintNFT}) {
               onClick={handleBuyNFT}>
 
               <BsCartCheck size={30} />
-              <span className='ml-2'>BUY</span>
+              <span className='ml-2'>구매하기</span>
 
             </button>
           </div>

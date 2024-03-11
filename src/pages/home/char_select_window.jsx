@@ -321,7 +321,8 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
     // 이유 : 새 배열을 반환하지 않기 때문이다.
 
     //unRegisteredCharacters={unregChars}
-
+    <div className = "character_select_container">
+    <p id='select_text'>NFT 캐릭터 선택</p>
     <div className="character_select_border1">
       <div className="character_select_border2">
 
@@ -337,23 +338,29 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
 
 
         <div className="character_select_border3">
-          <div className="character_select_border4">
+          <div className="character_select_border4 ">
 
-            {regChars.map((character, index) => (
+          <div className='character_select_border5'>
+          {regChars.map((character, index) => (
               <CharSelectItem key={index} 
               registeredCharacter={character}
               onCharSelect={handleCharSelect}
               />
             ))}
-
-            <div className='add_character_btn_group gap-2 px-4 pb-3'>
-              <button className='border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openModal}><TbSelect size={30}/><span className='pl-2'>SELECT</span></button>
-              <button className='ml-3 border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openBuyModal}><BsCartCheck size={30} /><span className='pl-2'>SHOP</span></button>
+          </div>
+            
+          <div className='add_character_btn_group gap-2 px-4 pb-3 self-end'>
+              <button className='border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openModal}><TbSelect size={30}/><span className='pl-2'>캐릭터 생성</span></button>
+              <button className='ml-3 border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openBuyModal}><BsCartCheck size={30} /><span className='pl-2'>상점</span></button>
             </div>
             
+            
           </div>
+          
         </div>
       </div>
+    </div>
+  
     </div>
 
   );

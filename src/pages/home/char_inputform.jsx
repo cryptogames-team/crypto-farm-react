@@ -118,20 +118,17 @@ function CharInputForm({ unregiCharInfo, onClose, onCreateChar, onCreateResult }
             <div className="form_border2">
                 <div className="form_border3">
                     <div className="form_border4">
+                    <span className="title_text">캐릭터 정보 입력</span>
                         <div className="input_container">
-                            <span className="user_name_text">Character Name : </span>
+                            <span className="char_name_txt">캐릭터 이름 : </span>
                             <input type="text" className="input_user_name" onChange={onChangeListener}></input>
                         </div>
                         <div className="button_container">
-                            <div className="back_btn_container1" onClick={onClose}>
-                                <div className="back_btn_container2">
-                                    Back
-                                </div>
+                            <div className="back_btn_container2" onClick={createUser}>
+                                캐릭터 생성
                             </div>
-                            <div className="create_btn_container1" onClick={createUser}>
-                                <div className="create_btn_container2">
-                                    Create
-                                </div>
+                            <div className="back_btn_container2" onClick={onClose}>
+                                취소
                             </div>
                         </div>
                     </div>
@@ -139,35 +136,8 @@ function CharInputForm({ unregiCharInfo, onClose, onCreateChar, onCreateResult }
             </div>
         </div>
 
-
     );
 
 }
 
-
 export default CharInputForm;
-
-// 기존에 만들던 입력 폼
-/*
-        <div className="nft_character_form">
-            <div className="nft_character_form_border1">
-                <form style={{
-                    width: "100%",
-                    height: "100%"
-                }}>
-                    <div className='div_flex_row_center'>
-                        <p>캐릭터 이름 : </p>
-
-                        <input className='input_character'
-                            type="text"
-                            name="characterName"
-                            maxLength="15"></input>
-                    </div>
-                    <div className='div_flex_row_space-between'>
-                        <button className='character_input_button'>생성</button>
-                        <button className='character_input_button'>취소</button>
-                    </div>
-                </form>
-            </div>
-        </div>
- */

@@ -65,7 +65,7 @@ function LoginWindow({onLogin}) {
 
       <div className='border_container'>
         <img src={GameLogo} className="gamelogo" />
-        <p id ="login_text">Login</p>
+        <p id ="login_text">지갑 로그인</p>
         <div className="border1">
           <div className="border2">
             <div className="border3">
@@ -75,7 +75,7 @@ function LoginWindow({onLogin}) {
 
                 <div className="border5">
                   <button className="button" onClick={handleLogin}>
-                    <img src={Logo} className="heptagon" /> Heptagon Wallet</button>
+                    <img src={Logo} className="heptagon" />Heptagon Wallet</button>
                 </div>
               </div>
             </div>

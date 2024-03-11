@@ -16,8 +16,8 @@ export default function TrxModal({ isTrxModalOpen, closeModal, trxIds }) {
                 <div className='mt-2 h-full'>
                     <div className="w-full h-full font-bold flex flex-col items-center">
                         <AiOutlineCheckCircle className="text-lime-500" size={80} />
-                        <div className="mt-2 text-4xl">Buy Success!</div>
-                        <div className="mt-5 text-xl">Cryptofarm's nft character purchase has been completed.</div>
+                        <div className="mt-2 text-4xl">캐릭터 구매 성공!</div>
+                        <div className="mt-5 text-xl">크립토팜의 NFT 캐릭터 구매가 완료 되었습니다.</div>
                         <div className="mt-7 text-xl">
                             Trx ID (1) : {" "}
                             <a

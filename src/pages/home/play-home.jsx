@@ -11,8 +11,6 @@ import { MintNFT } from '../../js/MintNFT';
 import TrxModal from '../../components/TrxModal';
 
 
-
-
 // 브라우저 창의 크기가 변경될 때
 window.addEventListener('resize', event => {
 
@@ -25,17 +23,14 @@ window.addEventListener('resize', event => {
 // 여기에 페이저 컴포넌트를 넣을까?
 function LoginWithCharacter({callbackMintNFT}) {
 
-
   // useState 미사용하면 변수가 변경되어도 렌더링이 안되거나 적용이 안된다.
   // 계정 이름 관리
   const [accountName, setAccountName] = useState('');
-
 
   // 로그인 컴포넌트에서 지갑 로그인이 완료되면 계정 이름을 받고
   // 로그인 컴포넌트 -> 캐릭터 선택 컴포넌트로 교체하는 함수
   const handleLogin = (value) => {
     console.log("로그인 컴포넌트한테 받은 계정 이름 :", value);
-
 
     // 로그인 컴포넌트로부터 받은 계정 이름 전달
     setAccountName(value);
@@ -60,7 +55,6 @@ function LoginWithCharacter({callbackMintNFT}) {
 
     // 캐릭터 선택 이벤트 발생
     eventSystem.emit('charSelection', characterInfo );
-
 
   }
 

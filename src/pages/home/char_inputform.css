@@ -1,11 +1,4 @@
-body {
-/*     width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center; */
-    font-family: 'Paytone One',sans-serif;
-}
+
 
 
 /*이름 짓기UI/window container*/
@@ -17,7 +10,7 @@ body {
     justify-self: center;
 
     width: 500px;
-    height: 150px;
+    height: 200px;
     border: 2.4px solid #181425;
     background-color: #EEA468;
     display: flex;
@@ -50,36 +43,41 @@ body {
     height: 97%;
     background-color: #C28669;
     display: flex;
+    justify-content: space-around;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: center
+}
+
+.title_text{
+    font-size: x-large;
+    color: white;
+    text-shadow: 0.5px 0.4px 0.5px black; 
 }
 
 .input_container{
     width: 97%;
-    height: 70%;
     display: flex;
-    flex-direction: row;
     align-items: center;
-}
-.user_name_text{
-    font-size: 19px;
-    color: white;
-    text-shadow: 0.5px 0.4px 0.5px black; 
-    margin-right: 7px;
+    justify-content: center;
 }
 .input_user_name {
-    font-size: 15px;
-    height: 30px;
-    width: 60%;
+
+    font-size: large;
+    height:fit-content;
+    
     background-color: #E7A873;
     border: none;
     box-shadow: inset 0px 1px 3px 0.5px black;
     color: white;
     text-shadow: 0.5px 0.4px 0.5px black; 
-    font-family: 'Paytone One',sans-serif;
     justify-content: center;
     text-align: center;
+}
+.char_name_txt {
+    font-size: large;
+    color: white;
+    text-shadow: 0.5px 0.4px 0.5px black;
+    margin-right: 10px;
 }
 .input_user_name:focus {
     outline: 1px solid white;
@@ -94,23 +92,7 @@ body {
     font-size: 10px;
     height: 30%;
 }
-.back_btn_container1 {
-    cursor: pointer;
-    text-align: center;
-    width: 50%;
-    height: 20px;
-    border: 2px solid #181425;
-    background-color: #EAD4AA;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 5px;
-}
-.back_btn_container2 {
-    width: 99%;
-    height: 18px;
-    background-color: #E7A873;
-}
+
 .create_btn_container1{
     cursor: pointer;
     margin-left: 5px;
