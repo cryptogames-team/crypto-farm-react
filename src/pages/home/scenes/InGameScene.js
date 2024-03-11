@@ -188,26 +188,11 @@ export default class InGameScene extends Phaser.Scene {
                 asset_id: 4563456
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzA5MjY3NjYwLCJleHAiOjE3MDkzMDM2NjB9.BwMlVrR2T7Lx-Uwp-CZIKim61muHKlHpnpiL7dWtlXE';
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzEwMTM1NTc1LCJleHAiOjE3MTAxNzE1NzV9.msybWY6cLjY-DC-ZcogvEHFe6l0jnSXhyMbk08S2sn0';
         }
 
         this.assetManager = new AssetManager(this);
         this.networkManager = new NetworkManager(this);
-
-        // 모든 아이템 정보 목록 요청
-        this.networkManager.serverGetAllItem().then(data => {
-            // 받은 아이템 배열을 해쉬 테이블로 변환
-            data.forEach((item, index) => {
-                // 구조 분해 할당
-                const { item_name } = item;
-                // 값 추가
-                this.allItemMap.set(item_name, item);
-            });
-
-            // 받은 배열 저장
-            this.allItemList = data;
-            //console.log('allItemList 확인',this.allItemList);
-        });
 
     }
 
@@ -233,13 +218,16 @@ export default class InGameScene extends Phaser.Scene {
         this.load.path = 'assets/Maps/'
         this.load.tilemapTiledJSON('ingame_tilemap', 'ingame/Crypto_Farm_InGame.json');
         this.load.tilemapTiledJSON('Market', 'ingame/Market.json');
-        this.load.tilemapTiledJSON('Test', 'ingame/test.json');        // 게임에 필요한 이미지 전부 로드
+        this.load.tilemapTiledJSON('Test', 'ingame/test.json');
+        // 게임에 필요한 이미지 전부 로드
         assetManager.loadAllImage();
+
+        // 폰트 로드
+        //this.load.add('main', 'src/assets/fonts/NanumGothic.ttf');
     }
 
     create() {
-        
-        
+
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
@@ -249,9 +237,6 @@ export default class InGameScene extends Phaser.Scene {
         const bottomY = this.cameras.main.height;
 
         const assetManager = this.assetManager;
-
-        // 마우스 우클릭 컨텍스트 메뉴 표시 비활성화
-        //this.input.mouse.disableContextMenu();
 
 
         // 캐릭터 애니메이션 정보 객체 생성
@@ -263,6 +248,11 @@ export default class InGameScene extends Phaser.Scene {
         // 컨테이너 클래스의 오리진은 변경이 불가능하다.
         this.playerObject = new PlayerObject(this, 500, 600);
 
+        // 플레이어 캐릭터의 중앙값 구하기
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
+        const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
+        const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
+
         // 플레이어 캐릭터 디버그 표시 해제
         this.playerObject.body.debugShowBody = false;
         this.playerObject.body.debugShowVelocity = false;
@@ -273,13 +263,6 @@ export default class InGameScene extends Phaser.Scene {
         this.searchArea.setDisplaySize(tileSize, tileSize).setOrigin(0, 0);
         this.searchArea.body.debugShowBody = false;
 
-        // 플레이어 캐릭터의 중앙값 구하기
-        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨.
-        const playerCenterX = this.playerObject.x + (this.playerObject.body.width / 2);
-        const playerCenterY = this.playerObject.y + (this.playerObject.body.height / 2);
-
-        
-
         //옥션 UI 생성
         //크기
         const auctionWidth = 1400;
@@ -289,14 +272,7 @@ export default class InGameScene extends Phaser.Scene {
         const autionX = this.cameras.main.width / 2 - auctionWidth / 2;
         const autionY = this.cameras.main.height / 2 - auctionHeight / 2;
         this.auction = new Auction(this, autionX, autionY, auctionWidth, auctionHeight);
-
         this.auction.setVisible(false);
-
-        // 인벤토리 UI 추가
-
-    
-
-
 
         // 퀵슬롯 클래스 객체 생성하고 추가
         this.quickSlotUI = new QuickSlot(this, 0, 0);
@@ -324,26 +300,6 @@ export default class InGameScene extends Phaser.Scene {
         this.inventory = new Inventory(this, invenX, invenY, invenWidth, invenHeight);
         this.inventory.disable();
 
-        // 서버에 로그인 한 유저의 아이템 목록 요청
-        // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
-        // Promise 객체에서 원하는 값을 빼올려면 then() 이나 다른 async 함수내에서 await 사용 해야 한다.
-        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then(data => {
-            this.own_items = data;
-
-            // 퀵슬롯, 인벤 유저 소유 아이템 표시하게 초기화
-            this.quickSlotUI.initQuick(this.own_items);
-            this.inventory.initInventory(this.own_items);
-
-            // 씨앗 상점 소유 아이템 개수 표시
-            // 기본 탭 : 판매
-            this.seedStoreUI.tabBody.switchTabs(0);
-
-            /* this.seedStoreUI.state = 'sale'; 판매 탭 버튼 활성화 코드
-            this.seedStoreUI.purchaseTab.setImgVisible(false);
-            this.seedStoreUI.saleTab.setImgVisible(true);
-            this.seedStoreUI.tabBody.switchTabs(1); */
-        });
-
         // 게임 오브젝트들(농작물, 나무) 정보 툴팁
         this.objectToolTip = new ObjectToolTip(this, 0, 0, 150, 100);
         this.objectToolTip.setVisible(false);
@@ -359,20 +315,18 @@ export default class InGameScene extends Phaser.Scene {
 
         // 씨앗 상점 npc 추가 원래 위치 16 x 8
         this.seedStoreNPC = new SeedStoreNPC(this, tileSize * 16, tileSize * 2);
+        // 화덕(요리) NPC 추가
+        this.firePitNPC = new FirePitNPC(this, tileSize * 8, tileSize * 3);
 
         // 씨앗 상점 UI 생성
         // 크기
         const seedStoreWidth = 650;
         const seedStoreHeight = 500;
-
         // 위치
         const seedStoreX = this.cameras.main.width / 2 - seedStoreWidth / 2;
         const seedStoreY = this.cameras.main.height / 2 - seedStoreHeight / 2;
         this.seedStoreUI = new SeedStoreUI(this, seedStoreX, seedStoreY, seedStoreWidth, seedStoreHeight);
         this.seedStoreUI.disable();
-
-        // 화덕(요리) NPC 추가
-        this.firePitNPC = new FirePitNPC(this, tileSize * 8, tileSize * 3);
 
         // 화덕 UI 생성
         // 크기
@@ -381,8 +335,45 @@ export default class InGameScene extends Phaser.Scene {
         // 위치
         const firePitX = this.cameras.main.width / 2 - firePitWidth / 2;
         const firePitY = this.cameras.main.height / 2 - firePitHeight / 2;
-        this.FirePitUI = new FirePitUI(this, firePitX, firePitY, firePitWidth, firePitHeight);
-        this.FirePitUI.disable();
+        this.firePitUI = new FirePitUI(this, firePitX, firePitY, firePitWidth, firePitHeight);
+        this.firePitUI.disable();
+
+
+        // UI 생성완료 되었으니 아이템 정보들 네트워크 요청
+
+        // 모든 아이템 정보 목록 요청
+        this.networkManager.serverGetAllItem().then(data => {
+            // 받은 아이템 배열을 해쉬 테이블로 변환
+            data.forEach((item, index) => {
+                // 구조 분해 할당
+                const { item_name } = item;
+                // 값 추가
+                this.allItemMap.set(item_name, item);
+            });
+
+            // 받은 배열 저장
+            this.allItemList = data;
+            //console.log('allItemList 확인',this.allItemList);
+
+            // 전체 아이템 정보 리스트 도착했으니 상점에서 구매/판매 가능한 리스트 뽑아내기
+            this.seedStoreUI.tabBody.initItemList();
+            // 구매 탭 열게 설정
+            this.seedStoreUI.tabBody.switchTabs(0);
+
+            // 화덕 UI도 초기화
+            this.firePitUI.tabBody.initTab();
+        });
+
+        // 서버에 로그인 한 유저의 아이템 목록 요청
+        // async 함수에서 반환하는 값은 항상 'Promise' 객체로 감싸져 있음.
+        // Promise 객체에서 원하는 값을 빼올려면 then() 이나 다른 async 함수내에서 await 사용 해야 한다.
+        this.networkManager.serverGetUserItem(this.characterInfo.user_id).then(data => {
+            this.own_items = data;
+
+            // 퀵슬롯, 인벤 유저 소유 아이템 표시하게 초기화
+            this.quickSlotUI.initQuick(this.own_items);
+            this.inventory.initInventory(this.own_items);
+        });
 
         // 타일 맵 생성
         // 타일 맵 정보를 담은 Json 로드할 때 설정한 키값과 맞춰야 한다.
@@ -413,10 +404,6 @@ export default class InGameScene extends Phaser.Scene {
             this.physics.add.collider(this.playerObject, layer);
 
 
-
-
-
-
             // 디버그 그래픽 객체 배열 초기화
             if (i === 0) {
                 // 타일맵 레이어 갯수만큼
@@ -444,9 +431,6 @@ export default class InGameScene extends Phaser.Scene {
 
             // 처음 접속하면 계정이면 data가 null일 거임
             // 그럼 기본맵 사용하게 변경한다.
-
-
-
             // 맵 데이터 초기화
             console.log(data)
             this.initMapData(data);
@@ -478,23 +462,9 @@ export default class InGameScene extends Phaser.Scene {
 
             /* if (object.rectangle) {
                 objectGraphics.strokeRect(
-                    object.x,
-                    object.y,
-                    object.width,
-                    object.height);
+                    object.x, object.y, object.width, object.height);
             } */
-
-            //console.log("object layerScale 만큼 크기 늘림", object);
         });
-
-
-        /* this.trees.push(new Tree(this, tileSize * 15, tileSize * 5, new Date('2024-02-01T12:05:41.652Z')));
-        // 2024-02-01T10:47:41.652Z
-        // 벌목 시간이 기록된 나무 오브젝트 추가
-        this.trees.push(new Tree(this, tileSize * 18, tileSize * 5, new Date('2024-02-01T10:47:41.652Z')));
-        this.trees.push(new Tree(this, tileSize * 21, tileSize * 5, new Date('2024-02-01T10:47:41.652Z')));
-        // 컨테이너끼리 충돌 효과는 안된다고 한다.
-        this.physics.add.collider(this.playerObject, this.trees); */
 
         // 키보드 키 입력 설정
         // 방향키, 쉬프트, 스페이스바 키 객체 생성
@@ -552,7 +522,6 @@ export default class InGameScene extends Phaser.Scene {
             debugGraphics.forEach((debugGraphic) => {
                 debugGraphic.visible = !debugGraphic.visible;
             });
-
         });
 
         // 'B' 키 입력 이벤트 리스너
@@ -600,6 +569,14 @@ export default class InGameScene extends Phaser.Scene {
             align: 'center'
         };
 
+        // 폰트 로드되기전에 실행되는 듯
+        const txtStyle1 = {
+            fontFamily: 'NanumGothicExtraBold',
+            fontSize: 30,
+            backgroundColor: '#000000',
+            align: 'center'
+        };
+
         // 현재 플레이어가 위치한 타일의 인덱스 표시하고 화면 왼쪽 아래에 배치     
         /* this.interactTileIndexTxt = this.add.text(0, bottomY, 'interact tile index', txtStyle);
         this.interactTileIndexTxt.setScrollFactor(0).setOrigin(0, 1).setDepth(100);
@@ -610,12 +587,24 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터가 상호작용할 타일을 표시하는 selectBox 오브젝트 추가
         this.interTileMarker = new SelectBox(this, 550, 550, tileSize, tileSize);
 
-
         // 캐릭터 정보창 추가
         this.charInfoUI = new CharacterInfo(this, 10, 10, 250, 100, this.characterInfo);
 
+        this.txt1 = this.add.text(centerX, centerY,'안녕하세요', txtStyle);
+        this.txt1.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
+
+        this.txt2 = this.add.text(centerX, centerY + this.txt1.height + 20, '안녕하세요', txtStyle1);
+        this.txt2.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
+
+
+        this.fontKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+        this.fontKey.on('down', () => {
+            console.log("폰트 패밀리 변경");
+            this.txt2.setFontFamily('Spoqa Han Sans Neo');
+            this.txt2.setFontSize(30);
+        });
     }
-    
+
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
     // delta : 이전 프레임과 현재 프레임 사이의 경과 시간을 밀리초 단위로 나타낸다
     // 이 값은 게임이 얼마나 매끄럽게 실행되고 있는지를 나타내는데 사용될 수 있으며,
@@ -623,6 +612,9 @@ export default class InGameScene extends Phaser.Scene {
     update(time, delta) {
 
         this.playerObject.update(this.cursorsKeys, this.keys);
+
+        // 플레이어 오브젝트 위치 점으로 찍어보기
+        this.graphics2 = this.add.graphics()
 
         //console.log(this.crops);
         this.crops.forEach((crops, index) => {
@@ -646,14 +638,10 @@ export default class InGameScene extends Phaser.Scene {
                     // 상호작용할 타일의 프로퍼티 표시
                     this.interactPropsTxt.setText("Plantable : " + interactTile.properties.plantable); */
 
-
-        // 타일의 월드좌표로 상호작용 타일의 월드 상의 위치 저장
-        // tileToWorldX()랑 Tile.pixelX랑 차이가 있네
-        // ingameMap 원래 크기보다 4배 커져있는데
-        // Tile.pixel 위치는 원래 크기에서 위치 값을 구해주네
-        const frontTileX = interactTile.pixelX * layerScale;
-        const frontTileY = interactTile.pixelY * layerScale;
-
+        // 타일의 월드좌표 값으로로 상호작용 타일의 월드 상의 위치 설정
+        // ingameMap이 원래 크기보다 4배 커져있어서 레이어 스케일 만큼 곱해야 됨.
+        let frontTileX = interactTile.pixelX * layerScale;
+        let frontTileY = interactTile.pixelY * layerScale;
 
         // 상호작용 할 타일 표시 UI 마커 위치 업데이트
         this.interTileMarker.x = frontTileX;
@@ -668,35 +656,22 @@ export default class InGameScene extends Phaser.Scene {
             this.auction.enable();
         }
         //시장맵이동
-        if(this.playerObject.x> 740 && this.playerObject.x <920 &&this.playerObject.y<1)
-        {
-            this.scene.start('MarketScene',this.characterInfo);
-            this.playerObject.y=10
+        if (this.playerObject.x > 740 && this.playerObject.x < 920 && this.playerObject.y < 1) {
+            this.scene.start('MarketScene', this.characterInfo);
+            this.playerObject.y = 10
         }
-
-       
     }
 
-    // 현재 장비하고 있는 퀵슬롯을 표시하는 사각형 그리는 함수
+    // 퀵슬롯을 선택하고
+    // 선택한 퀵슬롯의 셀렉트 박스 표시
     equipQuickSlot(equipNumber) {
 
-        // 사각형 그릴 때 선은 원점에서 감싸지는 형태로 그려지는거 아닌가?
-        // 선 두께가 1 초과하면 두께 절반만큼 더하거나 빼야되나?
-        // 이걸 어떻게 설명하지
-
-        // 선 굵기가 굵어지면 top-left 기준점에서 어느 방향으로 굵어지는가
-        // 밖으로 굵어지나? 아니면 안밖으로 굵어지나
-
-        const lineWidth = 5;
-
-        const x = this.quickSlotUI.x + 100 * equipNumber + lineWidth / 2;
-        const y = this.quickSlotUI.y + lineWidth / 2;
-
         this.equipNumber = equipNumber;
-        this.equipMarker.clear();
-        this.equipMarker.lineStyle(lineWidth, 0xFF0000, 1);
-        this.equipMarker.setDepth(100).setScrollFactor(0);
-        this.equipMarker.strokeRect(x, y, 100 - lineWidth, 100 - lineWidth);
+        const quickSlots = this.quickSlotUI.quickSlots;
+        quickSlots.forEach((quickSlot, index) => {
+            quickSlot.selectBox.setVisible(false);
+        });
+        quickSlots[equipNumber].selectBox.setVisible(true);
     }
 
     // 캐릭터가 땅을 판 타일의 타일 레이어 1를 밭 타일로 변경한다.
@@ -711,7 +686,6 @@ export default class InGameScene extends Phaser.Scene {
 
         // mapData에 새 밭 타일 추가 시도
         this.addMapTile(interactTileX, interactTileY);
-
 
         // 타일 인덱스를 전달, 페이저 타일 인덱스는 1부터 시작한다.
         // 전체 레이어의 타일 변경
@@ -1059,7 +1033,7 @@ export default class InGameScene extends Phaser.Scene {
             y: this.playerObject.y
         }
         // 플레이어 현재 중앙 위치
-        // // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨
+        // 컨테이너의 현재 위치 값에서 컨테이너의 실제 길이, 높이 값의 절반을 더하면 됨
         const playerCenterLoc = {
             x: playerLoc.x + (this.playerObject.body.width / 2),
             y: playerLoc.y + (this.playerObject.body.height / 2)
@@ -1080,12 +1054,21 @@ export default class InGameScene extends Phaser.Scene {
 
         // 월드 상의 특정 위치(픽셀 단위)를 기반으로 해당 위치에 해당하는 타일맵의 타일 좌표를 계산한다.
         // 캐릭터가 상호작용할 타일의 위치 구하기
-        //const interactTileX = this.ingameMap.worldToTileX(pointX);
-        //const interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
         this.interactTileX = this.ingameMap.worldToTileX(pointX);
         this.interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
 
-        return this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
+        let interactTile = this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
+
+        //타일맵 바깥의 위치에서 상호작용할 타일을 구하는 경우 현재 캐릭터의 위치의 타일로 상호작용 하도록 설정한다
+        if (interactTile === null) {
+            console.log('상호작용할 타일을 구할 수 없어서 현재 캐릭터 위치로 상호작용 타일 구하기');
+            this.interactTileX = this.ingameMap.worldToTileX(playerCenterLoc.x);
+            this.interactTileY = this.ingameMap.worldToTileY(playerCenterLoc.y);
+            interactTile = this.ingameMap.getTileAt(this.interactTileX, this.interactTileY, true, 1);
+            console.log(interactTile);
+        }
+
+        return interactTile;
     }
 
     // 사각형 영역안에 특정 위치의 점이 포함되는지 확인

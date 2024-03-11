@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import Item from "../../elements/item";
 import Frame_W from "../frame_w";
 import SelectBox from "../select_box";
-import { tab } from "@testing-library/user-event/dist/tab";
 import Frame from "../frame/frame";
+
 
 
 export default class StoreItemSlot extends Frame {
@@ -19,12 +19,18 @@ export default class StoreItemSlot extends Frame {
     // 수량 관련 변수들
     countBox;
     countTxt;
-    count;
+    count = 0;
+
+    // 자물쇠 아이콘
+    lockIcon;
 
     // 셀렉트 박스
     selectBox;
 
     index;
+
+    // 0 : open, 1 : lock
+    state = 0;
 
     constructor(scene, x, y, width, height, index , tabBody = null) {
 
@@ -34,7 +40,7 @@ export default class StoreItemSlot extends Frame {
         this.tabBody = tabBody;
         this.setSize(width, height);
         
-        // 아이템 이미지 하드코딩해서 추가
+        // 아이템 이미지 추가
         const itemImgX = this.width / 2;
         const itemImgY = this.height / 2;
         this.itemImg = scene.add.image(itemImgX, itemImgY, '');
@@ -66,11 +72,20 @@ export default class StoreItemSlot extends Frame {
         // 디스플레이 사이즈 / 원본 사이즈 값으로 스케일 값이 변경됨.
         //console.log('아이템 이미지 스케일', this.itemImg.scaleX, this.itemImg.scaleY );
 
+
+        // 자물쇠 아이콘 추가
+        let lockX = this.width - this.edgeSize;
+        let lockY = this.height - this.edgeSize;
+        this.lockIcon = scene.add.image(lockX, lockY, 'lockIcon');
+        this.lockIcon.setDisplaySize(20, 20).setOrigin(1,1);
+        this.lockIcon.setVisible(false);
+
+        // 셀렉트 박스 추가
         this.selectBox = new SelectBox(scene, 0, 0, this.width, this.height);
-        this.selectBox.setScale(3);
+        this.selectBox.setScale(2.5);
         this.selectBox.setVisible(false);
 
-        this.add([this.itemImg, this.selectBox]);
+        this.add([this.itemImg, this.lockIcon, this.selectBox]);
         this.add([this.countBox, this.countTxt]);
 
         // 상호작용 영역 설정
@@ -88,6 +103,7 @@ export default class StoreItemSlot extends Frame {
             document.body.style.cursor = 'default';
         });
 
+
     }
 
     // 아이템 이미지 설정
@@ -104,4 +120,20 @@ export default class StoreItemSlot extends Frame {
         this.countTxt.setText(count);
     }
 
+    // 슬롯 잠금 상태 설정
+    setSlotLockState(isLocked){
+
+        if(isLocked){
+            this.lockIcon.setVisible(true);
+            // 알파값 조정
+            this.itemImg.setAlpha(0.5);
+            this.center.setAlpha(0.5);
+            this.state = 1;
+        }else{
+            this.lockIcon.setVisible(false);
+            this.itemImg.setAlpha(1);
+            this.center.setAlpha(1);
+            this.state = 0;
+        }
+    }
 }

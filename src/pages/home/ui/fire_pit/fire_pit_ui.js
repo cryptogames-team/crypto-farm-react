@@ -85,7 +85,7 @@ export default class FirePitUI extends Frame {
         this.setVisible(true);
         // 요리 탭 아이템 개수 연동과 기본 아이템 선택
         this.tabBody.syncItemCount();
-        this.tabBody.selectDefaultItem();
+        this.tabBody.selectItemSlot(0);
     }
     // UI창 비활성화
     disable(){

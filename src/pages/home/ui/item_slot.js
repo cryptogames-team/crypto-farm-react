@@ -1,10 +1,14 @@
 import Phaser from "phaser";
+import Frame from "./frame/frame";
+import Frame_LT from "./frame/frame_lt";
+import Frame_W from "./frame_w";
+import SelectBox from "./select_box";
 
 
-const pad = 7;
+const pad = 10;
 
 
-export default class ItemSlot extends Phaser.GameObjects.Container {
+export default class ItemSlot extends Frame_LT {
 
     scene;
 
@@ -20,8 +24,11 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     itemTitle;
     // 아이템 이미지
     itemImg;
-    // 아이템 슬롯 배경
-    slotBG;
+    // 상호작용 투명 이미지
+    bgImg;
+
+    // 아이템 수량 관련 변수들
+    countBox;
     // 아이템 수량 텍스트
     countTxt;
     // 아이템 수량
@@ -33,8 +40,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     // 아이템 슬롯의 높이와 길이
     width;
     height;
-    // 배경 안쪽 사각형 패딩
-    bgPad = 5;
 
     // 아이템 슬롯의 인벤토리나 퀵슬롯 내의 인덱스
     index;
@@ -42,11 +47,14 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     // 퀵슬롯 크기 서버에서 인벤 인덱스는 9부터임
     quickSize = 9;
 
+    // 셀렉트 박스
+    selectBox;
+
     // 아이템과 슬롯 번호에 디폴트 매개변수 적용
     // 아이템 슬롯, 빈 아이템 슬롯, 퀵슬롯, 빈 퀵슬롯으로 사용 가능함
-    constructor(scene, x, y, width, height, bgPad = 5, item = null, slotNumber = null) {
+    constructor(scene, x, y, width, height, item = null, slotNumber = null) {
 
-        super(scene, x, y);
+        super(scene, x, y, width, height);
 
         this.setSize(width, height);
         this.setDepth(100).setScrollFactor(0);
@@ -55,7 +63,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
         this.slotNumber = slotNumber;
-        this.bgPad = bgPad;
         // 슬롯의 길이 높이 설정
         this.width = width;
         this.height = height;
@@ -63,15 +70,8 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         //console.log("아이템 슬롯의 길이와 높이 : " , width, height);
 
-        // 페이저는 HEX 색상 코드가 아니라 16진수 형식으로 받는다.
-        // 아이템 슬롯 배경
-        this.slotBG = scene.add.graphics();
-        this.slotBG.fillStyle(0xB55001, 1);
-        this.slotBG.fillRect(0, 0, width, height);
-        this.slotBG.fillStyle(0xF5B667, 1);
-        this.slotBG.fillRect(this.bgPad, this.bgPad,
-            width - this.bgPad * 2, height - this.bgPad * 2);
-        this.add([this.slotBG]);
+        this.bgImg = scene.add.sprite(width / 2, height / 2, null);
+        this.bgImg.setDisplaySize(this.width - 14, this.height - 14).setAlpha(0.00001);
 
         // 아이템 객체를 받아서 아이템 슬롯으로 사용 시
         if (item) {
@@ -80,7 +80,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, item.imgKey);
-            this.itemImg.setDisplaySize(width / 2, height / 2);
         }
         // 빈 아이템 슬롯으로 사용 시
         else {
@@ -90,26 +89,41 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
             // 아이템 이미지 추가하고 슬롯 중앙에 배치
             this.itemImg = scene.add.sprite(width / 2, height / 2, null);
-            this.itemImg.setDisplaySize(width / 2, height / 2).setVisible(false);
+            this.itemImg.setVisible(false);
         }
 
         let txtConfig = {
             fontFamily: 'Arial',
             fontSize: 15,
-            color: 'white',
+            color: 'black',
             fontStyle: 'bold',
-            stroke: 'black',
-            strokeThickness: 5
+            align: 'center',
+            /* stroke: 'black',
+            strokeThickness: 5 */
         };
 
-        this.countTxt = scene.add.text(width - pad, pad, this.count,
+        // 아이템 수량 표시 프레임 박스
+        this.countBox = new Frame_W(scene, 0, 0, 25, 25, 6);
+        // 오른쪽 위에 위치 설정
+        this.countBox.x = this.width - this.countBox.width;
+        this.countBox.y = 0;
+        this.countBox.setVisible(false);
+
+        let countTxtX = this.countBox.x + this.countBox.width / 2;
+        let countTxtY = this.countBox.y + this.countBox.height / 2;
+        this.countTxt = scene.add.text(countTxtX, countTxtY, this.count,
             txtConfig);
-        this.countTxt.setDepth(100).setOrigin(1, 0);
+        this.countTxt.setDepth(100).setOrigin(0.5, 0.5);
 
         txtConfig.color = 'black';
         txtConfig.fontSize = 15;
 
-        this.add([this.countTxt, this.itemImg]);
+        // 셀렉트 박스 추가
+        this.selectBox = new SelectBox(scene, 0, 0, this.width, this.height);
+        this.selectBox.setScale(2);
+        this.selectBox.setVisible(false);
+
+        this.add([this.bgImg, this.itemImg, this.selectBox, this.countBox, this.countTxt]);
 
         // 퀵슬롯 UI로 사용시
         if (this.slotNumber !== null) {
@@ -145,7 +159,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         // 마우스 오버하면 딱 한번만 호출됨
         this.on('pointerover', (pointer) => {
 
-            //console.log("아이템 슬롯 포인터 오버");
+            console.log("아이템 슬롯 포인터 오버");
             //this.hoverIndex = this.index;
 
             scene.hoverSlot = this;
@@ -176,7 +190,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                 // 퀵슬롯일 경우
                 else if (scene.hoverSlot.type === 1) {
 
-
                     const toolTip = scene.quickSlotUI.toolTip;
 
                     // 계속 호출해도 문제가 없나보네?
@@ -199,7 +212,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             }
 
             scene.input.setTopOnly(false);
-
         });
 
         // 마우스가 움직일 때 마다 발생한다.
@@ -266,17 +278,18 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         });
 
-        // 아이템 슬롯 이미지 이벤트 추가
-        // 슬롯 이미지 포인터 오버
-        this.itemImg.on('pointerover', (pointer) => {
+
+        // 상호작용 배경 이미지 이벤트 추가
+        // 포인터 오버
+        this.bgImg.on('pointerover', (pointer) => {
             scene.input.setTopOnly(false);
-            //console.log("겹치는 오브젝트들 상호작용 가능함.");
+            console.log("겹치는 오브젝트들 상호작용 가능함.");
         });
 
-        // 마우스 우클릭 이벤트 추가
-        this.itemImg.on('pointerdown', (pointer) => {
-
-            if(pointer.rightButtonDown()){
+        // 포인터 다운 - 마우스 우클릭 처리
+        this.bgImg.on('pointerdown', (pointer) => {
+            //console.log('배경 이미지 클릭됨');
+            if (pointer.rightButtonDown()) {
                 //console.log('아이템 이미지 우클릭 됨');
 
                 // 클릭한 슬롯 아이템의 타입 확인
@@ -285,7 +298,7 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                 //console.log('마우스 우클릭한 슬롯의 아이템', clickItem);
 
                 // 요리 아이템
-                if(clickItem.type === 5){
+                if (clickItem.type === 5) {
                     console.log('요리 아이템 소비 시도');
                     // 얻는 경험치 량
                     let exp = clickItem.seed_Time;
@@ -294,10 +307,9 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
                     // 서버에 경험치 올려달라고 요청하기
                     networkManager.serverAddExp(exp).then(data => {
-                        if(data){
+                        if (data) {
                             // 캐릭터 UI창 경험치 관련 UI 요소들 재설정
                             this.scene.charInfoUI.onEarnExp(exp);
-
 
                             // 사용할 요리 아이템 정보
                             const useItemInfo = this.scene.allItemMap.get(clickItem.name);
@@ -309,15 +321,14 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                                 let item_count = 0;
 
                                 // 아직 clickItem 참조가 남아있음
-                                if(clickItem.count > 0){
+                                if (clickItem.count > 0) {
                                     item_count = clickItem.count;
 
-                                }else{
+                                } else {
 
                                     // 요리 아이템 전부 소모하면 아이템 툴팁 끄기
-                                    if(clickSlot === scene.hoverSlot){
-                                        console.log('클릭한 슬롯과 마우스 오버중인 슬롯이 같음');
-
+                                    if (clickSlot === scene.hoverSlot) {
+                                        //console.log('클릭한 슬롯과 마우스 오버중인 슬롯이 같음');
                                         scene.inventory.toolTip.setVisible(false);
                                         scene.quickSlotUI.toolTip.setVisible(false);
                                     }
@@ -327,17 +338,17 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
                                 console.log('남은 요리 아이템 수량', item_count);
                             });
 
-                        }else{
+                        } else {
                             console.log('요리 아이템 사용 실패');
                         }
                     });
 
-                } 
+                }
             }
         });
 
-        // 슬롯 이미지 드래그 시작
-        this.itemImg.on("dragstart", (pointer) => {
+        // 드래그 스타트
+        this.bgImg.on("dragstart", () => {
             // 마우스 올려둔 슬롯이 드래그 시작 슬롯이 됨
             scene.startSlot = scene.hoverSlot;
 
@@ -347,19 +358,21 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
             };
 
             //console.log("이미지 드래그 시작 슬롯 정보 : ", slotInfo);
-            //console.log("드래그 시작한 슬롯의 아이템 정보 : ", scene.startSlot.item);
-            console.log('드래그 시작한 슬롯 아이템 이미지 크기', scene.startSlot.itemImg.width, scene.startSlot.itemImg.height )
 
             // 일시적으로 컨테이너 자식에서 해제하고 depth 설정하기 
             this.remove(this.itemImg, false);
-            this.setDepth(2000);
+            this.itemImg.setDepth(2000);
 
             // 아이템 드래그할 때 시작 슬롯의 텍스트 안보이게 하기
             this.countTxt.setVisible(false);
 
+            // 원본 마우스 위치
+            let camera = this.scene.cameras.main;
+            let pointer = this.scene.input.activePointer;
+
             // 아이템 이미지가 이제 월드 위치를 사용함.
-            this.itemImg.x = pointer.x;
-            this.itemImg.y = pointer.y;
+            this.itemImg.x = pointer.x + camera.scrollX;
+            this.itemImg.y = pointer.y + camera.scrollY;
 
             // 툴팁 끄기
             const toolTip = scene.inventory.toolTip;
@@ -374,15 +387,18 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         });
 
         // 슬롯 이미지 드래그
-        this.itemImg.on('drag', (pointer, dragX, dragY) => {
+        this.bgImg.on('drag', () => {
 
-            // 아이템 이미지가 일시적으로 컨테이너의 자식에서 해제됐으니 월드 위치를 사용해야 한다.
-            this.itemImg.x = pointer.x;
-            this.itemImg.y = pointer.y;
+            // 원본 마우스 위치
+            let camera = this.scene.cameras.main;
+            let pointer = this.scene.input.activePointer;
+
+            // 아이템 이미지가 이제 월드 위치를 사용함.
+            this.itemImg.x = pointer.x + camera.scrollX;
+            this.itemImg.y = pointer.y + camera.scrollY;
         });
-
-        // 슬롯 이미지 드래그 종료
-        this.itemImg.on('dragend', (pointer) => {
+        // 슬롯 이미지 드래그 엔드
+        this.bgImg.on('dragend', (pointer) => {
 
             // 더 이상 멤버 슬롯 인덱스는 사용하지 않는다.
 
@@ -448,7 +464,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
     }
 
-
     // 네트워크 매니저에게 아이템 이동 요청을 서버에게 보내달라고 전달한다. 
     sendMoveItem(startSlot, endSlot) {
 
@@ -477,47 +492,30 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
     setSlotItem(item) {
         this.item = item;
 
+        //console.log('설정될 아이템 정보',this.item);
+
         this.itemImg.setTexture(item.name);
-        /* // 텍스처의 원본 크기로 이미지 크기 조정하기
-        this.itemImg.width = this.itemImg.frame.width;
-        this.itemImg.height = this.itemImg.frame.height; */
-        
-        this.itemImg.setVisible(true).setDisplaySize(this.width / 2, this.height / 2);
+        this.itemImg.setVisible(true)
+        this.itemImg.setDisplaySize(this.width / 2 - 7, this.height / 2 - 7);
 
         // 아이템 타입이 4이면 수량 텍스트 표시 안함.
-        if (item.type === 4)
+        if (item.type === 4){
             this.countTxt.setText(undefined);
-        else
+            this.countBox.setVisible(false);
+        }
+        else {
             this.countTxt.setText(item.count);
+            this.countBox.setVisible(true);
+        }
 
-        // 아이템 이미지가 표시되니까 드래그 이벤트 설정
+        // 투명 배경 이미지 상호작용 영역 설정
+        this.bgImg.setInteractive();
+        this.scene.input.setDraggable(this.bgImg);
+        this.bgImg.setScrollFactor(0);
 
-        // 아이템 이미지의 width, height
-        //console.log('아이템 이미지의 width, height', this.itemImg.width, this.itemImg.height);
-
-        // 왜 이럴까...
-
-        // 새 텍스처로 교체하면 상호작용 영역 크기가 달라진다.
-        // 아이템 이미지 상호작용 영역 설정
-        this.itemImg.setInteractive(new Phaser.Geom.Rectangle
-            (-this.itemImg.width / 2,
-            -this.itemImg.height / 2,
-             this.itemImg.width * 2,
-              this.itemImg.height * 2),
-            Phaser.Geom.Rectangle.Contains);
-
-        // hitArea가 주어지지 않을 경우 텍스처 프레임을 기반으로 직사각형으로 생성한다라...
-        // 텍스처 프레임이 뭐지?
-        //this.itemImg.setInteractive();
-
-        // 아이템 이미지 드래그 가능하게 설정
-        this.scene.input.setDraggable(this.itemImg);
-        this.itemImg.setScrollFactor(0);
-
-
-        // 아이템 이미지 상호작용 영역 보기
-        //this.itemImg.setDepth(1500);
-        //this.scene.input.enableDebug(this.itemImg);
+        // 상호작용 영역 이미지 디버그로 보기
+        /* this.bgImg.setDepth(1500);
+        this.scene.input.enableDebug(this.bgImg); */
     }
 
     // 아이템 소비해서 수량 감소시키는 함수
@@ -558,8 +556,9 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
         this.item = null;
         this.itemImg.setTexture(null).setVisible(false);
         this.countTxt.setText(null);
+        this.countBox.setVisible(false);
 
-        this.itemImg.removeInteractive();
+        this.bgImg.removeInteractive();
     }
 
     // 드래그 시작 슬롯과 드래그 종료 슬롯에 있는 아이템 서로 교체
@@ -571,38 +570,17 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         let hoverItem = JSON.parse(JSON.stringify(endSlot.item));
 
-        console.log("드랍 슬롯의 원본 아이템 : ", hoverItem);
-        console.log("시작 슬롯의 아이템 : ", startSlot.item);
+        //console.log("드랍 슬롯의 원본 아이템 : ", hoverItem);
+        //console.log("시작 슬롯의 아이템 : ", startSlot.item);
 
         // 드랍 슬롯의 아이템을 드래그 시작 슬롯의 아이템으로 교체
-        /* endSlot.item = Object.assign({}, startSlot.item);
-        endSlot.itemImg.setTexture(endSlot.item.name)
-            .setDisplaySize(endSlot.width / 2, endSlot.height / 2);
-        // 아이템 타입이 도구가 아닐 때만 수량 표시하기
-        //if(endSlot.item.type !== 4)
-        endSlot.countTxt.setText(endSlot.item.count); */
-
         endSlot.setSlotItem(startSlot.item);
-
-        console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
-
-        // HitArea 변경으로 원본 텍스처가 달라져 크기가 변경되도
-        // 이미지의 상호작용 영역 크기를 아이템 슬롯에 맞춤.
-        //endSlot.setImgHitArea();
+        //console.log("바뀐 후의 드랍 슬롯 아이템 : ", endSlot.item);
 
         // 드래그 시작 슬롯의 아이템을 드랍 슬롯의 아이템으로 교체하기
         // 드랍 슬롯 아이템 객체의 복사본이 필요하다.
         // Js에서 클래스 객체를 대입하면 객체에 대한 참조가 전달된다.
-        /* startSlot.item = hoverItem;
-        startSlot.itemImg.setTexture(startSlot.item.name)
-            .setDisplaySize(startSlot.width / 2, startSlot.height / 2);
-
-        // 아이템 타입이 도구가 아닐 때만 수량 표시하기
-        // if(startSlot.item.type !== 4)
-        startSlot.countTxt.setText(startSlot.item.count); */
-
         startSlot.setSlotItem(hoverItem);
-        //startSlot.setImgHitArea();
     }
 
     // 빈 아이템 슬롯으로 아이템 옮기기
@@ -610,24 +588,6 @@ export default class ItemSlot extends Phaser.GameObjects.Container {
 
         endSlot.setSlotItem(startSlot.item);
         startSlot.removeItem();
-    }
-
-    // 아이템 이미지의 상호작용 영역을 슬롯 크기에 맞춘다.
-    // 아이템 이미지 텍스처가 변경되었을 때 호출해야됨.
-    setImgHitArea() {
-
-        //console.log("setImgHitArea() 호출됨.");
-
-        // 아이템 이미지의 크기와 길이
-        let imgWidth = this.itemImg.width;
-        let imgHeight = this.itemImg.height;
-
-        // 아이템 이미지의 displaySize가 아이템 슬롯의 절반이니
-        // 슬롯 크기에 맞출려면 시작점을 아이템 이미지 절반 크기만큼 빼고
-        // 영역의 길이, 높이를 이미지 크기 2배만큼 줘야 슬롯 크기에 맞는다.
-        this.itemImg.input.hitArea.setTo(-imgWidth / 2, -imgHeight / 2,
-            imgWidth * 2, imgHeight * 2);
-
     }
 
     // 자식에서 해제한 이미지를 자식으로 다시 추가한다.

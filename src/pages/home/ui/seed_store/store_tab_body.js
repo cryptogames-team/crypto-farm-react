@@ -46,16 +46,6 @@ export default class StoreTabBody extends Frame_LT {
 
         super(scene, x, y, width, height, 0);
 
-        // 서버에서 전체 아이템 리스트 받고
-        // 거기서 구매 가능 아이템, 판매 가능 아이템 리스트로 나누기
-        // 구매 가능한 아이템 리스트 초기화
-        this.purchaseList = scene.allItemList.filter(item => item.item_type === 0);
-        //console.log('구매 가능 아이템 리스트 초기화', this.newPurchaseList);
-
-        // 판매 가능한 아이템(농작물) 리스트 초기화
-        this.saleList = scene.allItemList.filter(item => item.item_type === 1);
-        //console.log('판매 가능 아이템 리스트 초기화', this.saleList);
-
         this.type = type;
         this.storeUI = storeUI;
 
@@ -88,23 +78,8 @@ export default class StoreTabBody extends Frame_LT {
 
                 // 전체 인덱스
                 let index = row * this.gridCol + col;
-
-                // 각 슬롯에 들어갈 아이템의 이름
-                const { item_id, item_type, item_name,
-                    item_des, seed_time, use_level, item_price } = this.purchaseList[index];
-
-                const ownItemSlot = scene.findAddItemSlot(item_name);
-                //console.log('소유 아이템 슬롯', ownItemSlot);
-
+                // 아이템 슬롯 생성
                 const itemSlot = new StoreItemSlot(scene, slotX, slotY, slotSize, slotSize, index);
-                itemSlot.setItemImg(item_name);
-
-                // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
-                if (ownItemSlot.item) {
-                    itemSlot.setItemCount(ownItemSlot.item.count);
-                } else { // 없으면 0개로 표시
-                    itemSlot.setItemCount(0);
-                }
 
                 // 슬롯 클릭
                 itemSlot.on('pointerdown', (pointer) => {
@@ -113,25 +88,16 @@ export default class StoreTabBody extends Frame_LT {
                         itemSlot.selectBox.setVisible(false);
                     });
 
-                    // 클릭한 아이템 슬롯 인덱스
-                    this.selectIndex = itemSlot.index;
-
-                    // 표시할 아이템 객체
-                    let selectItem = null;
+                    let selectIndex = itemSlot.index;
+                    let itemList = null;
 
                     if (this.type === 0)
-                        selectItem = this.purchaseList[this.selectIndex];
+                        itemList = this.purchaseList;
                     else if (this.type === 1)
-                        selectItem = this.saleList[this.selectIndex];
+                        itemList = this.saleList;
 
-                    // 클릭한 아이템 정보를 툴팁에 표시한다.
-                    this.itemToolTips.setStoreToolTip(selectItem);
-                    itemSlot.selectBox.setVisible(true);
-
-                    // 낱개 거래 버튼 상태 설정
-                    this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1);
-                    // 10개 거래 버튼 상태 설정
-                    this.setTradeBtnState(this.multiTradeBtn, this.multiTxt, selectItem, 10);
+                    // 아이템 슬롯 선택
+                    this.selectItemSlot(selectIndex, itemList);
                 });
 
                 this.add([itemSlot]);
@@ -208,24 +174,12 @@ export default class StoreTabBody extends Frame_LT {
         this.singleTxt.setOrigin(0.5, 0.5);
 
         this.add([this.singleTradeBtn, this.singleTxt]);
-
-        // UI 생성할 때
-        // 기본 아이템(감자 씨앗, 감자) 선택되있는 상태로 만들기
-        const selectItem = this.purchaseList[0];
-
-        this.itemToolTips.setStoreToolTip(selectItem);
-        this.itemSlots[0].selectBox.setVisible(true);
-        this.selectIndex = 0;
-
-        // 낱개 거래 버튼 상태 설정
-        this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1);
-        // 10개 거래 버튼 상태 설정
-        this.setTradeBtnState(this.multiTradeBtn, this.multiTxt, selectItem, 10);
     }
 
     // 거래 버튼 상태 설정
     // 현재 탭의 상태에 따라 구매/판매 기능을 하게 상태 변경
-    setTradeBtnState(tradeBtn, tradeTxt, selectItem, item_count) {
+    // 추가 : 구매 탭 버튼에서 캐릭터 레벨이 아이템 제한 레벨보다 낮으면 표시 안보이게 설정
+    setTradeBtnState(tradeBtn, tradeTxt, selectItem, item_count, visible = true) {
 
         // 모든 이벤트 리스너 제거
         tradeBtn.removeAllListeners();
@@ -233,6 +187,16 @@ export default class StoreTabBody extends Frame_LT {
         // 구매 탭이면 구매 기능
         if (this.type === 0) {
             console.log('거래 버튼 기능을 아이템 구매로 설정');
+
+            console.log('visible : ', visible);
+
+            if (visible) {
+                tradeBtn.setVisible(true);
+                tradeTxt.setVisible(true);
+            } else {
+                tradeBtn.setVisible(false);
+                tradeTxt.setVisible(false);
+            }
 
             // 구매할 아이템의 총 가격
             let item_price = selectItem.item_price * item_count;
@@ -269,6 +233,9 @@ export default class StoreTabBody extends Frame_LT {
         // 판매 탭이면 판매 기능
         else if (this.type === 1) {
             console.log('거래 버튼 기능을 아이템 판매로 설정');
+
+            tradeBtn.setVisible(true);
+            tradeTxt.setVisible(true);
 
             // 판매할 아이템을 몇 개 소유했는지 확인
             const ownItemSlot = this.scene.findAddItemSlot(selectItem.item_name);
@@ -332,32 +299,17 @@ export default class StoreTabBody extends Frame_LT {
             this.categoryTxt.setText('씨앗');
             selectItem = this.purchaseList[0];
 
-            this.itemSlots.forEach((itemSlot, index) => {
-                itemSlot.setItemImg(this.purchaseList[index].item_name);
-
-                const ownItemSlot = this.scene.findAddItemSlot(this.purchaseList[index].item_name);
-                // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
-                if (ownItemSlot.item) {
-                    itemSlot.setItemCount(ownItemSlot.item.count);
-                } else { // 없으면 0개로 표시
-                    itemSlot.setItemCount(0);
-                }
-
-            });
+            // 아이템 슬롯 판매 가능한 아이템 표시하게 초기화
+            this.itemSlots.forEach((itemSlot, index) =>
+                this.initItemSlot(itemSlot, index, this.purchaseList)
+            );
 
             // 구매 버튼으로 설정
             this.singleTxt.setText('1개 구매');
             this.multiTxt.setText('10개 구매');
 
-            // 기본 아이템 선택된 상태로 변경
-            this.itemToolTips.setStoreToolTip(selectItem);
-            this.itemSlots[0].selectBox.setVisible(true);
-            this.selectIndex = 0;
-
-            // 낱개 거래 버튼 상태 설정
-            this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1);
-            // 10개 거래 버튼 상태 설정
-            this.setTradeBtnState(this.multiTradeBtn, this.multiTxt, selectItem, 10);
+            // 기본 아이템 선택
+            this.selectItemSlot(0, this.purchaseList);
         }
         // 판매 탭
         else if (type === 1) {
@@ -365,34 +317,16 @@ export default class StoreTabBody extends Frame_LT {
             this.categoryTxt.setText('농작물');
             selectItem = this.saleList[0];
 
-            this.itemSlots.forEach((itemSlot, index) => {
-                itemSlot.setItemImg(this.saleList[index].item_name);
-
-                const ownItemSlot = this.scene.findAddItemSlot(this.saleList[index].item_name);
-
-                // 유저가 아이템을 소유하고 있을 경우 아이템 개수를 연동한다.
-                if (ownItemSlot.item) {
-                    itemSlot.setItemCount(ownItemSlot.item.count);
-                } else { // 없으면 0개로 표시
-                    itemSlot.setItemCount(0);
-                }
-
-            });
+            // 아이템 슬롯 구매 가능한 아이템 표시하게 초기화
+            this.itemSlots.forEach((itemSlot, index) =>
+                this.initItemSlot(itemSlot, index, this.saleList)
+            );
 
             // 판매 버튼으로 설정
             this.singleTxt.setText('1개 판매');
             this.multiTxt.setText('10개 판매');
 
-            // 기본 아이템 선택된 상태로 변경
-            this.itemToolTips.setStoreToolTip(selectItem);
-            this.itemSlots[0].selectBox.setVisible(true);
-            this.selectIndex = 0;
-
-            // 낱개 거래 버튼 상태 설정
-            this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1);
-            // 10개 거래 버튼 상태 설정
-            this.setTradeBtnState(this.multiTradeBtn, this.multiTxt, selectItem, 10);
-
+            this.selectItemSlot(0, this.saleList);
         }
     }
 
@@ -438,4 +372,72 @@ export default class StoreTabBody extends Frame_LT {
         this.scene.networkManager.serverSellItem(item_count, item_index, sellItemInfo, sellItemSlot, this);
     }
 
+    // 특정 아이템 슬롯 선택
+    selectItemSlot(selectIndex, itemList) {
+
+        this.selectIndex = selectIndex;
+        const selectItem = itemList[this.selectIndex];
+        const selectSlot = this.itemSlots[this.selectIndex];
+
+        // 아이템 툴팁 선택한 아이템 정보 표시
+        this.itemToolTips.setStoreToolTip(selectItem);
+        // 선택된 슬롯 셀렉트 박스 표시
+        selectSlot.selectBox.setVisible(true);
+
+        // 캐릭터 레벨 확인하고 슬롯 상태, 거래 버튼 상태 설정
+        let level = this.scene.characterInfo.level;
+
+        // 전체 거래 버튼들 상태 설정
+        if (level >= selectItem.use_level) {
+            this.setAllTradeBtnState(selectItem, true);
+        } else {
+            this.setAllTradeBtnState(selectItem, false);
+        }
+
+        // 아이템 슬롯 잠금 상태 설정
+        this.itemSlots.forEach((itemSlot, index) => {
+            // 아이템 정보
+            let itemInfo = itemList[index];
+
+            if (level >= itemInfo.use_level) {
+                itemSlot.setSlotLockState(false);
+            } else {
+                itemSlot.setSlotLockState(true);
+            }
+        });
+    }
+
+    // 전체 거래 버튼들 상태 설정
+    setAllTradeBtnState(selectItem, visible) {
+        // 낱개 거래 버튼
+        this.setTradeBtnState(this.singleTradeBtn, this.singleTxt, selectItem, 1, visible);
+        // 10개 거래 버튼
+        this.setTradeBtnState(this.multiTradeBtn, this.multiTxt, selectItem, 10, visible);
+    }
+
+    // 아이템 슬롯 초기화
+    initItemSlot(itemSlot, index, itemList) {
+        // 유저가 소유했는지 확인할 아이템 이름
+        let item_name = itemList[index].item_name;
+        itemSlot.setItemImg(item_name);
+
+        // 유저 소유 아이템 개수를 확인하고 슬롯에 표시
+        const ownItemSlot = this.scene.findAddItemSlot(item_name);
+        if (ownItemSlot.item)
+            itemSlot.setItemCount(ownItemSlot.item.count);
+        else
+            itemSlot.setItemCount(0);
+    }
+
+    // 서버에서 전체 아이템 리스트를 받으면
+    // 거기서 구매, 판매 아이템 리스트로 뽑고 초기화
+    initItemList(){
+        // 구매 가능한 아이템 리스트 초기화
+        this.purchaseList = this.scene.allItemList.filter(item => item.item_type === 0);
+        //console.log('구매 가능 아이템 리스트 초기화', this.newPurchaseList);
+
+        // 판매 가능한 아이템(농작물) 리스트 초기화
+        this.saleList = this.scene.allItemList.filter(item => item.item_type === 1);
+        //console.log('판매 가능 아이템 리스트 초기화', this.saleList);
+    }
 }

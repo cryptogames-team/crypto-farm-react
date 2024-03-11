@@ -20,9 +20,8 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
     // 퀵슬롯 끝 인덱스
     endIndex = this.size - 1;
 
-    // 퀵슬롯 크기 100x100
-    slotSize = 100;
-
+    // 퀵슬롯 크기 85x85
+    slotSize = 75;
 
     // 퀵슬롯 배열
     quickSlots = [];
@@ -44,14 +43,13 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
         this.scene = scene;
 
         // 퀵슬롯 추가
-        const slotBGPad = 5;
-        // 슬롯의 크기
-        const slotSize = 100;
+        // 각 퀵슬롯의 크기
+        const slotSize = this.slotSize;
         // 아이템 슬롯 격자 배치의 시작 위치
         const startX = 0;
         const startY = 0;
         // 슬롯간 간격
-        const spacing = 0;
+        const space = 0;
 
         // 퀵슬롯 생성
         for (let col = 0; col < this.col; col++) {
@@ -59,22 +57,20 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             // 퀵슬롯 위치 정할 때 퀵슬롯 컨테이너에서 상대 위치를 정하는 것임.
 
             // 각 퀵슬롯은 서로의 길이만큼만 떨어지면됨.
-            const slotX = startX + slotSize * col + spacing;
+            const slotX = startX + (slotSize + space) * col;
             const slotY = startY;
 
             const slotNumber = col + 1;
 
             let quickSlot = new ItemSlot(scene, slotX, slotY,
-                slotSize, slotSize, slotBGPad, null, slotNumber);
+                slotSize, slotSize, null, slotNumber);
 
             // 퀵슬롯마다 인덱스 부여
             quickSlot.index = col;
 
-
             // 상호작용 영역 디버그 그래픽으로 표시
             /* quickSlot.setDepth(100).setScrollFactor(0);
             scene.input.enableDebug(quickSlot); */
-
 
             // 생성된 퀵슬롯을 퀵슬롯 컨테이너에 자식으로 추가한다.
             this.quickSlots.push(quickSlot);
@@ -103,10 +99,9 @@ export default class QuickSlot extends Phaser.GameObjects.Container {
             }
         });
 
-
         // 아이템 툴팁 생성하기3
         // 컨테이너는 오리진 설정이 불가능
-        this.toolTip = new ToolTip(scene, 0 , -250, 250, 250);
+        this.toolTip = new ToolTip(scene, 0 , -250, 225, 250);
         this.toolTip.setVisible(false);
         this.add(this.toolTip);
 

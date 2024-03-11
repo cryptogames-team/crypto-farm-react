@@ -63,7 +63,7 @@ export default class FirePitNPC extends Phaser.GameObjects.Container {
 
         this.building.on('pointerdown', (pointer) => {
             //console.log("화덕 NPC 클릭됨!");
-            this.scene.FirePitUI.enable();
+            this.scene.firePitUI.enable();
             this.setNPCInteractive(false);
             document.body.style.cursor = 'default';
         });
