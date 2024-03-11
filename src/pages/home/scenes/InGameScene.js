@@ -188,7 +188,7 @@ export default class InGameScene extends Phaser.Scene {
                 asset_id: 4563456
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzEwMDUyMjU3LCJleHAiOjE3MTAwODgyNTd9.qEGdPnOLwtFU4ntTGwsvZ-p2jAqWZ2nK3nuE-jlrRgw';
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzEwMTM1NTc1LCJleHAiOjE3MTAxNzE1NzV9.msybWY6cLjY-DC-ZcogvEHFe6l0jnSXhyMbk08S2sn0';
         }
 
         this.assetManager = new AssetManager(this);
@@ -560,7 +560,7 @@ export default class InGameScene extends Phaser.Scene {
 
         // 폰트 로드되기전에 실행되는 듯
         const txtStyle1 = {
-            fontFamily: 'Paytone One',
+            fontFamily: 'NanumGothicExtraBold',
             fontSize: 30,
             backgroundColor: '#000000',
             align: 'center'
@@ -579,14 +579,19 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터 정보창 추가
         this.charInfoUI = new CharacterInfo(this, 10, 10, 250, 100, this.characterInfo);
 
-
-
         this.txt1 = this.add.text(centerX, centerY,'안녕하세요', txtStyle);
         this.txt1.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
 
-        this.txt1 = this.add.text(centerX, centerY + this.txt1.height + 20, 'Hi', txtStyle1);
-        this.txt1.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
+        this.txt2 = this.add.text(centerX, centerY + this.txt1.height + 20, '안녕하세요', txtStyle1);
+        this.txt2.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
 
+
+        this.fontKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+        this.fontKey.on('down', () => {
+            console.log("폰트 패밀리 변경");
+            this.txt2.setFontFamily('Spoqa Han Sans Neo');
+            this.txt2.setFontSize(30);
+        });
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -644,8 +649,6 @@ export default class InGameScene extends Phaser.Scene {
             this.scene.start('MarketScene', this.characterInfo);
             this.playerObject.y = 10
         }
-
-
     }
 
     // 퀵슬롯을 선택하고

@@ -107,14 +107,14 @@ export default function PlayHome() {
 
     <div id="container">
       <PhaserGameComponent/>
-{/*       <input id="auth_name_for_multi" type="hidden" value=""></input>
+      <input id="auth_name_for_multi" type="hidden" value=""></input>
       <input id="datas_for_multi" type="hidden" ></input>
       <button id="transactions" type="hidden" ></button>
 
       <input id="result_for_multi" type="hidden"></input>
       <input id="status_for_multi" type="hidden"></input>
       <button id="transaction_complete_for_multi" type="hidden" onClick={sendComplete}></button>
-      <LoginWithCharacter></LoginWithCharacter> */}
+      <LoginWithCharacter></LoginWithCharacter>
 
     </div>
 

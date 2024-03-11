@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Paytone+One&display=swap');
 @import url('https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css');
 @import url(//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css);
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
 
 .label {
     width: 200px;
@@ -29,12 +30,7 @@
     align-items: center;
 }
 
-body {
-font-family: 'NanumGothicLight', sans-serif;
-font-family: 'NanumGothic', sans-serif;
-font-family: 'NanumGothicBold', sans-serif;
-font-family: 'NanumGothicExtraBold', sans-serif;
-}
+
 
 * { font-family: 'Spoqa Han Sans Neo', sans-serif; }
 
@@ -46,6 +42,8 @@ font-family: 'NanumGothicExtraBold', sans-serif;
         font-family: "skybory";
         src : url('../../../public/assets/Fonts/SKYBORI.ttf') format('truetype');
       }
+
+
 
 /*로그인 폼 오버레이 스타일*/
 .login_wrapper {
