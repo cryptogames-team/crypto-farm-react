@@ -26,11 +26,10 @@ export default class chatContentBox extends Phaser.GameObjects.Container {
         this.add(this.chatContentBox)
 
         this.chatContentText = scene.add.text(-this.chatWidth/2+50, -this.chatHeight - 10, '', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fixedWidth: this.chatWidth,
             fontSize: '22px',
             color: 'black',
-            fontStyle: 'bold',
             wordWrap : {
                 // 줄바꿈할 최대 너비
                 width : this.chatWidth-30,

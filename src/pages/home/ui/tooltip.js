@@ -48,10 +48,9 @@ export default class ToolTip extends Frame_LT {
         const nameY = this.pad;
 
         this.nameTxt = scene.add.text(nameX, nameY, '아이템 이름', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 25,
             color: 'black',
-            fontStyle: 'bold'
         });
 
         // 텍스트의 높이를 구함 : 텍스트가 화면에 렌더링된 후에 정확한 값을 가짐.
@@ -62,10 +61,9 @@ export default class ToolTip extends Frame_LT {
         const typeY = nameY + this.nameTxt.height + this.space;
 
         this.typeTxt = scene.add.text(typeX, typeY, '농작물', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 20,
             color: 'black',
-            fontStyle: 'bold'
         });
 
         //console.log("typeTxt의 높이", this.typeTxt.height);
@@ -83,10 +81,9 @@ export default class ToolTip extends Frame_LT {
         const desY = headerY + this.headerLine.displayHeight + this.space;
 
         this.desTxt = scene.add.text(desX, desY, '아이템 설명', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'black',
-            fontStyle: 'bold',
             // 텍스트가 일정 길이 이상 길어질 때 자동으로 줄 바꿈
             wordWrap: {
                 // 줄바꿈할 최대 너비
@@ -102,10 +99,9 @@ export default class ToolTip extends Frame_LT {
         const priceX = (this.width - this.edgeSize * 2) / 2;
         const priceY = desY + this.desTxt.height + this.space;
         this.priceTxt = scene.add.text(priceX, priceY, '아이템 가격', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'white',
-            fontStyle: 'bold'
         });
         this.priceTxt.setOrigin(0.5, 0);
 
@@ -121,10 +117,9 @@ export default class ToolTip extends Frame_LT {
 
         // 텍스트에 멀 넣든 고정 크기를 가진다.
         this.seedTimeTxt = scene.add.text(seedTimeX, seedTimeY, '성장 시간', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'white',
-            fontStyle: 'bold'
         });
         this.seedTimeTxt.setOrigin(0.5, 0);
 
@@ -142,10 +137,9 @@ export default class ToolTip extends Frame_LT {
         let ingredient1X = (this.width - this.edgeSize * 2) / 2;
         let ingredient1Y = seedTimeY + this.seedTimeTxt.height + this.space;
         this.ingredient1Txt = scene.add.text(ingredient1X, ingredient1Y, '요리 재료 1', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'white',
-            fontStyle: 'bold'
         });
         this.ingredient1Txt.setOrigin(0.5, 0);
 
@@ -158,10 +152,9 @@ export default class ToolTip extends Frame_LT {
         let ingredient2X = (this.width - this.edgeSize * 2) / 2;
         let ingredient2Y = ingredient1Y + this.ingredient1Txt.height + this.space;
         this.ingredient2Txt = scene.add.text(ingredient2X, ingredient2Y, '요리 재료 2', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'white',
-            fontStyle: 'bold'
         });
         this.ingredient2Txt.setOrigin(0.5, 0);
 
@@ -174,10 +167,9 @@ export default class ToolTip extends Frame_LT {
         let expX = (this.width - this.edgeSize * 2) / 2;
         let expY = ingredient2Y + this.ingredient2Txt.height + this.space;
         this.expTxt = scene.add.text(expX, expY, '경험치', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'white',
-            fontStyle: 'bold'
         });
         this.expTxt.setOrigin(0.5, 0);
 
@@ -190,10 +182,9 @@ export default class ToolTip extends Frame_LT {
         let guideX = this.width / 2;
         let guideY = this.height - this.edgeSize;
         this.guideTxt = scene.add.text(guideX, guideY, '안내 텍스트', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'black',
-            fontStyle: 'bold',
             align: 'center',
             // 텍스트가 일정 길이 이상 길어질 때 자동으로 줄 바꿈
             wordWrap: {
@@ -209,10 +200,9 @@ export default class ToolTip extends Frame_LT {
         let levelX = (this.width - this.edgeSize * 2) / 2;
         let levelY = guideY + this.guideTxt.height + this.space;
         this.levelLimitTxt = scene.add.text(levelX, levelY, '레벨 제한 텍스트', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'red',
-            fontStyle: 'bold',
             align: 'center',
         });
         this.levelLimitTxt.setOrigin(0.5, 0);

@@ -4,7 +4,6 @@ import Crops from '../elements/crops';
 import Inventory from '../ui/inventory';
 import QuickSlot from '../ui/quickslot';
 import Auction from '../ui/auction/auction';
-import Chat from '../ui/chat/chatInput';
 import ObjectToolTip from '../ui/object_tooltip';
 import UIVisibleBtn from '../ui/button/UIVisibleBtn';
 import Tree from '../elements/tree';
@@ -15,7 +14,6 @@ import SeedStoreNPC from '../npc/seed_store_npc';
 import SeedStoreUI from '../ui/seed_store/seed_store_ui';
 import FirePitNPC from '../npc/fire_pit_npc';
 import FirePitUI from '../ui/fire_pit/fire_pit_ui';
-import Frame_LT from '../ui/frame/frame_lt';
 import CharacterInfo from '../ui/character_info';
 
 // 현재 맵 크기
@@ -188,7 +186,7 @@ export default class InGameScene extends Phaser.Scene {
                 asset_id: 4563456
             }
             // 하드코딩된 액세스 토큰 값 넣어주면 된다.
-            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzEwMTM1NTc1LCJleHAiOjE3MTAxNzE1NzV9.msybWY6cLjY-DC-ZcogvEHFe6l0jnSXhyMbk08S2sn0';
+            this.accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ0ZXN0IiwiYXNzZXRfaWQiOiI0NTYzNDU2IiwiaWF0IjoxNzEwMjQxMzY1LCJleHAiOjE3MTAyNzczNjV9.CyZLzbCsQYTOgtwlm64KtwS1hsFGXzcKifVIqcB9N4s';
         }
 
         this.assetManager = new AssetManager(this);
@@ -211,6 +209,9 @@ export default class InGameScene extends Phaser.Scene {
         */
         const assetManager = this.assetManager;
 
+        // 폰트 로드
+        //assetManager.loadFont("DNFbitbitv2", "assets/Fonts/DNFbitbitv2.woff");
+
         // 게임에 필요한 스프라이트 전부 로드
         assetManager.loadAllSprites();
 
@@ -222,11 +223,11 @@ export default class InGameScene extends Phaser.Scene {
         // 게임에 필요한 이미지 전부 로드
         assetManager.loadAllImage();
 
-        // 폰트 로드
-        //this.load.add('main', 'src/assets/fonts/NanumGothic.ttf');
+        //console.log('Preload 끝');
     }
 
     create() {
+
 
         // 게임 화면의 가로, 세로 중앙 좌표
         const centerX = this.cameras.main.centerX;
@@ -569,9 +570,8 @@ export default class InGameScene extends Phaser.Scene {
             align: 'center'
         };
 
-        // 폰트 로드되기전에 실행되는 듯
         const txtStyle1 = {
-            fontFamily: 'NanumGothicExtraBold',
+            fontFamily: 'serif',
             fontSize: 30,
             backgroundColor: '#000000',
             align: 'center'
@@ -590,19 +590,19 @@ export default class InGameScene extends Phaser.Scene {
         // 캐릭터 정보창 추가
         this.charInfoUI = new CharacterInfo(this, 10, 10, 250, 100, this.characterInfo);
 
-        this.txt1 = this.add.text(centerX, centerY,'안녕하세요', txtStyle);
+        // 폰트 변경 테스트
+        /* this.txt1 = this.add.text(centerX, centerY,'안녕하세요', txtStyle);
         this.txt1.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
 
         this.txt2 = this.add.text(centerX, centerY + this.txt1.height + 20, '안녕하세요', txtStyle1);
         this.txt2.setScrollFactor(0).setOrigin(0.5, 0).setDepth(100);
-
-
         this.fontKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+
         this.fontKey.on('down', () => {
             console.log("폰트 패밀리 변경");
-            this.txt2.setFontFamily('Spoqa Han Sans Neo');
-            this.txt2.setFontSize(30);
-        });
+            this.txt2.setFontFamily('DNFBitBitv2');
+            //this.txt2.setFontSize(30);
+        }); */
     }
 
     // time : 게임이 시작된 이후의 총 경과 시간을 밀리초 단위로 나타냄.
@@ -914,9 +914,7 @@ export default class InGameScene extends Phaser.Scene {
             // 서버에 맵 데이터 변경 저장 요청
             this.networkManager.serverAddMap(this.mapData);;
         }
-
     }
-
 
     // 아이템 이름으로 새 아이템이 추가되거나 수량이 증가할 아이템 슬롯 찾음
     findAddItemSlot(itemName) {
@@ -1222,4 +1220,6 @@ export default class InGameScene extends Phaser.Scene {
         //console.log("string -> Date mapDate 확인", this.mapData.crops);
         //console.log("string -> Date serverCrops 확인", this.serverCrops);
     }
+
+    
 }

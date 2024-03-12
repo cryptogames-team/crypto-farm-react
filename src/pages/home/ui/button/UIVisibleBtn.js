@@ -79,8 +79,5 @@ export default class UIVisibleBtn extends ItemDisc {
                 this.uiVisible = true;
                 break;
         }
-
     }
-
-
 }

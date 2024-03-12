@@ -94,24 +94,22 @@ export default class RemotePlayer extends Phaser.GameObjects.Container {
 
         //캐릭터 이름표 추가
         this.nameTag = scene.add.text(33, 60, this.name, {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '18px',
             color: 'white',
-            fontStyle: 'bold',
             stroke: '#000000',
-            strokeThickness: 4
+            strokeThickness: 5
         }).setOrigin(0.5, 0)
         this.add(this.nameTag)
 
 
         //캐릭터 이름표 추가
         this.nameTag = scene.add.text(33, 60, this.name, {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '18px',
             color: 'white',
-            fontStyle: 'bold',
             stroke: '#000000',
-            strokeThickness: 4
+            strokeThickness: 5
         }).setOrigin(0.5, 0)
         this.add(this.nameTag)
 

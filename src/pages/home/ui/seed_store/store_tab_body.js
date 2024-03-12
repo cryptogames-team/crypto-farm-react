@@ -50,10 +50,9 @@ export default class StoreTabBody extends Frame_LT {
         this.storeUI = storeUI;
 
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'black',
-            fontStyle: 'bold',
             align: 'center',
         };
 

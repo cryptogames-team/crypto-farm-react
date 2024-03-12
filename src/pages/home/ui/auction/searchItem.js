@@ -19,10 +19,9 @@ export default class SearchItem extends Phaser.GameObjects.Container {
         scene.add.existing(this);
         this.setDepth(100).setScrollFactor(0);
         const textConfig={
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '24px',
             color: 'black',
-            fontStyle: 'bold'
         }
         this.index=index;
         // UI 객체라서 물리 효과가 필요 없지만 테두리 확인할려고 추가

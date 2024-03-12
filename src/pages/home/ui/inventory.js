@@ -78,10 +78,9 @@ export default class Inventory extends Frame {
         let titleX = pad + imgSize + space;
         let titleY = pad;
         this.titleText = scene.add.text(titleX, titleY, "인벤토리", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 30,
             color: 'black',
-            fontStyle: 'bold'
         });
 
         //나가기 X버튼
@@ -367,7 +366,7 @@ export default class Inventory extends Frame {
         // 디버그 텍스트 추가
         // 텍스트 스타일 객체
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 30,
             backgroundColor: '#000000',
             align: 'center'

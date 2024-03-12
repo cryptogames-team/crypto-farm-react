@@ -32,10 +32,9 @@ export default class FirePitUI extends Frame {
         const headerSpaceY = 10;
         const headerPad = this.edgeSize + 10;
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 25,
             color: 'white',
-            fontStyle: 'bold',
             align: 'center',
             stroke: 'black', // 외곽선
             strokeThickness: 5 // 외곽선 두께  

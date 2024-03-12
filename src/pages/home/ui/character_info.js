@@ -36,10 +36,9 @@ export default class CharacterInfo extends Frame {
         this.setScrollFactor(0).setDepth(500);
 
         const txtStyle = {
-            fontFamily: 'Arial',
-            fontSize: 18,
+            fontFamily: 'DNFbitbitv2',
+            fontSize: 20,
             color: 'white',
-            fontStyle: 'bold',
             align: 'center',
             stroke: 'black', // 외곽선
             strokeThickness: 5 // 외곽선 두께  

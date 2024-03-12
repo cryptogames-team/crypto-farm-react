@@ -21,10 +21,9 @@ export default class SellingItem extends Phaser.GameObjects.Container {
         scene.add.existing(this);
         this.setDepth(100).setScrollFactor(0);
         const textConfig = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '28px',
             color: 'black',
-            fontStyle: 'bold'
         }
 
         this.index = index;
@@ -63,16 +62,14 @@ export default class SellingItem extends Phaser.GameObjects.Container {
         this.item_text = scene.add.text(frame_searchResult_x + 80, frame_searchResult_y + 25, "감자", textConfig).setOrigin(0, 0);
 
         this.itemCount_text = scene.add.text(frame_searchResult_x + 280, frame_searchResult_y + 12, "2000개", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '20px',
             color: 'black',
-            fontStyle: 'bold'
         }).setOrigin(1, 0);
         this.itemPrice_text = scene.add.text(frame_searchResult_x + 280, frame_searchResult_y + 46, "개당 140원", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '20px',
             color: 'black',
-            fontStyle: 'bold'
         }).setOrigin(1, 0);
 
 

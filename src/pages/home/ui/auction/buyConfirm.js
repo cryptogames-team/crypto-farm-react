@@ -33,17 +33,15 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
             .setVisible(false)
         /*.setVisible(false)*/
         const textConfig = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '30px',
             color: 'black',
-            fontStyle: 'bold'
         }
 
         const textConfigWhite = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '24px',
             color: 'white',
-            fontStyle: 'bold'
         }
 
         this.ItemBG = scene.add.graphics()
@@ -81,11 +79,11 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
 
         //입력된 구매수량 텍스트
         this.buyCountValueText = scene.add.text((x + width / 4) + 325, y + (height / 12) + 260, '', {
+            fontFamily: 'DNFbitbitv2',
             fixedWidth: 120,
             fixedHeight: 36,
             fontSize: '25px',
             color: 'black',
-            fontStyle: 'bold',
         })
             .setOrigin(1, -0.3)
 
@@ -193,10 +191,9 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
 
         //확인 버튼 텍스트       
         this.confirmButtonText = scene.add.text(x + width / 2.45 + 15, y + (height / 1.32), "확인", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '27px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0.5, 0)
 
 
@@ -218,10 +215,9 @@ export default class BuyConfirm extends Phaser.GameObjects.Container {
 
         //취소 버튼 텍스트       
         this.cancelButtonText = scene.add.text(x + width / 1.65 - 5, y + (height / 1.32), "취소", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '27px',
             color: 'black',
-            fontStyle: 'bold',
         }).setOrigin(0.5, 0)
 
 

@@ -93,10 +93,9 @@ export default class ItemSlot extends Frame_LT {
         }
 
         let txtConfig = {
-            fontFamily: 'Arial',
-            fontSize: 15,
+            fontFamily: 'DNFbitbitv2',
+            fontSize: 12,
             color: 'black',
-            fontStyle: 'bold',
             align: 'center',
             /* stroke: 'black',
             strokeThickness: 5 */
@@ -129,7 +128,7 @@ export default class ItemSlot extends Frame_LT {
         if (this.slotNumber !== null) {
             //console.log("퀵슬롯 UI로 사용중");
             // 퀵슬릇 번호 텍스트 추가하고 왼쪽 상단에 배치
-            txtConfig.fontSize = 20;
+            txtConfig.fontSize = 16;
             txtConfig.color = 'black';
             txtConfig.stroke = 'white';
             txtConfig.strokeThickness = 0;

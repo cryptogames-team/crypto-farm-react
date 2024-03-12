@@ -47,10 +47,9 @@ export default class CompleteItem extends Phaser.GameObjects.Container {
         scene.add.existing(this);
         this.setDepth(100).setScrollFactor(0);
         const textConfig={
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '28px',
             color: 'black',
-            fontStyle: 'bold'
         }
        
         this.index=index;
@@ -78,11 +77,10 @@ export default class CompleteItem extends Phaser.GameObjects.Container {
         
     
 
-        this.tradeTime_text=scene.add.text(frame_searchResult_x+220, frame_searchResult_y+15, "2024-01-17\n  17:53:25",{
-            fontFamily: 'Arial',
+        this.tradeTime_text=scene.add.text(frame_searchResult_x+220, frame_searchResult_y+25, "2024-01-17\n  17:53:25",{
+            fontFamily: 'DNFbitbitv2',
             fontSize: '20px',
             color: 'black',
-            fontStyle: 'bold'
         }).setOrigin(0.5,0);
         this.itemTrade_text=scene.add.text(frame_searchResult_x+30, frame_searchResult_y+20, "판매",textConfig).setOrigin(0,0);
         this.item_image = scene.add.image(frame_searchResult_x+375, frame_searchResult_y+35, "케일 씨앗")   

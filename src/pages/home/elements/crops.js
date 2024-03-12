@@ -192,10 +192,9 @@ export default class Crops extends Phaser.GameObjects.Container {
 
 
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 15,
             color: 'white',
-            fontStyle: 'bold',
             align: 'center',
             stroke: 'black', // 외곽선
             strokeThickness: 5 // 외곽선 두께  

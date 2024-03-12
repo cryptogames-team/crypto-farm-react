@@ -219,19 +219,18 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //아이템 이름 텍스트
             this.itemNameText = scene.add.text(frame_search_x_position + 18, frame_search_y_position + 18, "아이템이름", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '17px',
                 color: 'white',
-                fontStyle: 'bold'
             })
 
 
             this.searchItem_name = scene.add.text(frame_search_x_position + 22, frame_search_y_position + 48, '', {
+                fontFamily: 'DNFbitbitv2',
                 fixedWidth: 250,
                 fixedHeight: 36,
                 fontSize: '25px',
                 color: 'black',
-                fontStyle: 'bold'
             })
                 .setOrigin(0, -0.3)
 
@@ -268,10 +267,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //검색결과 텍스트
             this.resultText = scene.add.text(frame_result_x_position + 18, frame_result_y_position + 18, "| 검색결과", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '25px',
                 color: 'white',
-                fontStyle: 'bold'
             })
 
             //구매확인 패널
@@ -303,10 +301,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
             //구매하기 버튼 텍스트
 
             this.buyButtonText = scene.add.text(width - 700 + ((frame_search_width - 35) / 2), height - 90, "구매하기", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'white',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
                 .setVisible(false)
 
@@ -408,17 +405,15 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //검색하기 버튼 텍스트
             this.searchButtonText = scene.add.text(frame_search_x_position + 18 + ((frame_search_width - 35) / 2), height - 490, "검색시작", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'white',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
 
             const categoryTextType = {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '16px',
                 color: 'white',
-                fontStyle: 'bold'
             }
             //검색결과 아이템 이름
             this.category_itemName_text = scene.add.text(frame_result_x_position + 190, frame_result_y_position + 55, "아이템 이름", categoryTextType)
@@ -631,10 +626,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 }).setVisible(false);
 
             this.pageText = scene.add.text(frame_result_x_position + 453, frame_result_y_position + frame_search_height - 102, "5 / 10", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '22px',
                 color: 'white',
-                fontStyle: 'bold'
             }).setVisible(false)
 
             //아이템 페이징을 위한 인디케이터
@@ -866,10 +860,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //아이템을 클릭해주세요
             this.pleaseSelectItemText = scene.add.text(frame_enroll_width / 2, frame_enroll_height / 2, "판매하실 아이템을 \n    클릭해주세요.", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '33px',
                 color: 'white',
-                fontStyle: 'bold'
             }).setOrigin(0.5, 0.5)
             this.enrollmentionBG.add(this.pleaseSelectItemText)
 
@@ -901,22 +894,21 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //선택된 아이템 이름
             this.selectedItemName_text = scene.add.text(x_position + (size * 2), y_position + (size / 2), "사탕무", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '33px',
                 color: 'white',
-                fontStyle: 'bold'
             }).setOrigin(0.5, 0.5)
 
             //판매 수량 텍스트
             this.sellingCount_text = scene.add.text(x_position + (size / 2), y_position + size + 15, "판매 수량", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '15px',
                 color: 'white',
-                fontStyle: 'bold'
             }).setOrigin(0.5, 0.5)
 
 
             this.sellingCountInput_text = scene.add.text(x_position + 6, y_position + 130, '', {
+                fontFamily: 'DNFbitbitv2',
                 fixedWidth: 120,
                 fixedHeight: 36,
                 fontSize: '18px',
@@ -952,18 +944,17 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //판매 가격 텍스트
             this.sellingPrice_text = scene.add.text(x_position + (size * 2), y_position + size + 15, "판매 가격", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '15px',
                 color: 'white',
-                fontStyle: 'bold'
             }).setOrigin(0.5, 0.5)
 
             this.sellingPriceInput_text = scene.add.text(x_position + 156, y_position + 130, '', {
+                fontFamily: 'DNFbitbitv2',
                 fixedWidth: 120,
                 fixedHeight: 36,
                 fontSize: '18px',
                 color: 'black',
-                fontStyle: 'bold'
             })
                 .setOrigin(0, -0.4)
 
@@ -1070,10 +1061,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //판매등록 버튼 텍스트
             this.enrollButtonText = scene.add.text(x_position + 125, y_position + 202, "판매등록", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'white',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
 
 
@@ -1243,10 +1233,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //전체기록 버튼 텍스트
             this.wholeLogButtonText = scene.add.text(79, 161, "전체", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'white',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
 
 
@@ -1316,10 +1305,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //판매완료 버튼 텍스트
             this.soldButtonText = scene.add.text(179, 161, "판매", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'white',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
 
 
@@ -1388,10 +1376,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
 
             //구매완료 버튼 텍스트
             this.boughtButtonText = scene.add.text(279, 161, "구매", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'white',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
 
             //완료 아이템목록 프레임  
@@ -1403,10 +1390,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 frame_complete_width, frame_complete_height);
 
             const headerTextConfig = {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '17px',
                 color: 'white',
-                fontStyle: 'bold'
             }
 
             this.itemAction = scene.add.text(50, 18, "거래", headerTextConfig)
@@ -1430,24 +1416,21 @@ export default class TabItem extends Phaser.GameObjects.Container {
             //활성화된 버튼을 보여주기위함
             this.disableTexts=[]
             this.disableText_1 = scene.add.text(79, 161, "전체", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'black',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
             this.disableTexts.push(this.disableText_1)
             this.disableText_2 = scene.add.text(179, 161, "판매", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'black',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
             this.disableTexts.push(this.disableText_2)
             this.disableText_3 = scene.add.text(279, 161, "구매", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '27px',
                 color: 'black',
-                fontStyle: 'bold',
             }).setOrigin(0.5, 0)
             this.disableTexts.push(this.disableText_3)
 
@@ -1526,10 +1509,9 @@ export default class TabItem extends Phaser.GameObjects.Container {
                 }).setVisible(false)
 
             this.completePageText = scene.add.text(frame_complete_width / 2, 505, "5 / 9", {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '26px',
                 color: 'white',
-                fontStyle: 'bold'
             }).setOrigin(0.5, 0.5).setVisible(false)
 
             //아이템 페이징을 위한 인디케이터

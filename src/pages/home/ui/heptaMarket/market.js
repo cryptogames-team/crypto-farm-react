@@ -48,10 +48,9 @@ export default class Market extends Frame {
 
         // 크립토 옥션 제목
         this.headerText = scene.add.text(30, 26, "HEP 마켓", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '37px',
             color: 'white',
-            fontStyle: 'bold'
         });
 
 
@@ -83,10 +82,9 @@ export default class Market extends Frame {
         this.tab_texts=[];
 
         const textStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 30,
             color: 'black',
-            fontStyle: 'bold'
         };
         //탭이름
         this.search_text = scene.add.text(50, 100, "구매",textStyle)
@@ -113,10 +111,9 @@ export default class Market extends Frame {
         //골드 텍스트
         this.gold=scene.characterInfo.cft
         this.goldText = scene.add.text(width-40, 91, scene.characterInfo.cft.toLocaleString(),{
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '29px',
             color: 'white',
-            fontStyle: 'bold'
         }).setOrigin(1,0)
         scene.goldText=this.goldText
 

@@ -20,10 +20,9 @@ export default class Chat extends Phaser.GameObjects.Container {
         const sayButtonX = 250
         //채팅 말하기 버튼 텍스트
         this.sayButtonText = scene.add.text(sayButtonX + 60, 8, "말하기", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '27px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0.5, 0)
 
         var shape = new Phaser.Geom.Rectangle(sayButtonX, 0,
@@ -65,12 +64,11 @@ export default class Chat extends Phaser.GameObjects.Container {
 
 
         this.chatContentText = scene.add.text(this.chatBoxX + 5, 10, '', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fixedWidth: 480,
             fixedHeight: 30,
             fontSize: '22px',
             color: 'black',
-            fontStyle: 'bold'
         })
         shape = new Phaser.Geom.Rectangle(this.chatBoxX - 2, 0,
             this.chatBoxWidth, heigt);
@@ -87,12 +85,11 @@ export default class Chat extends Phaser.GameObjects.Container {
 
         for (let i = 0; i < 8; i++) {
             var chatContentText = this.scene.add.text(-345, -27 - i * 24, '', {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fixedWidth: 480,
                 fixedHeight: 30,
                 fontSize: '22px',
                 color: 'white',
-                fontStyle: 'bold'
             })
             this.chatLogTexts.push(chatContentText)
         }
@@ -113,11 +110,10 @@ export default class Chat extends Phaser.GameObjects.Container {
                 this.ReSizeChatPanel(false)
             }).setVisible(false);
 
-        this.minusText = scene.add.text(217, -245, "-", {
-            fontFamily: 'Arial',
+        this.minusText = scene.add.text(213, -245, "-", {
+            fontFamily: 'DNFbitbitv2',
             fontSize: '40px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0, 0)
         .setVisible(false)
 
@@ -136,15 +132,11 @@ export default class Chat extends Phaser.GameObjects.Container {
                 this.ReSizeChatPanel(true)
             });
 
-        this.plusText = scene.add.text(214, -97, "+", {
-            fontFamily: 'Arial',
+        this.plusText = scene.add.text(212, -99, "+", {
+            fontFamily: 'DNFbitbitv2',
             fontSize: '40px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0, 0)
-
-
-
 
         shape = new Phaser.Geom.Rectangle(-395, 3,
             40, 40);
@@ -162,10 +154,9 @@ export default class Chat extends Phaser.GameObjects.Container {
             });
 
         this.downText = scene.add.text(-387, 9, "▼", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '25px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0, 0)
 
 
@@ -188,10 +179,9 @@ export default class Chat extends Phaser.GameObjects.Container {
             .setVisible(false)
 
         this.upText = scene.add.text(-387, 9, "▲", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '25px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0, 0)
         .setVisible(false)
 

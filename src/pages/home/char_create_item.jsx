@@ -5,6 +5,18 @@ import React, { useEffect, useState } from 'react';
 function CharCreateItem({characterInfo, onClick, setUnregiCharInfo }) {
 
 
+    let name = '빡빡이';
+
+
+    if (characterInfo.name === 'bow'){
+        name = '바가지 헤어';
+    }else if(characterInfo.name === 'long hair'){
+        name = '포니테일';
+    }else if(characterInfo.name === 'curly'){
+        name = '드레드락';
+    }
+
+
     // NFT 캐릭터 생성 컴포넌트의 클릭 이벤트에 등록할 콜백 함수
     // 캐릭터 생성 아이템을 클릭할 경우 
     // 1. 부모 컴포넌트한테 선택된 캐릭터의 정보를 넘겨준다.
@@ -26,6 +38,7 @@ function CharCreateItem({characterInfo, onClick, setUnregiCharInfo }) {
             <div className="nft_character_border">
                 <img src={characterInfo.imageURL}
                     className='nft_create_image'></img>
+                    <p className='nft_p'>{name}</p>
             </div>
         </div>
 

@@ -30,10 +30,9 @@ export default class CookingTab extends TabBodyUI {
         this.categoryTxt.setText('기본 요리');
 
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'white',
-            fontStyle: 'bold',
             align: 'center',
             stroke: 'black',
             strokeThickness: 5,

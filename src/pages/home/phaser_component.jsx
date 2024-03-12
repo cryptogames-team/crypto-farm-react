@@ -5,8 +5,9 @@ import { eventSystem } from './event_system';
 // import Phaser Scene
 import LoginScene from './scenes/LoginScene';
 import InGameScene from './scenes/InGameScene';
-import MarketScene from './scenes/MarketScene'
-import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin'
+import MarketScene from './scenes/MarketScene';
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin';
+
 // 게임에서 사용할 이미지는 public에 넣을 것
 
 function PhaserGameComponent() {
@@ -59,7 +60,9 @@ function PhaserGameComponent() {
             plugin: RexUIPlugin,
             mapping: 'rexUI'
           }
+          
         ]
+        
       }
 
     }

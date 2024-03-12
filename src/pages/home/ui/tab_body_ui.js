@@ -35,10 +35,9 @@ export default class TabBodyUI extends Frame_LT {
 
         // 카테고리 텍스트 추가
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'black',
-            fontStyle: 'bold',
             align: 'center',
         };
         const categoryX = pad;

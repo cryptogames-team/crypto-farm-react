@@ -59,10 +59,9 @@ export default class SeedStoreNPC extends Phaser.GameObjects.Container {
 
         // NPC 이름표 추가
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'white',
-            fontStyle: 'bold',
             align: 'center',
             stroke: 'black', // 외곽선
             strokeThickness: 5 // 외곽선 두께  

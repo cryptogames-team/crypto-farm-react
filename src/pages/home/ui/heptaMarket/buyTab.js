@@ -52,14 +52,12 @@ export default class BuyTab extends Phaser.GameObjects.Container {
 
 
         const categoryTextType = {
-            fontFamily: 'Arial',
-            fontSize: '16px',
+            fontFamily: 'DNFbitbitv2',
+            fontSize: '15px',
             color: 'white',
-            fontStyle: 'bold'
+            stroke: 'black',
+            strokeThickness: 3,
         }
-
-
-        
 
         this.button_tl = scene.add.image(18, 80, 'tab_9slice_tl')
             .setOrigin(0, 0)
@@ -227,10 +225,9 @@ export default class BuyTab extends Phaser.GameObjects.Container {
                 this.paging(true)
             })
         this.pageText = scene.add.text(273, 375, "5 / 10", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
         //아이템 페이징을 위한 인디케이터
         this.next_page = scene.add.image(362, 387, 'next')
@@ -259,10 +256,9 @@ export default class BuyTab extends Phaser.GameObjects.Container {
         //구매 희망가격
         //골드 구매량
         this.quantaty = scene.add.text(frame_result_x_position + 20, frame_search_y_position + 53, "> 골드 구매량", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '18px',
             color: 'white',
-            fontStyle: 'bold'
         })
         this.quantatyInput = scene.add.graphics()
             .fillStyle(0xffffff) // 채우기 색상 설정
@@ -271,12 +267,11 @@ export default class BuyTab extends Phaser.GameObjects.Container {
             .strokeRoundedRect(inputXpos, frame_search_y_position + 43, 80, 40, 5) // round rectangle 테두리 그리기
             .setScrollFactor(0)
         this.quantatyText = scene.add.text(inputXpos + 7, frame_search_y_position + 49, '', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fixedWidth: 480,
             fixedHeight: 30,
             fontSize: '22px',
             color: 'black',
-            fontStyle: 'bold'
         })
         var shape = new Phaser.Geom.Rectangle(inputXpos, frame_search_y_position + 43,
             80, 40);
@@ -299,18 +294,16 @@ export default class BuyTab extends Phaser.GameObjects.Container {
         });
         //골드
         this.goldText = scene.add.text(inputXpos + 90, frame_search_y_position + 53, "골드", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
         //토큰 비용
         this.deposit = scene.add.text(frame_result_x_position + 20, frame_search_y_position + 100, "| 토큰 비용", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '21px',
             color: 'white',
-            fontStyle: 'bold',
             stroke: '#000000',
             strokeThickness: 4
 
@@ -323,29 +316,26 @@ export default class BuyTab extends Phaser.GameObjects.Container {
             .setScrollFactor(0)
         this.depositQuantaty = scene.add.text(frame_result_x_position + frame_result_width / 2 + 40, frame_search_y_position + 140, "0",
             {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '32px',
                 color: 'yellow',
-                fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4
             }).setOrigin(1, 0)
 
         //HEP
         this.depositHep = scene.add.text(frame_result_x_position + 215, frame_search_y_position + 150, "HEP", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
 
         //구입 골드
         this.buyGold = scene.add.text(frame_result_x_position + 20, frame_search_y_position + 200, "| 구입 골드", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '21px',
             color: 'white',
-            fontStyle: 'bold',
             stroke: '#000000',
             strokeThickness: 4
         })
@@ -358,20 +348,18 @@ export default class BuyTab extends Phaser.GameObjects.Container {
             .setScrollFactor(0)
         this.buyGoldQuantaty = scene.add.text(frame_result_x_position + frame_result_width / 2 + 40, frame_search_y_position + 240, "0",
             {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '32px',
                 color: 'yellow',
-                fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4
             }).setOrigin(1, 0)
 
         //골드
         this.buyGoldText = scene.add.text(frame_result_x_position + 215, frame_search_y_position + 250, "골드", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
         //구매하기
@@ -414,10 +402,9 @@ export default class BuyTab extends Phaser.GameObjects.Container {
 
         //구매하기 버튼 텍스트
         this.buyButtonText = scene.add.text(frame_result_x_position + 160, frame_search_y_position + 335, "거래신청", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '27px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0.5, 0)
 
 

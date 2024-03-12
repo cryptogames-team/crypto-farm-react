@@ -54,15 +54,14 @@ export default class AuctionItem extends Phaser.GameObjects.Container {
 
         this.item_image = scene.add.image(x_position+(size/2), y_position+(size/2), "감자")   
         .setOrigin(0.5,0.5)
-        .setDisplaySize(40,40)
+        .setDisplaySize(30,30)
         .setVisible(false)
 
 
         this.item_count = scene.add.text(x_position+5, y_position+50, "1", {
-            fontFamily: 'Arial',
-            fontSize: '22px',
+            fontFamily: 'DNFbitbitv2',
+            fontSize: '20px',
             color: 'black',
-            fontStyle: 'bold'
         }).setVisible(false)
  
         this.add([

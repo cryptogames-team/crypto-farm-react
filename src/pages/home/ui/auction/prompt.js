@@ -76,10 +76,9 @@ export default class Prompt extends Phaser.GameObjects.Container {
         .setDisplaySize(edgeSize,edgeSize);
 
         this.contentText  = scene.add.text(310, 25, "", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '30px',
             color: 'black',
-            fontStyle: 'bold'
         }).setOrigin(0.50,0)
         
 

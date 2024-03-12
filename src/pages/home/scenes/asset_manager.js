@@ -435,4 +435,14 @@ export default class AssetManager {
         this.scene.anims.create(animData);
     }
 
+    loadFont(name, url) {
+        var newFont = new FontFace(name, `url(${url})`);
+        newFont.load().then(function (loaded) {
+            //console.log('폰트 로드 완료');
+            document.fonts.add(loaded);
+        }).catch(function (error) {
+            return error;
+        });
+    }
+
 }

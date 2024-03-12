@@ -37,9 +37,6 @@ export default class Selltab extends Phaser.GameObjects.Container {
         const edgeSize = 10;
         this.setSize(120, 100);
 
-
-
-
         const index = 1
         this.button_tl = scene.add.image(18 + (index * 120), 80, 'tab_9slice_tl')
             .setOrigin(0, 0)
@@ -118,16 +115,14 @@ export default class Selltab extends Phaser.GameObjects.Container {
             fontStyle: 'bold'
         }
         const textWhite = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         }
         const textYellow = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '24px',
             color: 'yellow',
-            fontStyle: 'bold',
             stroke: '#000000',
             strokeThickness: 4
         }
@@ -148,10 +143,9 @@ export default class Selltab extends Phaser.GameObjects.Container {
         const inputXpos = 280
         //판매 희망가격
         this.hopePriceText = scene.add.text(frame_search_x_position + 20, frame_search_y_position + 28, "> 판매희망 가격(100골드당)", {
-            fontFamily: 'Arial',
-            fontSize: '18px',
+            fontFamily: 'DNFbitbitv2',
+            fontSize: '17px',
             color: 'white',
-            fontStyle: 'bold'
         })
         this.hopeInputBox = scene.add.graphics()
             .fillStyle(0xffffff) // 채우기 색상 설정
@@ -160,12 +154,11 @@ export default class Selltab extends Phaser.GameObjects.Container {
             .strokeRoundedRect(inputXpos, frame_search_y_position + 18, 80, 40, 5) // round rectangle 테두리 그리기
             .setScrollFactor(0)
         this.hopePrice = scene.add.text(inputXpos + 7, frame_search_y_position + 24, '', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fixedWidth: 480,
             fixedHeight: 30,
             fontSize: '22px',
             color: 'black',
-            fontStyle: 'bold'
         })
         var shape = new Phaser.Geom.Rectangle(inputXpos, frame_search_y_position + 18,
             80, 40);
@@ -184,10 +177,9 @@ export default class Selltab extends Phaser.GameObjects.Container {
         });
         //HEP
         this.hepText = scene.add.text(inputXpos + 90, frame_search_y_position + 28, "HEP", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
 
@@ -195,10 +187,9 @@ export default class Selltab extends Phaser.GameObjects.Container {
 
         //골드 판매량
         this.quantaty = scene.add.text(frame_search_x_position + 20, frame_search_y_position + 78, "> 골드 판매량", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '18px',
             color: 'white',
-            fontStyle: 'bold'
         })
         this.quantatyInput = scene.add.graphics()
             .fillStyle(0xffffff) // 채우기 색상 설정
@@ -207,12 +198,11 @@ export default class Selltab extends Phaser.GameObjects.Container {
             .strokeRoundedRect(inputXpos, frame_search_y_position + 68, 80, 40, 5) // round rectangle 테두리 그리기
             .setScrollFactor(0)
         this.quantatyText = scene.add.text(inputXpos + 7, frame_search_y_position + 74, '', {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fixedWidth: 480,
             fixedHeight: 30,
             fontSize: '22px',
             color: 'black',
-            fontStyle: 'bold'
         })
         var shape = new Phaser.Geom.Rectangle(inputXpos, frame_search_y_position + 68,
             80, 40);
@@ -229,10 +219,9 @@ export default class Selltab extends Phaser.GameObjects.Container {
         });
         //골드
         this.goldText = scene.add.text(inputXpos + 90, frame_search_y_position + 78, "골드", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
 /*
@@ -295,10 +284,9 @@ export default class Selltab extends Phaser.GameObjects.Container {
         // this.average4 = scene.add.text(frame_search_x_position + 315, frame_search_y_position + 234, "HEP", textWhite)
 
         this.recomend1 = scene.add.text(frame_search_x_position + 25, frame_search_y_position + 282, "추천거래가", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '18px',
             color: 'white',
-            fontStyle: 'bold'
         })
         this.recomend2 = scene.add.text(frame_search_x_position + 140, frame_search_y_position + 279, "100 골드:", textWhite)
         this.recomend3 = scene.add.text(frame_search_x_position + 265, frame_search_y_position + 276, "256", textYellow)
@@ -315,19 +303,17 @@ export default class Selltab extends Phaser.GameObjects.Container {
 
         //예상 거래 결과 텍스트
         this.predictResultText = scene.add.text(frame_result_x_position + frame_result_width / 3 - 5, frame_result_y_position + 18, "예상 거래 결과", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '26px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
 
         //예치금
         this.deposit = scene.add.text(frame_result_x_position + 20, frame_search_y_position + 70, "| 예치금", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '21px',
             color: 'white',
-            fontStyle: 'bold',
             stroke: '#000000',
             strokeThickness: 4
 
@@ -340,29 +326,26 @@ export default class Selltab extends Phaser.GameObjects.Container {
             .setScrollFactor(0)
         this.depositQuantaty = scene.add.text(frame_result_x_position + frame_result_width / 2 + 20, frame_search_y_position + 110, "0",
             {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '32px',
                 color: 'yellow',
-                fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4
             }).setOrigin(1, 0)
 
         //골드
         this.depositGold = scene.add.text(frame_result_x_position + 285, frame_search_y_position + 120, "골드", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
 
         //구입 HEP
         this.buyHEP = scene.add.text(frame_result_x_position + 20, frame_search_y_position + 170, "| 구입 HEP", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '21px',
             color: 'white',
-            fontStyle: 'bold',
             stroke: '#000000',
             strokeThickness: 4
         })
@@ -375,20 +358,18 @@ export default class Selltab extends Phaser.GameObjects.Container {
             .setScrollFactor(0)
         this.buyHEPQuantaty = scene.add.text(frame_result_x_position + frame_result_width / 2 + 20, frame_search_y_position + 210, "0",
             {
-                fontFamily: 'Arial',
+                fontFamily: 'DNFbitbitv2',
                 fontSize: '32px',
                 color: 'yellow',
-                fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4
             }).setOrigin(1, 0)
 
         //골드
         this.buyHEPText = scene.add.text(frame_result_x_position + 285, frame_search_y_position + 220, "HEP", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '22px',
             color: 'white',
-            fontStyle: 'bold'
         })
 
         //구매하기
@@ -407,10 +388,9 @@ export default class Selltab extends Phaser.GameObjects.Container {
 
         //구매하기 버튼 텍스트
         this.buyButtonText = scene.add.text(frame_result_x_position + 255, frame_search_y_position + 335, "거래신청", {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: '27px',
             color: 'white',
-            fontStyle: 'bold',
         }).setOrigin(0.5, 0)
 
 

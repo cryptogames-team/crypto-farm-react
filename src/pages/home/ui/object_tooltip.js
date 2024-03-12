@@ -31,10 +31,9 @@ export default class ObjectToolTip extends Frame_LT {
         this.setSize(width, height).setDepth(100).setScrollFactor(1);
 
         const txtStyle = {
-            fontFamily: 'Arial',
+            fontFamily: 'DNFbitbitv2',
             fontSize: 18,
             color: 'white',
-            fontStyle: 'bold',
             align: 'center',
             stroke: 'black', // 외곽선
             strokeThickness: 5 // 외곽선 두께  

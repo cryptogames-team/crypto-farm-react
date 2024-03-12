@@ -53,18 +53,18 @@ export default class StoreItemSlot extends Frame {
         this.countBox.y = 0;
 
         const txtStyle = {
-            fontFamily: 'Arial',
-            fontSize: 15,
+            fontFamily: 'DNFbitbitv2',
+            fontSize: 12,
             color: 'black',
-            fontStyle: 'bold',
-            align: 'center',
             /* stroke: 'white', // 외곽선
-            strokeThickness: 3 // 외곽선 두께   */
+            strokeThickness: 3 // 외곽선 두께  */ 
         };
 
         // 아이템 수량 표시 텍스트 추가
-        const countTxtX = this.countBox.x + this.countBox.width / 2;
-        const countTxtY = this.countBox.y + this.countBox.height / 2;
+        let countTxtX = this.countBox.x + this.countBox.width / 2;
+        let countTxtY = this.countBox.y + this.countBox.height / 2;
+        countTxtX = Math.round(countTxtX);
+        
         this.countTxt = scene.add.text(countTxtX, countTxtY, this.count, txtStyle);
         this.countTxt.setOrigin(0.5, 0.5);
 

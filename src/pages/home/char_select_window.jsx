@@ -28,7 +28,7 @@ const serverURL = process.env.REACT_APP_API + 'user/all';
 
 // async : 비동기 처리
 // 함수형 컴포넌트는 async로 실행 불가능함.
-function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
+function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT }) {
 
   // 캐릭터 정보가 있는 NFT 배열 이름
   const [regChars, setRegChars] = useState([]);
@@ -39,8 +39,11 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
+  // 컴포넌트 제목 텍스트 내용 저장
+  const [titleTxt, setTitleTxt] = useState('캐릭터 선택');
+
   // transaction 관련 html 요소들
-  
+
 
 
   const handleCharSelect = onCharSelect;
@@ -68,31 +71,38 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
     // 이유 : 제거될 캐릭터 정보와 미등록 캐릭터 배열의 객체의 키 값이 달라서 생기는 문제이다.
     // asset_id로 비교하니 미등록 배열에서 삭제가 되었음.
 
-    console.log("생성된 캐릭터가 제거되기 전의 미등록 캐릭터 배열" , unregChars);
+    console.log("생성된 캐릭터가 제거되기 전의 미등록 캐릭터 배열", unregChars);
 
     // filter : 주어진 조건에 맞는 요소만을 포함하는 새 배열을 반환한다.
     setUnregChars(unregChars.filter(character => character.asset_id !== characterToRemove.asset_id));
-    
-    console.log("생성된 캐릭터가 제거되고 난 후에 미등록 캐릭터 배열" , unregChars);
+
+    console.log("생성된 캐릭터가 제거되고 난 후에 미등록 캐릭터 배열", unregChars);
   }
 
 
 
   // 화살표 함수를 변수에 대입한다는 건
   // 해당 변수로 함수를 참조한다. 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openModal = () => {
+    setIsModalOpen(true);
+    setTitleTxt('캐릭터 생성');
+  }
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTitleTxt('캐릭터 선택');
+  }
+  
   const openBuyModal = () => {
     setIsBuyModalOpen(true);
     // setTrxPage('buyCharacterNFT');
-  } 
+    setTitleTxt('캐릭터 구매');
+  }
   const closeBuyModal = () => {
     setIsBuyModalOpen(false);
     // setTrxPage('');
+    setTitleTxt('캐릭터 선택');
   }
-
-
 
   // 계정에 있는 NFT 정보를 모조리 가져온다.
   async function loadNFT() {
@@ -115,7 +125,7 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
       });
 
       // 계정의 크립토 팜 관련 NFT
-      console.log("크립토 팜 NFT 정보",response);
+      console.log("크립토 팜 NFT 정보", response);
 
       // 받은 NFT 정보 개수만큼 배열에 넣기
       response.rows.forEach(function (nft) {
@@ -132,7 +142,7 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
         let nft_info = {
           asset_id: asset_id,
           imageURL: imageURL,
-          name : name
+          name: name
         }
 
         my_nfts.push(nft_info);
@@ -140,9 +150,6 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
       });
 
       console.log("크립토 팜 NFT 정보에서 필요한 거만 빼옴", my_nfts);
-
-
-
 
     } catch (error) {
       console.error('Error:', error);
@@ -321,46 +328,42 @@ function CharSelectWindow({ accountName, onCharSelect, callbackMintNFT}) {
     // 이유 : 새 배열을 반환하지 않기 때문이다.
 
     //unRegisteredCharacters={unregChars}
-    <div className = "character_select_container">
-    <p id='select_text'>NFT 캐릭터 선택</p>
-    <div className="character_select_border1">
-      <div className="character_select_border2">
+    <div className="character_select_container">
+      <p id='select_text'>{titleTxt}</p>
+      <div className="character_select_border1">
+        <div className="character_select_border2">
 
-        {isModalOpen && <CharCreateModal
-          unregChars={unregChars}
-          onClose={closeModal}
-          onCreateChar={{handleCreateChar, rmCreateChar}} />}
+          {isModalOpen && <CharCreateModal
+            unregChars={unregChars}
+            onClose={closeModal}
+            onCreateChar={{ handleCreateChar, rmCreateChar }} />}
 
-        {isBuyModalOpen && <CharBuyModal
-          onClose={closeBuyModal}
-          callbackMintNFT={callbackMintNFT}
+          {isBuyModalOpen && <CharBuyModal
+            onClose={closeBuyModal}
+            callbackMintNFT={callbackMintNFT}
           />}
 
 
-        <div className="character_select_border3">
-          <div className="character_select_border4 ">
+          <div className="character_select_border3">
+            <div className="character_select_border4 ">
 
-          <div className='character_select_border5'>
-          {regChars.map((character, index) => (
-              <CharSelectItem key={index} 
-              registeredCharacter={character}
-              onCharSelect={handleCharSelect}
-              />
-            ))}
-          </div>
-            
-          <div className='add_character_btn_group gap-2 px-4 pb-3 self-end'>
-              <button className='border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openModal}><TbSelect size={30}/><span className='pl-2'>캐릭터 생성</span></button>
-              <button className='ml-3 border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openBuyModal}><BsCartCheck size={30} /><span className='pl-2'>상점</span></button>
+              <div className='character_select_border5'>
+                {regChars.map((character, index) => (
+                  <CharSelectItem key={index}
+                    registeredCharacter={character}
+                    onCharSelect={handleCharSelect}
+                  />
+                ))}
+              </div>
+
+              <div className='add_character_btn_group gap-2 px-4 pb-3 self-end'>
+                <button className='border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openModal}><TbSelect size={30} /><span className='pl-2'>캐릭터 생성</span></button>
+                <button className='ml-3 border-black rounded-xl border-4 p-3 text-xl flex items-center' onClick={openBuyModal}><BsCartCheck size={30} /><span className='pl-2'>상점</span></button>
+              </div>
             </div>
-            
-            
           </div>
-          
         </div>
       </div>
-    </div>
-  
     </div>
 
   );
