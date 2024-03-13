@@ -20,8 +20,6 @@ function CharInputForm({ unregiCharInfo, onClose, onCreateChar, onCreateResult }
     // 캐릭터 생성 결과를 알려주는 UI
     let createUI;
 
-
-
     // 초기화 전에 onChangeListener에 접근 불가능...
     // 캐릭터 생성에 성공 했을 때 입력 UI
     if (isCharSuccess === true) {
@@ -135,9 +133,7 @@ function CharInputForm({ unregiCharInfo, onClose, onCreateChar, onCreateResult }
                 </div>
             </div>
         </div>
-
     );
-
 }
 
 export default CharInputForm;
